@@ -79,4 +79,46 @@ router.post('/create-new-uml', async(req, res) => {
     }
 });
 
+router.post('/test', async(req,res) => {
+    res.send("hi");
+})
+
+router.post('/copy-uml', async(req, res) => {
+    uml_id = req.body.uml_id;
+    uid = req.body.uid;
+
+    try{
+        await firebase.firestore().runTransaction(async (t) => {
+            // Get the savedUML of a user
+            const userRef = firebase.firestore().collection("User").doc(uid);
+            const userDoc = await t.get(userRef);
+            const savedUML = userDoc.data().savedUML;
+
+            // get the uml document to copy
+            const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+            const umlDoc = await t.get(umlRef);
+
+            // create new uml with the proper content
+            const newUmlData = {
+                content: umlDoc.data().content,
+                privacy: 'public',
+                name:  umlDoc.data().name + '-copy'
+            }
+
+            const newUmlRef = firebase.firestore().collection("UML").doc();
+            t.set(newUmlRef, newUmlData);
+
+            // update user's savedUML array with new document ID
+            savedUML.push(newUmlRef.id);
+            t.update(userRef, { savedUML: savedUML });
+        });
+        res.status(200).send("Successly added new uml doc");
+    }
+    catch (error){
+        res.status(503).send("Could not create new uml, changes to db were not saved.");
+    }
+});
+
+
+
 module.exports = router;
