@@ -8,10 +8,11 @@ describe('Firebase route testing', () => {
     let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub;
 
     const req = {
-        body: {
-            uid: 'test-uid',
-            uml_id: 'test-uml_id'
-        }
+        uid: 'test-uid',
+        uml_id: 'test-uml_id',
+        content: 'content',
+        privacy: 'privacy',
+        name: 'name'
     };
 
     beforeEach(() => {
@@ -81,10 +82,29 @@ describe('Firebase route testing', () => {
     });
 
     
-    it('should return error message when create fails', async () => {
+    it('should return error message when copy fails', async () => {
         getStub.callsFake(() => {
             throw new Error('Getting from database failed');
         });
         const res = await request(app).post('/copy-uml').send(req).expect(503);
+    });
+
+    it('should return success message when update succeeds', async () => { 
+        docStub.returns({id: "some_uml_id"});
+
+        //await createNewUml(req, res);
+        const res = await request(app).post('/update-uml').send(req).expect(200);
+
+        //make sure that the uml is set with the data we passed in
+        assert(setStub.calledWith(sinon.match.any,{ content: 'content', privacy: 'privacy', name: 'name'}));
+
+    });
+
+    
+    it('should return error message when update fails', async () => {
+        setStub.callsFake(() => {
+            throw new Error('Getting from database failed');
+        });
+        const res = await request(app).post('/update-uml').send(req).expect(503);
     });
 });

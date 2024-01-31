@@ -79,10 +79,6 @@ router.post('/create-new-uml', async(req, res) => {
     }
 });
 
-router.post('/test', async(req,res) => {
-    res.send("hi");
-})
-
 router.post('/copy-uml', async(req, res) => {
     uml_id = req.body.uml_id;
     uid = req.body.uid;
@@ -112,13 +108,42 @@ router.post('/copy-uml', async(req, res) => {
             savedUML.push(newUmlRef.id);
             t.update(userRef, { savedUML: savedUML });
         });
-        res.status(200).send("Successly added new uml doc");
+        res.status(200).send("Successly copied uml doc");
     }
     catch (error){
-        res.status(503).send("Could not create new uml, changes to db were not saved.");
+        res.status(503).send("Could not copy uml, changes to db were not saved.");
     }
 });
 
+router.post('/update-uml', async(req, res) => {
+    uml_id = req.body.uml_id;
+    newContent = req.body.content;
+    newPrivacy = req.body.privacy;
+    newName = req.body.name;
+
+    try{
+        await firebase.firestore().runTransaction(async (t) => {
+
+            // get the uml document to update
+            const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+
+            // create new uml with the proper content
+            const newUmlData = {
+                content: newContent,
+                privacy: newPrivacy,
+                name:  newName
+            }
+
+            // set existing uml ref
+            t.set(umlRef, newUmlData);
+
+        });
+        res.status(200).send("Successly updated uml doc");
+    }
+    catch (error){
+        res.status(503).send("Could not update uml, changes to db were not saved.");
+    }
+});
 
 
 module.exports = router;
