@@ -5,7 +5,7 @@ const firebase = require('firebase');
 const assert = require('assert');
 
 describe('Firebase route testing', () => {
-    let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub;
+    let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub, deleteStub;
 
     const req = {
         uid: 'test-uid',
@@ -19,13 +19,15 @@ describe('Firebase route testing', () => {
         getStub = sinon.stub();
         setStub = sinon.stub();
         updateStub = sinon.stub();
+        deleteStub = sinon.stub();
         docStub = sinon.stub();
 
         runTransactionStub = sinon.stub().callsFake(async (fakeTransaction) => {
             await fakeTransaction({
                 get: getStub,
                 set: setStub,
-                update: updateStub
+                update: updateStub,
+                delete: deleteStub,
             });
         });
 
@@ -100,11 +102,30 @@ describe('Firebase route testing', () => {
 
     });
 
-    
     it('should return error message when update fails', async () => {
         setStub.callsFake(() => {
             throw new Error('Getting from database failed');
         });
         const res = await request(app).post('/update-uml').send(req).expect(503);
+    });
+
+    it('should return success message when delete succeeds', async () => { 
+        getStub.callsFake(() => ({
+            data: () => ({ savedUML: ['saved_uml_id', 'test-uml_id'] })
+        }));
+
+        //await createNewUml(req, res);
+        const res = await request(app).post('/delete-uml').send(req).expect(200);
+
+        //make sure that id from input ends up being deleted from the user's saved UML
+        assert(updateStub.calledWith(sinon.match.any,{ savedUML: ['saved_uml_id']}));
+    });
+
+    
+    it('should return error message when delete fails', async () => {
+        setStub.callsFake(() => {
+            throw new Error('Getting from database failed');
+        });
+        const res = await request(app).post('/delete-uml').send(req).expect(503);
     });
 });

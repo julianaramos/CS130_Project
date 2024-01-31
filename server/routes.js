@@ -145,5 +145,35 @@ router.post('/update-uml', async(req, res) => {
     }
 });
 
+router.post('/delete-uml', async(req, res) => {
+    uid = req.body.uid;
+    uml_id = req.body.uml_id;
+
+    try{
+        await firebase.firestore().runTransaction(async (t) => {
+
+            // Get the savedUML of a user
+            const userRef = firebase.firestore().collection("User").doc(uid);
+            const userDoc = await t.get(userRef);
+            const savedUML = userDoc.data().savedUML;
+
+            // get the uml document to delete
+            const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+
+            // Delete the refernce
+            t.delete(umlRef);
+
+            // Remove the uml_id from the user's saved Uml
+            savedUML.splice(savedUML.findIndex(p => p === uml_id, 1));
+            t.update(userRef, { savedUML: savedUML });
+
+
+        });
+        res.status(200).send("Successly deleted uml doc");
+    }
+    catch (error){
+        res.status(503).send("Could not delete uml, changes to db were not saved.");
+    }
+});
 
 module.exports = router;
