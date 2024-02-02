@@ -240,4 +240,78 @@ router.post('/fetch-plant-uml', async(req, res) => {
     return res.status(200).send(diagram_response);
 });
 
+// Aspect ratio is always maintained
+router.post('/add-scale-to-uml', async(req, res) => {
+    const {
+        uml_code,       // UML source code string
+        scale_width,    // width of generated image in pixels
+        scale_height,   // height of generated image in pixels
+                        // if both are provided, scale until one is reached
+        max = false     // boolean: if true, can only scale down to fit; won't scale up to fit
+    } = req.body;
+
+    // Require url_code parameter
+    if (!uml_code) {
+        return res.status(400).send({ type: 'MissingInput', message: 'uml_code is required as non-empty parameter.' });
+    }
+
+    // Require at least one of scale_width and scale_height parameters
+    if (!scale_width && !scale_height) {
+        return res.status(400).send({ type: 'MissingInput', message: 'At least one of scale_width and scale_height is required as a parameter.' });
+    }
+
+    // uml_code must be a string
+    if (typeof uml_code !== 'string') {
+        return res.status(400).send({ type: 'InvalidInput', message: 'uml_code must be a string.' });
+    }
+
+    // scale_width must be an int if it exists
+    if (scale_width !== undefined && !Number.isInteger(scale_width)) {
+        return res.status(400).send({ type: 'InvalidInput', message: 'scale_width must be an int if it passed.' });
+    }
+
+    // scale_height must be an int if it exists
+    if (scale_height !== undefined && !Number.isInteger(scale_height)) {
+        return res.status(400).send({ type: 'InvalidInput', message: 'scale_height must be an int if it passed.' });
+    }
+
+    // max must be a boolean (default false)
+    if (typeof max !== 'boolean') {
+        return res.status(400).send({ type: 'InvalidInput', message: 'max must be a boolean (default false).' });
+    }
+
+    // Construct scale command based on parameters
+    let scale_command = max ? 'scale max ' : 'scale ';
+
+    if (scale_width && scale_height) {
+        scale_command += `${scale_width}x${scale_height}`;
+    }
+    else if (scale_width) {
+        scale_command += `${scale_width} width`;
+    }
+    else { // scale_height
+        scale_command += `${scale_height} height`;
+    }
+
+    // Split UML code into lines
+    let lines = uml_code.split('\n');
+
+    // Find index of the @enduml line
+    // May not be last line due to whitespace, but not responsibility of this route to ensure no content after @enduml
+    let end_index = lines.findIndex(line => line.trim() === '@enduml');
+
+    // @enduml must be present
+    if (end_index === -1) {
+        return res.status(400).send({ type: 'MissingEnduml', message: '@enduml must be present to indicate end of program.' });
+    }
+
+    // Insert scale command before @enduml line
+    lines.splice(end_index, 0, scale_command);
+
+    // Rejoin code
+    const uml_code_with_scale = lines.join('\n');
+
+    return res.status(200).send(uml_code_with_scale);
+});
+
 module.exports = router;
