@@ -185,7 +185,7 @@ router.post('/fetch-plant-uml', async(req, res) => {
 
     // Require parameters: url_code, response_type
     if (!uml_code || !response_type) {
-        return res.status(401).send({ type: 'MissingInput', message: 'Both uml_code and response_type are required as non-empty parameters.' });
+        return res.status(400).send({ type: 'MissingInput', message: 'Both uml_code and response_type are required as non-empty parameters.' });
     }
 
     // uml_code must be a string

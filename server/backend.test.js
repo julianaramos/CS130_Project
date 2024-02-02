@@ -143,18 +143,18 @@ describe('PlantUML diagram fetching testing', () => {
         sinon.restore();
     });
 
-    it('should return 401 when umlCode is missing', async () => {
+    it('should return 400 when umlCode is missing', async () => {
         const req = {
             response_type: 'SVG'
         };
-        const res = await request(app).post('/fetch-plant-uml').send(req).expect(401);
+        const res = await request(app).post('/fetch-plant-uml').send(req).expect(400);
     });
 
-    it('should return 401 when responseType is missing', async () => {
+    it('should return 400 when responseType is missing', async () => {
         const req = {
             uml_code: 'non-empty code'
         };
-        const res = await request(app).post('/fetch-plant-uml').send(req).expect(401);
+        const res = await request(app).post('/fetch-plant-uml').send(req).expect(400);
     });
 
     it('should return 400 when uml_code is not a string', async() => {
