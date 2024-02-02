@@ -1,5 +1,7 @@
 const express = require('express')
 const firebase = require('firebase')
+const plantuml_encoder = require('plantuml-encoder');
+const axios = require('axios');
 const router = express.Router()
 
 router.post('/create-user', async (req, res) => {
@@ -174,6 +176,68 @@ router.post('/delete-uml', async(req, res) => {
     catch (error){
         res.status(503).send("Could not delete uml, changes to db were not saved.");
     }
+});
+
+router.post('/fetch-plant-uml', async(req, res) => {
+    // Default behavior is to return raw data, not as URI
+    const { uml_code, response_type, return_as_uri = false } = req.body;
+    let file_type;
+
+    // Require parameters: url_code, response_type
+    if (!uml_code || !response_type) {
+        return res.status(401).send({ type: 'MissingInput', message: 'Both uml_code and response_type are required as non-empty parameters.' });
+    }
+
+    // uml_code must be a string
+    if (typeof uml_code !== 'string') {
+        return res.status(400).send({ type: 'InvalidInput', message: 'uml_code must be a string.' });
+    }
+
+    // response_type must be "SVG" or "PNG"
+    if (response_type !== 'SVG' && response_type !== 'PNG') {
+        return res.status(400).send({ type: 'InvalidInput', message: 'response_type must be "SVG" or "PNG".' });
+    }
+
+    // return_as_uri must be a boolean (default false)
+    if (typeof return_as_uri !== 'boolean') {
+        return res.status(400).send({ type: 'InvalidInput', message: 'return_as_uri must be a boolean (default false).' });
+    }
+
+    // Encode UML source code into PlantUML link
+    const encoded_source = plantuml_encoder.encode(uml_code);
+    const plant_uml_link = `http://www.plantuml.com/plantuml/${response_type.toLowerCase()}/${encoded_source}`;
+
+    // Retrieve diagram response from PlantUML server
+    let diagram_response;
+    try {
+        const response = await axios.get(plant_uml_link, { responseType: 'arraybuffer', timeout: 5000 });
+        diagram_response = response.data;
+    }
+    catch (error) {
+        console.error(error);
+
+        // Check for timeout error
+        if (error.code === 'ECONNABORTED') {
+            return res.status(500).send({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
+        }
+
+        // Check for invalid UML code error
+        if (error?.response?.status === 400) {
+            return res.status(400).send({ type: 'InvalidUMLCodeError', message: 'The provided UML code is not valid.' });
+        }
+
+        // Default error: server not available
+        return res.status(500).send({ type: 'ServerError', message: 'The PlantUML server is unavailable.', error: error });
+    }
+
+    // Convert SVG or PNG to URI form if requested
+    if (return_as_uri) {
+        const base64 = Buffer.from(diagram_response, 'binary').toString('base64');
+        const mime_type = response_type === 'SVG' ? 'image/svg+xml' : 'image/png';
+        diagram_response = `data:${mime_type};base64,${base64}`;
+    }
+
+    return res.status(200).send(diagram_response);
 });
 
 module.exports = router;
