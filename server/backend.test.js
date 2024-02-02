@@ -143,18 +143,18 @@ describe('PlantUML diagram fetching testing', () => {
         sinon.restore();
     });
 
-    it('should return 401 when umlCode is missing', async () => {
+    it('should return 400 when umlCode is missing', async () => {
         const req = {
             response_type: 'SVG'
         };
-        const res = await request(app).post('/fetch-plant-uml').send(req).expect(401);
+        const res = await request(app).post('/fetch-plant-uml').send(req).expect(400);
     });
 
-    it('should return 401 when responseType is missing', async () => {
+    it('should return 400 when responseType is missing', async () => {
         const req = {
             uml_code: 'non-empty code'
         };
-        const res = await request(app).post('/fetch-plant-uml').send(req).expect(401);
+        const res = await request(app).post('/fetch-plant-uml').send(req).expect(400);
     });
 
     it('should return 400 when uml_code is not a string', async() => {
@@ -294,5 +294,123 @@ describe('PlantUML diagram fetching testing', () => {
         const base64_data = res.text.replace(png_uri_prefix, '');
         const decoded_data = Buffer.from(base64_data, 'base64').toString();
         assert.strictEqual(decoded_data, png_data);
+    });
+});
+
+describe('Scale adding testing', () => {
+    const check_scale_command = async (req, correct_scale_command) => {
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(200);
+
+        // Find index of @enduml line
+        const lines = res.text.split('\n');
+        const end_index = lines.findIndex(line => line.trim() === '@enduml');
+
+        // Ensure line before @enduml is correct scale command
+        assert.strictEqual(lines[end_index - 1], correct_scale_command);
+    };
+
+    it('should return 400 when umlCode is missing', async () => {
+        const req = {
+            scale_width: 100
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when both scale_width and scale_height are missing', async () => {
+        const req = {
+            uml_code: '@enduml'
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when uml_code is not a string', async() => {
+        const req = {
+            uml_code: 5,
+            scale_width: 100
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when scale_width is not an int', async() => {
+        const req = {
+            uml_code: '@enduml',
+            scale_width: '100'
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when scale_width is not an int', async() => {
+        const req = {
+            uml_code: '@enduml',
+            scale_height: '100'
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when max is not a boolean', async() => {
+        const req = {
+            uml_code: '@enduml',
+            scale_width: 100,
+            max: 10
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return 400 when @enduml is missing', async() => {
+        const req = {
+            uml_code: '@startuml',
+            scale_width: 100
+        };
+        const res = await request(app).post('/add-scale-to-uml').send(req).expect(400);
+    });
+
+    it('should return code with correct scale command when scale_width is specified and max is not passed', async() => {
+        const req = {
+            uml_code: '@startuml\nsome_line\n@enduml\n',
+            scale_width: 100
+        };
+        const correct_scale_command = 'scale 100 width';
+        await check_scale_command(req, correct_scale_command);
+    });
+
+    it('should return code with correct scale command when scale_height is specified and max is not passed', async() => {
+        const req = {
+            uml_code: '@startuml\nsome_line\n@enduml\n',
+            scale_height: 100
+        };
+        const correct_scale_command = 'scale 100 height';
+        await check_scale_command(req, correct_scale_command);
+    });
+
+    it('should return code with correct scale command when scale_width and scale_height are specified and max is not passed', async() => {
+        const req = {
+            uml_code: '@startuml\nsome_line\n@enduml\n',
+            scale_width: 100,
+            scale_height: 200
+        };
+        const correct_scale_command = 'scale 100x200';
+        await check_scale_command(req, correct_scale_command);
+    });
+
+    it('should return same code with correct scale command as not passing max when max is passed as false', async() => {
+        const req = {
+            uml_code: '@startuml\nsome_line\n@enduml\n',
+            scale_width: 100,
+            scale_height: 200,
+            max: false
+        };
+        const correct_scale_command = 'scale 100x200';
+        await check_scale_command(req, correct_scale_command);
+    });
+
+    it('should return code with correct scale command when max is passed as true', async() => {
+        const req = {
+            uml_code: '@startuml\nsome_line\n@enduml\n',
+            scale_width: 100,
+            scale_height: 200,
+            max: true
+        };
+        const correct_scale_command = 'scale max 100x200';
+        await check_scale_command(req, correct_scale_command);
     });
 });
