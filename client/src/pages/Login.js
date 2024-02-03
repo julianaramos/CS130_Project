@@ -2,6 +2,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { login, logout } from '../redux/user';
+import {TextField, Toolbar} from "@mui/material"
 
 const Login = () => {
     const { uid } = useSelector((state) => state.user);
@@ -23,6 +24,11 @@ const Login = () => {
 
     return (
         <div>
+            <form noValidate autoComplete="off">
+                <TextField id="standard-basic" label="Standard" />
+                <TextField id="filled-basic" label="Filled" variant="filled" />
+                <TextField id="outlined-basic" label="Outlined" variant="outlined" />
+            </form>
             {x}
             <button onClick={togglelogin}>togglelogin</button>
             <Link to = "/"> To Signup </Link>
