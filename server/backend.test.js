@@ -4,7 +4,6 @@ const sinon = require('sinon');
 const firebase = require('firebase');
 const axios = require('axios');
 const assert = require('assert');
-const { prompt_assistant } = require('./routes')._testonly;
 
 describe('Firebase route testing', () => {
     let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub, deleteStub;
@@ -418,18 +417,23 @@ describe('Scale adding testing', () => {
 
 
 // Mock openai dependency of prompt_assistant function
-const mock_object = Object();
-jest.mock('openai', () => {
-    return jest.fn().mockImplementation(() => { return mock_object; });
+const mock_openai = Object();
+jest.doMock('openai', () => {
+    return jest.fn().mockImplementation(() => { return mock_openai; });
 });
 
 describe('OpenAI Assitant API call testing', () => {
     const test_response = 'Test Response';
     let call_count = 0;
+    let prompt_assistant;
     let runsRetrieveStub;
 
     beforeEach(() => {
-        mock_object.beta = {
+        // Re-require function to use one with mocked openai module
+        jest.resetModules();
+        prompt_assistant = require('./routes')._testonly.prompt_assistant;
+
+        mock_openai.beta = {
             threads: {
                 create: sinon.stub().resolves({ id: 'thread-some-id' }),
                 runs: {
@@ -459,7 +463,7 @@ describe('OpenAI Assitant API call testing', () => {
         };
 
         // Create alias
-        runsRetrieveStub = mock_object.beta.threads.runs.retrieve;
+        runsRetrieveStub = mock_openai.beta.threads.runs.retrieve;
     });
 
     afterEach(() => {
