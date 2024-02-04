@@ -1,8 +1,10 @@
 const express = require('express')
 const firebase = require('firebase')
 const plantuml_encoder = require('plantuml-encoder');
+const OpenAI = require("openai");
 const axios = require('axios');
 const router = express.Router()
+require('dotenv').config();
 
 router.post('/create-user', async (req, res) => {
     const data = req.body;
@@ -151,7 +153,7 @@ router.post('/delete-uml', async(req, res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
 
-    try{
+    try {
         await firebase.firestore().runTransaction(async (t) => {
 
             // Get the savedUML of a user
@@ -173,7 +175,7 @@ router.post('/delete-uml', async(req, res) => {
         });
         res.status(200).send("Successly deleted uml doc");
     }
-    catch (error){
+    catch (error) {
         res.status(503).send("Could not delete uml, changes to db were not saved.");
     }
 });
@@ -218,11 +220,11 @@ router.post('/fetch-plant-uml', async(req, res) => {
 
         // Check for timeout error
         if (error.code === 'ECONNABORTED') {
-            return res.status(500).send({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
+            return res.status(408).send({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
         }
 
         // Check for invalid UML code error
-        if (error?.response?.status === 400) {
+        if (error.response?.status === 400) {
             return res.status(400).send({ type: 'InvalidUMLCodeError', message: 'The provided UML code is not valid.' });
         }
 
@@ -314,4 +316,48 @@ router.post('/add-scale-to-uml', async(req, res) => {
     return res.status(200).send(uml_code_with_scale);
 });
 
+async function prompt_assistant(assistant_id, prompt) {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    // Create new thread with prompt
+    const thread = await openai.beta.threads.create({
+        messages: [
+            {
+                role: 'user',
+                content: prompt
+            }
+        ]
+    });
+
+    // Run assistant on thread
+    const run = await openai.beta.threads.runs.create(
+        thread.id,
+        { assistant_id: assistant_id }
+    )
+
+    // Wait for run to complete
+    let status;
+    do {
+        const run_status = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+        status = run_status.status;
+    } while (status === 'queued' || status === 'in_progress');
+
+    // Check final status of run
+    if (status !== 'completed') {
+        // Return status as error
+        throw { status: status, message: 'Run finished with status other than "complete".' };
+    }
+
+    // Return last message from assistant
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    return messages.data.filter(message => message.role === 'assistant').pop().content[0].text.value;
+}
+
 module.exports = router;
+
+// Limit some exports to test environments
+if (process.env.NODE_ENV === 'test') {
+    module.exports._testonly = {
+        prompt_assistant
+    };
+}

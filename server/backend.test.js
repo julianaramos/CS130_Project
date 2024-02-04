@@ -4,6 +4,7 @@ const sinon = require('sinon');
 const firebase = require('firebase');
 const axios = require('axios');
 const assert = require('assert');
+const { prompt_assistant } = require('./routes')._testonly;
 
 describe('Firebase route testing', () => {
     let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub, deleteStub;
@@ -191,7 +192,7 @@ describe('PlantUML diagram fetching testing', () => {
         // Stub a server timeout
         getStub.throws({ code: 'ECONNABORTED' });
 
-        const res = await request(app).post('/fetch-plant-uml').send(req).expect(500);
+        const res = await request(app).post('/fetch-plant-uml').send(req).expect(408);
     });
 
     it('should return 400 when PlantUML server returns invalid code error', async() => {
@@ -412,5 +413,124 @@ describe('Scale adding testing', () => {
         };
         const correct_scale_command = 'scale max 100x200';
         await check_scale_command(req, correct_scale_command);
+    });
+});
+
+
+// Mock openai dependency of prompt_assistant function
+const mock_object = Object();
+jest.mock('openai', () => {
+    return jest.fn().mockImplementation(() => { return mock_object; });
+});
+
+describe('OpenAI Assitant API call testing', () => {
+    const test_response = 'Test Response';
+    let call_count = 0;
+    let runsRetrieveStub;
+
+    beforeEach(() => {
+        mock_object.beta = {
+            threads: {
+                create: sinon.stub().resolves({ id: 'thread-some-id' }),
+                runs: {
+                    create: sinon.stub().resolves({ run: 'run-some-id' }),
+                    retrieve: sinon.stub()  // variable response
+                },
+                messages: {
+                    list: sinon.stub().resolves({
+                        data: [
+                            {
+                                role: 'user'
+                            },
+                            {
+                                role: 'assistant',
+                                content: [
+                                    {
+                                        text: {
+                                            value: test_response
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                }
+            }
+        };
+
+        // Create alias
+        runsRetrieveStub = mock_object.beta.threads.runs.retrieve;
+    });
+
+    afterEach(() => {
+        sinon.reset();
+        sinon.restore();
+        call_count = 0;
+    });
+
+    it('should throw object when status is immediately not a pending or completed state', async () => {
+        const retrieved_status = 'failed';
+        runsRetrieveStub.resolves({ status: retrieved_status });
+
+        try {
+            const res = await prompt_assistant('assistant-id', 'prompt');
+        }
+        catch (error) {
+            // Ensure status of thrown object matches retrieved status
+            assert.strictEqual(error.status, retrieved_status);
+            assert.strictEqual(error.message, 'Run finished with status other than "complete".');
+        }
+    });
+
+    it('should return response when status is immediately completed state', async () => {
+        const retrieved_status = 'completed';
+        runsRetrieveStub.resolves({ status: retrieved_status });
+        
+        const res = await prompt_assistant('assistant-id', 'prompt');
+        
+        // Ensure response is as expected
+        assert.strictEqual(res, test_response);
+    });
+
+    it('should throw object when status is pending state followed by a non-completed state', async () => {
+        const pending_status = 'in_progress';
+        const retrieved_status = 'failed';
+        runsRetrieveStub.callsFake(() => {
+            call_count++;
+            if (call_count < 3) {
+                return Promise.resolve({ status: pending_status });
+            }
+            else {
+                return Promise.resolve({ status: retrieved_status });
+            }
+        });
+
+        try {
+            const res = await prompt_assistant('assistant-id', 'prompt');
+        }
+        catch (error) {
+            // Ensure status of thrown object matches retrieved status
+            assert.strictEqual(error.status, retrieved_status);
+            assert.strictEqual(error.message, 'Run finished with status other than "complete".');
+        }
+    });
+
+    it('should return response when status is pending state followed by completed state', async () => {
+        const pending_status = 'in_progress';
+        const retrieved_status = 'completed';
+        runsRetrieveStub.callsFake(() => {
+            call_count++;
+            if (call_count < 3) {
+                return Promise.resolve({ status: pending_status });
+            }
+            else {
+                return Promise.resolve({ status: retrieved_status });
+            }
+        });
+
+        const res = await prompt_assistant('assistant-id', 'prompt');
+        
+        // Ensure response is as expected
+        assert.strictEqual(res, test_response);
     });
 });
