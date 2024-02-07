@@ -3,7 +3,7 @@ require('dotenv').config({ path: './server/.env' });
 
 const AssistantUtils = {
     async prompt_assistant(assistant_id, prompt) {
-        const openai = new OpenAI({ apiKey: 'junk' /* process.env.OPENAI_API_KEY */ });
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
         // Create new thread with prompt
         const thread = await openai.beta.threads.create({
