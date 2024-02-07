@@ -215,8 +215,6 @@ router.post('/fetch-plant-uml', async(req, res) => {
         diagram_response = response.data;
     }
     catch (error) {
-        console.error(error);
-
         // Check for timeout error
         if (error.code === 'ECONNABORTED') {
             return res.status(408).json({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
