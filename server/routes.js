@@ -1,6 +1,7 @@
 const express = require('express');
 const firebase = require('firebase');
 const plantuml_encoder = require('plantuml-encoder');
+const AssistantUtils = require('./assistantUtils');
 const axios = require('axios');
 const router = express.Router();
 require('dotenv').config({ path: './server/.env' });
@@ -185,22 +186,22 @@ router.post('/fetch-plant-uml', async(req, res) => {
 
     // Require parameters: url_code, response_type
     if (!uml_code || !response_type) {
-        return res.status(400).send({ type: 'MissingInput', message: 'Both uml_code and response_type are required as non-empty parameters.' });
+        return res.status(400).json({ type: 'MissingInput', message: 'Both uml_code and response_type are required as non-empty parameters.' });
     }
 
     // uml_code must be a string
     if (typeof uml_code !== 'string') {
-        return res.status(400).send({ type: 'InvalidInput', message: 'uml_code must be a string.' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'uml_code must be a string.' });
     }
 
     // response_type must be "SVG" or "PNG"
     if (response_type !== 'SVG' && response_type !== 'PNG') {
-        return res.status(400).send({ type: 'InvalidInput', message: 'response_type must be "SVG" or "PNG".' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'response_type must be "SVG" or "PNG".' });
     }
 
     // return_as_uri must be a boolean (default false)
     if (typeof return_as_uri !== 'boolean') {
-        return res.status(400).send({ type: 'InvalidInput', message: 'return_as_uri must be a boolean (default false).' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'return_as_uri must be a boolean (default false).' });
     }
 
     // Encode UML source code into PlantUML link
@@ -218,16 +219,16 @@ router.post('/fetch-plant-uml', async(req, res) => {
 
         // Check for timeout error
         if (error.code === 'ECONNABORTED') {
-            return res.status(408).send({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
+            return res.status(408).json({ type: 'TimeoutError', message: 'The request timed out after 5 seconds.' });
         }
 
         // Check for invalid UML code error
         if (error.response?.status === 400) {
-            return res.status(400).send({ type: 'InvalidUMLCodeError', message: 'The provided UML code is not valid.' });
+            return res.status(400).json({ type: 'InvalidUMLCodeError', message: 'The provided UML code is not valid.' });
         }
 
         // Default error: server not available
-        return res.status(500).send({ type: 'ServerError', message: 'The PlantUML server is unavailable.', error: error });
+        return res.status(500).json({ type: 'ServerError', message: 'The PlantUML server is unavailable.', error: error });
     }
 
     // Convert SVG or PNG to URI form if requested
@@ -252,32 +253,32 @@ router.post('/add-scale-to-uml', async(req, res) => {
 
     // Require url_code parameter
     if (!uml_code) {
-        return res.status(400).send({ type: 'MissingInput', message: 'uml_code is required as non-empty parameter.' });
+        return res.status(400).json({ type: 'MissingInput', message: 'uml_code is required as non-empty parameter.' });
     }
 
     // Require at least one of scale_width and scale_height parameters
     if (!scale_width && !scale_height) {
-        return res.status(400).send({ type: 'MissingInput', message: 'At least one of scale_width and scale_height is required as a parameter.' });
+        return res.status(400).json({ type: 'MissingInput', message: 'At least one of scale_width and scale_height is required as a parameter.' });
     }
 
     // uml_code must be a string
     if (typeof uml_code !== 'string') {
-        return res.status(400).send({ type: 'InvalidInput', message: 'uml_code must be a string.' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'uml_code must be a string.' });
     }
 
     // scale_width must be an int if it exists
     if (scale_width !== undefined && !Number.isInteger(scale_width)) {
-        return res.status(400).send({ type: 'InvalidInput', message: 'scale_width must be an int if it passed.' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'scale_width must be an int if it is passed.' });
     }
 
     // scale_height must be an int if it exists
     if (scale_height !== undefined && !Number.isInteger(scale_height)) {
-        return res.status(400).send({ type: 'InvalidInput', message: 'scale_height must be an int if it passed.' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'scale_height must be an int if it is passed.' });
     }
 
     // max must be a boolean (default false)
     if (typeof max !== 'boolean') {
-        return res.status(400).send({ type: 'InvalidInput', message: 'max must be a boolean (default false).' });
+        return res.status(400).json({ type: 'InvalidInput', message: 'max must be a boolean (default false).' });
     }
 
     // Construct scale command based on parameters
@@ -302,7 +303,7 @@ router.post('/add-scale-to-uml', async(req, res) => {
 
     // @enduml must be present
     if (end_index === -1) {
-        return res.status(400).send({ type: 'MissingEnduml', message: '@enduml must be present to indicate end of program.' });
+        return res.status(400).json({ type: 'MissingEnduml', message: '@enduml must be present to indicate end of program.' });
     }
 
     // Insert scale command before @enduml line
@@ -312,6 +313,68 @@ router.post('/add-scale-to-uml', async(req, res) => {
     const uml_code_with_scale = lines.join('\n');
 
     return res.status(200).send(uml_code_with_scale);
+});
+
+router.post('/query-assistant-code-generator', async(req, res) => {
+    const {
+        uml_code = null,    // current source code string from which AI will work; if empty, will generate from scratch
+        prompt,             // prompt string from which code will be generated
+        timeout = 10000,    // duration before query request times out (default 10 seconds)
+    } = req.body;
+    const assistant_id = process.env.CODE_GENERATOR_ASSISTANT_ID;
+    let assistant_response;
+
+    // Require prompt parameter
+    if (!prompt) {
+        return res.status(400).json({ type: 'MissingInput', message: 'prompt is required as non-empty parameter.' });
+    }
+
+    // url_code must be a string if it exists
+    if (uml_code !== null && typeof uml_code !== 'string') {
+        return res.status(400).json({ type: 'InvalidInput', message: 'uml_code must be a string if it is passed.' });
+    }
+
+    // prompt must be a string
+    if (typeof prompt !== 'string') {
+        return res.status(400).json({ type: 'InvalidInput', message: 'prompt must be a string.' });
+    }
+
+    // timeout must be an int if it exists
+    if (timeout !== undefined && !Number.isInteger(timeout)) {
+        return res.status(400).json({ type: 'InvalidInput', message: 'timeout must be an int if it is passed.' });
+    }
+
+    // Construct assistant prompt based on UML code and passed prompt
+    const code_prompt = uml_code ?
+        `Here is my current code:\n${uml_code}\n\nMake changes to the PlantUML code according to the following prompt:\n` :
+        'Generate PlantUML code according to the following prompt:\n';
+    const assistant_prompt = code_prompt + prompt;
+
+    // Attempt to get response from assistant using helpers
+    try {
+        assistant_response = await AssistantUtils.handle_assistant_call(assistant_id, assistant_prompt, timeout);
+    }
+    catch (error) {
+        // All thrown objects are of form { status, to_send } due to handler structure
+        return res.status(error.status).json(error.to_send);
+    }
+
+    // Split the response into pre_code, uml_code, and post_code (everything after first @enduml)
+    // The UML code starts with @startuml and ends with @enduml ([\s\S]*? matches all characters until the first @enduml)
+    const [pre_code, uml_code_response, ...rest] = assistant_response.split(/(@startuml[\s\S]*?@enduml)/);
+    const post_code = rest.join('');
+
+    // Return an error if no complete code was generated
+    if (!uml_code_response) {
+        return res.status(500).json({ type: 'MissingSourceCode', message: 'Missing or incomplete source code message generated.' });
+    }
+
+    // Return the assistant response split by code
+    return res.status(200).json({
+        pre_code: pre_code.trim(),
+        uml_code: uml_code_response.trim(),
+        post_code: post_code.trim()
+    });
 });
 
 module.exports = router;

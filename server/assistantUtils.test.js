@@ -247,7 +247,7 @@ describe('Assistant handler testing', () => {
 
     it('should return prompt_assistant\'s return value when no error is thrown', async () => {
         const assistant_response = 'Some assistant response';
-        promptAssistantStub.returns(assistant_response);
+        promptAssistantStub.resolves(assistant_response);
 
         const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
         

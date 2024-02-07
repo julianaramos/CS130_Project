@@ -2,6 +2,7 @@ const request = require("supertest");
 const app = require('./app.js');
 const sinon = require('sinon');
 const firebase = require('firebase');
+const AssistantUtils = require('./assistantUtils');
 const axios = require('axios');
 const assert = require('assert');
 
@@ -189,7 +190,7 @@ describe('PlantUML diagram fetching testing', () => {
         };
 
         // Stub a server timeout
-        getStub.throws({ code: 'ECONNABORTED' });
+        getStub.rejects({ code: 'ECONNABORTED' });
 
         const res = await request(app).post('/fetch-plant-uml').send(req).expect(408);
     });
@@ -201,7 +202,7 @@ describe('PlantUML diagram fetching testing', () => {
         };
 
         // Stub invalid code error from server
-        getStub.throws({ response: { status: 400 } });
+        getStub.rejects({ response: { status: 400 } });
 
         const res = await request(app).post('/fetch-plant-uml').send(req).expect(400);
     });
@@ -213,7 +214,7 @@ describe('PlantUML diagram fetching testing', () => {
         };
 
         // Stub arbitrary error from server
-        getStub.throws(new Error('Some error'));
+        getStub.rejects(new Error('Some error'));
 
         const res = await request(app).post('/fetch-plant-uml').send(req).expect(500);
     });
@@ -412,5 +413,115 @@ describe('Scale adding testing', () => {
         };
         const correct_scale_command = 'scale max 100x200';
         await check_scale_command(req, correct_scale_command);
+    });
+});
+
+describe('Code generation assistant testing', () => {
+    let handleAssistantCallStub;
+
+    const check_assistant_response = async (req) => {
+        const pre_code = 'Some pre-code';
+        const uml_code_response = '@startuml...@enduml';
+        const post_code = 'Some post-code';
+        const assistant_response = `${pre_code}\n${uml_code_response}\n${post_code}`;
+        handleAssistantCallStub.resolves(assistant_response);
+
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(200);
+
+        assert.strictEqual(res.body.pre_code, pre_code);
+        assert.strictEqual(res.body.uml_code, uml_code_response);
+        assert.strictEqual(res.body.post_code, post_code);
+    };
+
+    beforeEach(() => {
+        handleAssistantCallStub = sinon.stub(AssistantUtils, 'handle_assistant_call');
+    });
+
+    afterEach(() => {
+        sinon.reset();
+        sinon.restore();
+    });
+
+    it('should return 400 when prompt is missing', async () => {
+        const req = {};
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(400);
+    });
+
+    it('should return 400 when uml_code is not a string', async () => {
+        const req = {
+            uml_code: 5,
+            prompt: 'non-empty prompt'
+        };
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(400);
+    });
+
+    it('should return 400 when prompt is not a string', async () => {
+        const req = {
+            prompt: 5
+        };
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(400);
+    });
+
+    it('should return 400 when timeout is not an integer', async () => {
+        const req = {
+            prompt: 'non-empty prompt',
+            timeout: false
+        };
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(400);
+    });
+
+    it('should return error when handle_assistant_call fails', async () => {
+        const req = {
+            prompt: 'non-empty prompt'
+        };
+        const error_status = 500;
+        const error_to_send = { message: 'Some error message.' };
+        const error_object = { status: error_status, to_send: error_to_send };
+        handleAssistantCallStub.rejects(error_object);
+
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(error_status);
+
+        assert.strictEqual(res.body.message, error_to_send.message);
+    });
+
+    it('should return 500 when no complete code was generated', async () => {
+        const req = {
+            prompt: 'non-empty prompt'
+        };
+        handleAssistantCallStub.resolves('@startuml...');
+
+        const res = await request(app).post('/query-assistant-code-generator').send(req).expect(500);
+    });
+
+    it('should return proper response when no UML code or timeout provided', async () => {
+        const req = {
+            prompt: 'non-empty prompt'
+        };
+        await check_assistant_response(req);
+    });
+
+    it('should return proper response when no UML code provided but timeout provided', async () => {
+        const req = {
+            prompt: 'non-empty prompt',
+            timeout: 20000
+        };
+        await check_assistant_response(req);
+    });
+
+    it('should return proper response when UML code provided but no timeout provided', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            prompt: 'non-empty prompt'
+        };
+        await check_assistant_response(req);
+    });
+
+    it('should return proper response when UML code and timeout provided', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            prompt: 'non-empty prompt',
+            timeout: 20000
+        };
+        await check_assistant_response(req);
     });
 });
