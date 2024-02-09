@@ -66,7 +66,7 @@ const AssistantUtils = {
                 case 'timeout':
                     throw { status: 408, to_send: { type: error.status, message: `The run timed out after ${timeout/1000} seconds.` } };
                 default:
-                    throw { status: 500, to_send: { type: 'ServerError', message: 'Unknown error.', error: error } };
+                    throw { status: 500, to_send: { type: 'ServerError', message: error.message } };
             }
         }
         finally {

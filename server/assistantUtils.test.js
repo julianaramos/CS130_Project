@@ -231,7 +231,8 @@ describe('Assistant handler testing', () => {
     });
 
     it('should throw ServerError when unknown status caught', async () => {
-        const thrown_error = { status: 'some-unknown-status', message: 'Some message.' };
+        const error_message = 'Some message.';
+        const thrown_error = { status: 'some-unknown-status', message: error_message };
         promptAssistantStub.rejects(thrown_error);
 
         try {
@@ -240,8 +241,7 @@ describe('Assistant handler testing', () => {
         catch(error) {
             assert.strictEqual(error.status, 500);
             assert.strictEqual(error.to_send.type, 'ServerError');
-            assert.strictEqual(error.to_send.message, 'Unknown error.');
-            assert.strictEqual(error.to_send.error, thrown_error);
+            assert.strictEqual(error.to_send.message, error_message);
         }
     });
 
