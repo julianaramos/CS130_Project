@@ -2,7 +2,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { login, logout } from '../redux/user';
-import {TextField, Toolbar} from "@mui/material"
+import {TextField} from "@mui/material"
 
 const Login = () => {
     const { uid } = useSelector((state) => state.user);
@@ -31,7 +31,7 @@ const Login = () => {
             </form>
             {x}
             <button onClick={togglelogin}>togglelogin</button>
-            <Link to = "/"> To Signup </Link>
+            <Link to = "/signup"> To Signup </Link>
         </div>
     );
 }
