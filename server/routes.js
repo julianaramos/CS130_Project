@@ -53,6 +53,37 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.get('/get-all-uml', async(req,res) => {
+    uid = req.body.uid;
+
+    var uml_map = {};
+
+    try{
+        await firebase.firestore().runTransaction(async (t) => {
+
+            // Get the savedUML of a user
+            const userRef = firebase.firestore().collection("User").doc(uid);
+            const userDoc = await t.get(userRef);
+            const savedUML = userDoc.data().savedUML;
+
+            await savedUML.forEach(async uml_id => {
+                const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+                const umlDoc = await t.get(umlRef);
+                uml_map[uml_id] = umlDoc.data();
+            });
+
+            uml_arr = savedUML;
+        });
+        res.status(200).send(uml_map);
+    }
+    catch (error){
+        res.status(503).send("Could not get user's uml diagrams.")
+    }
+
+
+
+});
+
 router.post('/create-new-uml', async(req, res) => {
     const umlData = {
         content: req.body.content,

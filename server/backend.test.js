@@ -130,6 +130,30 @@ describe('Firebase route testing', () => {
         });
         const res = await request(app).post('/delete-uml').send(req).expect(503);
     });
+
+    it('should return success message when getting all uml succeeds', async () => {
+        getStub.onCall(0).callsFake(() => ({
+            data: () => ({ savedUML: ['first_id', 'second_id'] })
+        }));
+
+        getStub.onCall(1).callsFake(() => ({
+            data: () => ({ content: 'first_content', name: 'first_name' })
+        }));
+
+        getStub.onCall(2).callsFake(() => ({
+            data: () => ({ content: 'second_content', name: 'second_name' })
+        }));
+
+        //await createNewUml(req, res);
+        const res = await request(app).get('/get-all-uml').send(req).expect(200);
+
+        //make sure res contains map with each uml id to its content
+        jsonRes = JSON.stringify(res.body);
+        jsonExpected = JSON.stringify({first_id: { content: 'first_content', name: 'first_name' },
+        second_id: { content: 'second_content', name: 'second_name' }});
+
+        assert(jsonRes == jsonExpected);
+    });
 });
 
 describe('PlantUML diagram fetching testing', () => {
