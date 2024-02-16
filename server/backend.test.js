@@ -131,7 +131,7 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/delete-uml').send(req).expect(503);
     });
 
-    it('should return success message when getting all uml succeeds', async () => {
+    it('should return uml json when get-all-uml succeeds', async () => {
         getStub.onCall(0).callsFake(() => ({
             data: () => ({ savedUML: ['first_id', 'second_id'] })
         }));
@@ -144,13 +144,27 @@ describe('Firebase route testing', () => {
             data: () => ({ content: 'second_content', name: 'second_name' })
         }));
 
-        //await createNewUml(req, res);
         const res = await request(app).get('/get-all-uml').send(req).expect(200);
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);
         jsonExpected = JSON.stringify({first_id: { content: 'first_content', name: 'first_name' },
         second_id: { content: 'second_content', name: 'second_name' }});
+
+        assert(jsonRes == jsonExpected);
+    });
+
+    it('should return uml content when get-uml succeeds', async () => {
+        getStub.callsFake(() => ({
+            data: () => ({ content: 'content', name: 'uml_name' })
+        }));
+
+
+        const res = await request(app).get('/get-uml').send(req).expect(200);
+
+        //make sure res contains map with each uml id to its content
+        jsonRes = JSON.stringify(res.body);
+        jsonExpected = JSON.stringify({ content: 'content', name: 'uml_name' });
 
         assert(jsonRes == jsonExpected);
     });

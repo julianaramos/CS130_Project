@@ -84,6 +84,29 @@ router.get('/get-all-uml', async(req,res) => {
 
 });
 
+router.get('/get-uml', async(req,res) => {
+    uid = req.body.uid;
+    uml_id = req.body.uml_id;
+
+    var uml;
+
+    try{
+        await firebase.firestore().runTransaction(async (t) => {
+
+            const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+            const umlDoc = await t.get(umlRef);
+            uml = umlDoc.data();
+        });
+        res.status(200).send(uml);
+    }
+    catch (error){
+        res.status(503).send("Could not get uml.")
+    }
+
+
+
+});
+
 router.post('/create-new-uml', async(req, res) => {
     const umlData = {
         content: req.body.content,
