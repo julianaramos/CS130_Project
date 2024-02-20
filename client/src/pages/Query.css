@@ -1,0 +1,15 @@
+body{
+    background-color: #e4e4e7;
+}
+
+.query-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10%;
+    align-items: center;
+  }
+
+.uml-wrapper {
+    display: flex;
+    width: 60%;
+}
