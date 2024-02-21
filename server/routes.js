@@ -46,7 +46,13 @@ router.post('/login', async (req, res) => {
     }
 
     // TODO VALIDATE DATA
-
+    const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegEx.test(fields.email)){
+        return res.status(400).send("Invalid email address.")
+    }
+    if(fields.password.length < 6){
+        return res.status(400).send("Invalid password.")
+    }
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
