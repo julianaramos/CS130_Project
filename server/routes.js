@@ -6,6 +6,11 @@ const axios = require('axios');
 const router = express.Router();
 require('dotenv').config({ path: './server/.env' });
 
+router.post('/test', async(req, res) => {
+    console.log(req.body);
+    res.send('Test route');
+});
+
 router.post('/create-user', async (req, res) => {
     const data = req.body;
     await firebase.firestore().collection("User").add(data);
@@ -53,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/get-all-uml', async(req,res) => {
+router.post('/get-all-uml', async(req,res) => {
     uid = req.body.uid;
 
     var uml_map = {};
@@ -84,9 +89,11 @@ router.get('/get-all-uml', async(req,res) => {
 
 });
 
-router.get('/get-uml', async(req,res) => {
+router.post('/get-uml', async(req,res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
+
+    console.log(req.body);
 
     var uml;
 
@@ -97,6 +104,7 @@ router.get('/get-uml', async(req,res) => {
             const umlDoc = await t.get(umlRef);
             uml = umlDoc.data();
         });
+        console.log(uml);
         res.status(200).send(uml);
     }
     catch (error){

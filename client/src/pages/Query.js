@@ -2,100 +2,146 @@ import React, { useEffect, useState } from 'react';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
-import { TextField, Card, CardMedia, Typography, Stack, IconButton } from '@mui/material';
+import { TextField, Card, CardMedia, Typography, Stack, IconButton, TextareaAutosize, CardContent } from '@mui/material';
 import './Query.css'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Diagram_img from '../images/test.png'
+import NavBar from './NavBar';
 
-
-const ToggleSwitch = ({assistant, handleAssistantChange}) => {  
+const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
-      <div className="button-wrapper">
-        <button
-          className={`button generate ${assistant === 'Generate' ? 'selected' : ''}`}
-          onClick={handleAssistantChange}
-          type="button"
-        >
-          Generate
-        </button>
-        <button
-          className={`button assist ${assistant === 'Assist' ? 'selected' : ''}`}
-          onClick={handleAssistantChange}
-          type="button"
-        >
-          Assist
-        </button>
-      </div>
-    );
-};
-
-const UmlInputBox = ({umlText, handleUMLChange}) => {
-
-  const handleKeyPress = async(event) => {
-    if (event.key === 'Enter') {
-      console.log('Enter Pressed');
-    }
-  }
-    
-    return (
-        <TextField
-          id="uml-box"
-          label="uml"
-          variant="outlined"
-          placeholder="Enter a search term"
-          value={umlText}
-          onChange={handleUMLChange}
-          onKeyDown={handleKeyPress}
-          multiline
-          style={{ width: '100%' }} // Adjust the width as desired
-        />
+      <Card className='uml-wrapper'>
+        <CardContent>
+          <TextareaAutosize
+            className='uml-box'
+            variant="outlined"
+            placeholder="Enter a search term"
+            value={umlText}
+            rows = {20}
+            maxRows= {20}
+            onChange={handleUMLChange}
+            style={{ width: '100%', height: '65vh'}} // Adjust the width as desired
+          />
+        </CardContent>
+      </Card>
     );
 };
 
 const Diagram = ({image}) => {
   return (    
-  <Card sx={{ p: 2, width: { xs: '100%', sm: 'auto' }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
+  <Card className='diagram-card'>
     <CardMedia
+      sx={{ height: '78vh', width: '50vw', objectFit: "contain"}}
       component="img"
-      width="100"
-      height="100"
       alt="UML Diagram"
-      src={imageUrl}
-      sx={{ width: { xs: '100%', sm: 100 }, borderRadius: 0.6 }}
+      src={image}
+      scale='86%'
     />
   </Card>)
-
 };
+
+const Submit = ({handleSubmission}) => {
+  return (<button onClick={handleSubmission}> submit </button>)
+};
+
+const Prompt = ({handlePromptChange, promptText}) => {
+  return (
+    <TextField 
+      onChange={handlePromptChange}
+      value={promptText}
+      fullWidth
+    />
+  )
+}
 
 const Query = () => {
     const [umlText, setUMLText] = useState('');
-    const [data, setData] = useState('poop');
+    const [data, setData] = useState({});
+    const [feedback, setFeedback] = useState('');
+    const [promptText, setPromptText] = useState('');
+    const [diagram, setDiagram] = useState('');
+
+    const uml_id = "AWguETzXKxrRlwnztV07";
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
-        // Implement your search logic here (e.g., filter data based on searchText).
     };
 
-    useEffect(() => {
-        async function getData() {
-            const data = await axios.get('http://localhost:4000/test');
-            console.log(data.data);
-            setData(data.data);
+    const handleSubmission = async () => {
+        const body = {
+          uml_code: umlText,
+          prompt: promptText
         }
-        getData();
+        console.log('loading');
+        const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
+        console.log('done');
+        setUMLText(res.data.uml_code)
+        console.log(res);
+    };
+
+    const handlePromptChange = (event) => {
+      setPromptText(event.target.value);
+    }
+
+    useEffect(() => {
+        async function loadUML() {
+            const body = {
+              uml_id: uml_id
+            }
+            const res = await axios.post('http://localhost:4000/get-uml', body);
+            setData(res.data);
+            setUMLText(res.data.content);
+        }
+
+        async function loadDiagram() {
+          const scaleBody = {
+            uml_code: umlText,
+            scale_width: 1000,
+            scale_height: 1000
+          }
+          try {
+            //const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
+            //const uml_code_scaled = res1.data;
+            //console.log(res1);
+
+            //console.log(uml_code_scaled);
+            
+            const plantBody = {
+              uml_code: umlText, //not using scaled for now
+              response_type: 'PNG',
+              return_as_uri: true
+
+            }
+            const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
+            setDiagram(res.data);
+            console.log(res);
+          }
+          catch(error){
+
+          }
+        }
+
+        if (JSON.stringify(data) === '{}')
+          loadUML();
+        loadDiagram();
     });
 
     return (
-    <Grid container direction='row' className='query-container'>
-        <Grid item className='uml-wrapper'>
-            <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText}/>
-        </Grid>
-        <Grid item>
+    <div>
+      <NavBar/>
+      <Grid container direction='row' className='query-container' spacing={2}>
+          <Grid item className='uml-wrapper' xs = {6}>
+              <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
+          </Grid>
+          <Grid item className='diagram-wrapper' xs = {6}>
+            <Diagram image={diagram}/>
+          </Grid>
+      </Grid>
+      <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
+      <Submit handleSubmission={handleSubmission}/>
+    </div>
 
-        </Grid>
-        <div> {umlText} </div>
-        <div> {data} </div>
-    </Grid>
     );
 };
 

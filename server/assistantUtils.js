@@ -1,5 +1,5 @@
 const OpenAI = require("openai");
-require('dotenv').config({ path: './server/.env' });
+require('dotenv').config({ path: './.env' });
 
 const AssistantUtils = {
     async prompt_assistant(assistant_id, prompt) {
