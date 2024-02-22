@@ -1,6 +1,5 @@
 import React from 'react'
 //import { useDispatch, useSelector } from 'react-redux';
-//import { Link } from 'react-router-dom';
 //import { login, logout } from '../redux/user';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -97,8 +96,8 @@ const Home = () => {
             <Container
                 id="user-designs"
                 sx={{
-                    pt: { xs: 4, sm: 12 },
-                    pb: { xs: 8, sm: 16 },
+                    pt: "5rem",
+                    pb: "5rem",
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
@@ -108,8 +107,8 @@ const Home = () => {
                 >
                 <Box
                     sx={{
-                    width: { sm: '100%', md: '60%' },
-                    textAlign: { sm: 'left', md: 'center' },
+                    width: .7,
+                    textAlign: 'center',
                     p: "5rem",
                     }}
                 >
@@ -121,15 +120,15 @@ const Home = () => {
                         id="placeholder"
                         hiddenLabel
                         fullWidth
+                        multiline
                         size="small"
                         variant="outlined"
-                        placeholder= "unload your ideas..."
+                        label= "unload your ideas..."
                     />
                 </Box>
                 <Box
                     sx={{
-                    width: { sm: '100%', md: '60%' },
-                    textAlign: { sm: 'left', md: 'center' },
+                    textAlign: 'center',
                     my:"1.5rem",
                     }}
                 >
