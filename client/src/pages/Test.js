@@ -1,13 +1,12 @@
-import React, { Component } from 'react'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 
-class Test extends Component {
-    render() {
-        return (
-            <div>
-                Test Page
-            </div>
-        )
+const Test = () => {
+    const locationData = useLocation();
+    if (!locationData.state){
+        return;
     }
+    return(<div>{locationData.state.searchText}</div>)
 }
 
 export default Test

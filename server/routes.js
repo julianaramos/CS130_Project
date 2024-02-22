@@ -6,6 +6,11 @@ const axios = require('axios');
 const router = express.Router();
 require('dotenv').config({ path: './server/.env' });
 
+router.post('/test', async(req, res) => {
+    console.log(req.body);
+    res.send('Test route');
+});
+
 router.post('/create-user', async (req, res) => {
     const data = req.body;
     await firebase.firestore().collection("User").add(data);
@@ -53,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/get-all-uml', async(req,res) => {
+router.post('/get-all-uml', async(req,res) => {
     uid = req.body.uid;
 
     var uml_map = {};
@@ -84,9 +89,11 @@ router.get('/get-all-uml', async(req,res) => {
 
 });
 
-router.get('/get-uml', async(req,res) => {
+router.post('/get-uml', async(req,res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
+
+    console.log(req.body);
 
     var uml;
 
@@ -97,6 +104,7 @@ router.get('/get-uml', async(req,res) => {
             const umlDoc = await t.get(umlRef);
             uml = umlDoc.data();
         });
+        console.log(uml);
         res.status(200).send(uml);
     }
     catch (error){
@@ -114,6 +122,7 @@ router.post('/create-new-uml', async(req, res) => {
         name: req.body.name
     }
     uid = req.body.uid;
+    let id;
     try{
         await firebase.firestore().runTransaction(async (t) => {
 
@@ -127,10 +136,11 @@ router.post('/create-new-uml', async(req, res) => {
             t.set(umlRef, umlData);
 
             // update user's savedUML array with new document ID
+            id = umlRef.id;
             savedUML.push(umlRef.id);
             t.update(userRef, { savedUML: savedUML });
         });
-        res.status(200).send("Successly added new uml doc");
+        res.status(200).send(id);
     }
     catch (error){
         res.status(503).send("Could not create new uml, changes to db were not saved.")

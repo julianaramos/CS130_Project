@@ -1,0 +1,53 @@
+body{
+    background-color: #e4e4e7;
+}
+
+.query-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4.5%;
+    padding-bottom: 1.5%;
+  }
+
+.uml-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 78vh;
+    width: 100%;
+}
+
+.uml-box {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    width: 100%;
+    resize: none;
+    overflow: auto;
+}
+
+.diagram-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 78vh;
+}
+
+.diagram-card {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    height: 78vh;
+    width: 100%;
+}
+
+.page-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 60vh;
+}
+
+.submit-wrapper{
+    padding-top: 50px;
+}
+
