@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,7 +13,14 @@ import MenuItem from '@mui/material/MenuItem';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import Slide from '@mui/material/Slide';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, logout } from '../redux/user';
+
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
+import ListItemIcon from '@mui/material/ListItemIcon';
+
 
 function HideOnScroll(props) {
     const { children} = props;
@@ -27,7 +34,6 @@ function HideOnScroll(props) {
 }
 
 const UMenu = () => {
-    const settings = ['Profile', 'Account', "Logout"];
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -36,6 +42,10 @@ const UMenu = () => {
         setAnchorElUser(null);
     };
 
+    const dispatch = useDispatch();
+    function flogout() {
+        dispatch(logout());
+    }
     return (
         <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
@@ -59,11 +69,10 @@ const UMenu = () => {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
             >
-            {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-            ))}
+                
+            <MenuItem component="a" href="/dashboard"><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
+            <MenuItem component="a" href='/'><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
+            <MenuItem onClick={flogout}><ListItemIcon><Logout/></ListItemIcon>Logout</MenuItem>
             </Menu>
         </Box>
     )
