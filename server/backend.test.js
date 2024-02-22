@@ -144,7 +144,7 @@ describe('Firebase route testing', () => {
             data: () => ({ content: 'second_content', name: 'second_name' })
         }));
 
-        const res = await request(app).get('/get-all-uml').send(req).expect(200);
+        const res = await request(app).post('/get-all-uml').send(req).expect(200);
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);
@@ -160,7 +160,7 @@ describe('Firebase route testing', () => {
         }));
 
 
-        const res = await request(app).get('/get-uml').send(req).expect(200);
+        const res = await request(app).post('/get-uml').send(req).expect(200);
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);
