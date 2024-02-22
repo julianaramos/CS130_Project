@@ -16,11 +16,13 @@ import DownloadIcon from '@mui/icons-material/Download';
 
 import Diagram_img from '../images/UML-Class-Diagram.png'
 import NavBar from './NavBar';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
 
     const isSmallScreen = useMediaQuery('(max-width:600px)');
     const columns = isSmallScreen ? 1 : 3;
+    const navigate = useNavigate()
     const userUML = [
         {
             username: "Logan",
@@ -43,6 +45,10 @@ const Dashboard = () => {
 
     ]
 
+    const handleCreateClick = () => {
+        navigate('/query');
+    }
+
     return(
         <Container                 
             sx={{
@@ -55,7 +61,7 @@ const Dashboard = () => {
             gap: { xs: 3, sm: 6 },
         }}>
             <Box>
-                <Button href='/query' variant='outlined' startIcon={<AddIcon/>}>Create</Button>
+                <Button onClick={handleCreateClick} variant='outlined' startIcon={<AddIcon/>}>Create</Button>
             </Box>
             <Masonry columns={columns} spacing={2}>
                 {userUML.map((UML, index) => (
