@@ -18,7 +18,18 @@ router.post('/signup', async (req, res) => {
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
     }
-
+    //VALIDATE DATA
+    const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegEx.test(fields.email)){
+        return res.status(400).send("Invalid email address.")
+    }
+    if(fields.password.length < 6){
+        return res.status(400).send("Invalid password.")
+    }    
+    // validation for password and confirmpassword 
+    if(newUser.password!=newUser.confirmPassword){
+        res.status(400).send("Password does not matcch with confrim password. ")
+    }
     try 
     {
         data = await firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password); 
@@ -40,7 +51,7 @@ router.post('/login', async (req, res) => {
         password: req.body.password,
     }
 
-    // TODO VALIDATE DATA
+    //VALIDATE DATA
     const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if(!emailRegEx.test(fields.email)){
         return res.status(400).send("Invalid email address.")
