@@ -56,7 +56,7 @@ const Dashboard = () => {
         }}>
             <NavBar/>
             <Box>
-                <Button variant='outlined' startIcon={<AddIcon/>}>Create</Button>
+                <Button href='/query' variant='outlined' startIcon={<AddIcon/>}>Create</Button>
             </Box>
             <Masonry columns={columns} spacing={2}>
                 {userUML.map((UML, index) => (
