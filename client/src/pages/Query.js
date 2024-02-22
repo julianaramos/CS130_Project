@@ -8,6 +8,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Diagram_img from '../images/test.png'
 import NavBar from './NavBar';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUML } from '../redux/uml';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -45,6 +47,10 @@ const Submit = ({handleSubmission}) => {
   return (<button onClick={handleSubmission}> submit </button>)
 };
 
+const Save = ({handleSave}) => {
+  return (<button onClick={handleSave}> save </button>)
+};
+
 const Prompt = ({handlePromptChange, promptText}) => {
   return (
     <TextField 
@@ -61,8 +67,9 @@ const Query = () => {
     const [feedback, setFeedback] = useState('');
     const [promptText, setPromptText] = useState('');
     const [diagram, setDiagram] = useState('');
-
-    const uml_id = "AWguETzXKxrRlwnztV07";
+    const { uid } = useSelector((state) => state.user);
+    const {uml_id} = useSelector((state) => state.uml);
+    const dispatch = useDispatch();
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
@@ -84,14 +91,43 @@ const Query = () => {
       setPromptText(event.target.value);
     }
 
+    const handleSave = async () => {
+      const body = {
+        uml_id : uml_id,
+        uid: uid,
+        content: umlText,
+        privacy: 'public',
+        name: 'Untitled'
+
+      }
+      if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
+        try {
+          const res = await axios.post('http://localhost:4000/create-new-uml', body);
+          dispatch(setUML(res.data));
+        }
+        catch(error)
+        {}
+      }
+      else if(uml_id != null) // if we know what uml we are changing
+      {
+        try{
+          const res = await axios.post('http://localhost:4000/update-uml', body);
+        }
+        catch(error){}
+      }
+    }
+
     useEffect(() => {
         async function loadUML() {
             const body = {
               uml_id: uml_id
             }
-            const res = await axios.post('http://localhost:4000/get-uml', body);
-            setData(res.data);
-            setUMLText(res.data.content);
+            try {
+              const res = await axios.post('http://localhost:4000/get-uml', body);
+              setData(res.data);
+              setUMLText(res.data.content);
+            }
+            catch{}
         }
 
         async function loadDiagram() {
@@ -124,7 +160,9 @@ const Query = () => {
 
         if (JSON.stringify(data) === '{}')
           loadUML();
-        loadDiagram();
+
+        if (umlText != '')
+          loadDiagram();
     });
 
     return (
@@ -140,6 +178,7 @@ const Query = () => {
       </Grid>
       <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
       <Submit handleSubmission={handleSubmission}/>
+      <Save handleSave={handleSave}/>
     </div>
 
     );

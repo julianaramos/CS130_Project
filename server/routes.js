@@ -122,6 +122,7 @@ router.post('/create-new-uml', async(req, res) => {
         name: req.body.name
     }
     uid = req.body.uid;
+    let id;
     try{
         await firebase.firestore().runTransaction(async (t) => {
 
@@ -135,10 +136,11 @@ router.post('/create-new-uml', async(req, res) => {
             t.set(umlRef, umlData);
 
             // update user's savedUML array with new document ID
+            id = umlRef.id;
             savedUML.push(umlRef.id);
             t.update(userRef, { savedUML: savedUML });
         });
-        res.status(200).send("Successly added new uml doc");
+        res.status(200).send(id);
     }
     catch (error){
         res.status(503).send("Could not create new uml, changes to db were not saved.")
