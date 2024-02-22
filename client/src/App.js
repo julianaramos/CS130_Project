@@ -6,6 +6,7 @@ import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Query from './pages/Query'
 import Test from './pages/Test';
+import Dashboard from './pages/Dashboard';
 
 class App extends Component {
 
@@ -28,6 +29,9 @@ class App extends Component {
               <Route
                 exact path={"/test"}
                 element = {<Test />}/>
+              <Route
+                exact path={"/dashboard"}
+                element = {<Dashboard />}/>
             </Routes>
           </Router>
         )
