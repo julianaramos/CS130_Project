@@ -15,6 +15,7 @@ import Slide from '@mui/material/Slide';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, logout } from '../redux/user';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import Settings from '@mui/icons-material/Settings';
@@ -35,6 +36,7 @@ function HideOnScroll(props) {
 
 const UMenu = () => {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const navigate = useNavigate()
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
@@ -45,6 +47,14 @@ const UMenu = () => {
     const dispatch = useDispatch();
     function flogout() {
         dispatch(logout());
+    }
+
+    const handleDashboardClick = () => {
+        navigate("/dashboard");
+    }
+
+    const handleHomeClick = () => {
+        navigate("/");
     }
     return (
         <Box sx={{ flexGrow: 0 }}>
@@ -70,8 +80,8 @@ const UMenu = () => {
                 onClose={handleCloseUserMenu}
             >
                 
-            <MenuItem component="a" href="/dashboard"><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
-            <MenuItem component="a" href='/'><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
+            <MenuItem component="a" onClick={handleDashboardClick}><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
+            <MenuItem component="a" onClick={handleHomeClick}><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
             <MenuItem onClick={flogout}><ListItemIcon><Logout/></ListItemIcon>Logout</MenuItem>
             </Menu>
         </Box>
@@ -95,6 +105,10 @@ const LogMenu = () => {
 const NavBar = () => {
     const { uid } = useSelector((state) => state.user);
     const pages = ['Something', "Something else"];
+    const navigate = useNavigate()
+    const handleHomeClick = () => {
+        navigate("/");
+    }
 
     let x = <LogMenu/>
     if (uid !== null){
@@ -111,7 +125,7 @@ const NavBar = () => {
                         variant="h5"
                         noWrap
                         component="a"
-                        href="/"
+                        onClick = {handleHomeClick}
                         sx={{
                             mr: 8,
                             display: { xs: 'none', md: 'flex' },

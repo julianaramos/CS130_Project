@@ -54,7 +54,6 @@ const Dashboard = () => {
             alignItems: 'center',
             gap: { xs: 3, sm: 6 },
         }}>
-            <NavBar/>
             <Box>
                 <Button href='/query' variant='outlined' startIcon={<AddIcon/>}>Create</Button>
             </Box>

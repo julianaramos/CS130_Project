@@ -92,7 +92,6 @@ const Home = () => {
 
     return (
         <div>
-            <NavBar/>
             <Container
                 id="user-designs"
                 sx={{

@@ -4,7 +4,7 @@ const plantuml_encoder = require('plantuml-encoder');
 const AssistantUtils = require('./assistantUtils');
 const axios = require('axios');
 const router = express.Router();
-require('dotenv').config({ path: './server/.env' });
+require('dotenv').config({ path: './.env' });
 
 router.post('/test', async(req, res) => {
     console.log(req.body);
@@ -25,10 +25,10 @@ router.post('/signup', async (req, res) => {
     }
     //VALIDATE DATA
     const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!emailRegEx.test(fields.email)){
+    if(!emailRegEx.test(newUser.email)){
         return res.status(400).send("Invalid email address.")
     }
-    if(fields.password.length < 6){
+    if(newUser.password.length < 6){
         return res.status(400).send("Invalid password.")
     }    
     // validation for password and confirmpassword 
@@ -42,11 +42,11 @@ router.post('/signup', async (req, res) => {
             savedUML: []
         }
         await firebase.firestore().collection("User").doc(data.user.uid).set(UserInfo);
-        res.send("user created");
+        res.status(200).send(data);
     } 
     catch (error)
     {
-        res.send(error);
+        res.status(400).send(error);
     }
 });
 
@@ -67,11 +67,11 @@ router.post('/login', async (req, res) => {
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
-        res.send("Sign in successful");
+        res.status(200).send(data);
     } 
     catch (error) 
     {
-        res.send(error);
+        res.status(400).send(error);
     }
 });
 

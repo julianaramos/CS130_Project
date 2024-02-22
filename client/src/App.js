@@ -7,12 +7,14 @@ import Login from './pages/Login'
 import Query from './pages/Query'
 import Test from './pages/Test';
 import Dashboard from './pages/Dashboard';
+import NavBar from './pages/NavBar';
 
 class App extends Component {
 
     render() {
         return (
           <Router>
+            <NavBar/>
             <Routes>
               <Route
                 exact path={"/"}

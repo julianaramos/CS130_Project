@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { login, logout } from '../redux/user';
 import {TextField} from "@mui/material"
 import Avatar from '@mui/material/Avatar';
@@ -24,6 +24,7 @@ const Login = () => {
     const [email,setEmail] = useState('');
     const [password,SetPassword] =useState('')
     const body = {email: email, password:password }
+    const navigate = useNavigate()
 
     const handleLogIn = async () => {
         try {
@@ -31,9 +32,9 @@ const Login = () => {
             const res = await axios.post('http://localhost:4000/login', body);
             // If the request is successful (status code 2xx)
             if(res.status === 200){
-                window.location.href = '/';
+                dispatch(login(res.data.user.id))
+                navigate("/");
             }
-            console.log('Response data:', res);
         } catch (error) {
             // If the request encounters an error (status code outside 2xx range)
             console.error('Error:', error);
@@ -65,12 +66,11 @@ const Login = () => {
         //     <Link to = "/signup"> To Signup </Link>
         // </div>
         <div>   
-            <NavBar/>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                     <Box
                     sx={{
-                        marginTop: 35,
+                        marginTop: 15,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
