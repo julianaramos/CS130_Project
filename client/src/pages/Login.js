@@ -67,7 +67,6 @@ const Login = () => {
         // </div>
         <div>   
             <Container component="main" maxWidth="xs">
-                <CssBaseline />
                     <Box
                     sx={{
                         marginTop: 15,

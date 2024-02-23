@@ -42,50 +42,50 @@ const Home = () => {
     const userUML = [
         {
             username: "Logan",
-            Dname: "starbucks app",
-            description: "a simplified design of the starbucks app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            Dname: "Starbucks app",
+            description: "A simplified design of the starbucks app. Some user generated description.",
             diagram: Diagram_img 
         },
         {
             username: "Ray",
-            Dname: "tiktok app",
-            description: "a simplified design of the tiktok app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            Dname: "Tiktok app",
+            description: "A simplified design of the tiktok app. Some user generated description.",
             diagram: Diagram_img       
         },
         {
             username: "Roberto",
             Dname: "Panera app",
-            description: "a simplified design of the panera app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            description: "A simplified design of the panera app. Some user generated description.",
             diagram: Diagram_img      
         },
         {
             username: "Panaberta",
             Dname: "AMC app",
-            description: "a simplified design of the AMC app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            description: "A simplified design of the AMC app. Some user generated description.",
             diagram: Diagram_img 
         },
         {
             username: "Logan",
-            Dname: "starbucks app",
-            description: "a simplified design of the starbucks app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            Dname: "Starbucks app",
+            description: "A simplified design of the starbucks app. Some user generated description.",
             diagram: Diagram_img 
         },
         {
             username: "Ray",
-            Dname: "tiktok app",
-            description: "a simplified design of the tiktok app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            Dname: "Tiktok app",
+            description: "A simplified design of the tiktok app. Some user generated description.",
             diagram: Diagram_img 
         },
         {
             username: "Roberto",
             Dname: "Panera app",
-            description: "a simplified design of the panera app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            description: "A simplified design of the panera app. Some user generated description.",
             diagram: Diagram_img 
         },
         {
             username: "Panaberta",
             Dname: "AMC app",
-            description: "a simplified design of the AMC app. sljfhbgdkhfbg dlfbakjerng;dfjdka; fjbgka kjnfgkelabgkdhfngvkaber kj bkdbgkdfn  ekrhg ksjnfe hr kfnk rkhbfkvd fgk kd fv rkndfkjbvkdj gea kdnf kadjnrg fkj aekrjndkf v ekvj dfvk dgefkj d",
+            description: "A simplified design of the AMC app. Some user generated description.",
             diagram: Diagram_img 
         },
     ]
