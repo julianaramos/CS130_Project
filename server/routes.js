@@ -32,12 +32,12 @@ router.post('/signup', async (req, res) => {
         return res.status(400).send("Invalid password.")
     }    
     // validation for password and confirmpassword 
-    if(newUser.password!=newUser.confirmPassword){
-        res.status(400).send("Password does not matcch with confrim password. ")
+    if(newUser.password !== newUser.confirmPassword){
+        res.status(400).send("Password does not match with confirm password. ")
     }
     try 
     {
-        data = await firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password); 
+        data = await firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password);
         const UserInfo = {
             savedUML: []
         }

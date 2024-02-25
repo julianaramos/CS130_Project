@@ -65,6 +65,76 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/create-new-uml').send(req).expect(503);
     });
 
+    it('should return success message when signup succeeds', async () => {
+        const newUser = {
+            email: 'goodtest@example.com',
+            password: 'password123',
+            confirmPassword: 'password123',
+        };
+
+        const createUserWithEmailAndPasswordStub = sinon.stub(firebase.auth(), 'createUserWithEmailAndPassword').returns({
+            user: {
+                uid: 'test-uid',
+            },
+        });
+
+        docStub.callsFake(() => ({
+            set: () => ({})
+        }));
+
+        const res = await request(app).post('/signup').send(newUser).expect(200);
+        console.log(res)
+
+        sinon.assert.calledOnce(createUserWithEmailAndPasswordStub);
+
+        createUserWithEmailAndPasswordStub.restore();
+    });
+
+    it('should return error message when signup fails', async () => {
+        const newUser = {
+            email: 'badtest@example.com',
+            password: 'badpw',
+            confirmPassword: 'badpw',
+        };
+        const createUserWithEmailAndPasswordStub = sinon.stub(firebase.auth(), 'createUserWithEmailAndPassword').throws(new Error('Signup failed'));
+
+        const res = await request(app).post('/signup').send(newUser).expect(400);
+
+        createUserWithEmailAndPasswordStub.restore();
+    });
+
+    it('should return success message when login succeeds', async () => {
+        const fields = {
+            email: 'goodtest@example.com',
+            password: 'password',
+        };
+        const signInWithEmailAndPasswordStub = sinon.stub(firebase.auth(), 'signInWithEmailAndPassword').returns({
+            user: {
+                uid: 'test-uid',
+            },
+        });
+
+        const res = await request(app).post('/login').send(fields).expect(200);
+
+        sinon.assert.calledOnce(signInWithEmailAndPasswordStub);
+
+        signInWithEmailAndPasswordStub.restore();
+    });
+
+    it('should return error message when login fails', async () => {
+        const fields = {
+            email: 'badtest@example.com',
+            password: 'password',
+        };
+        const signInWithEmailAndPasswordStub = sinon.stub(firebase.auth(), 'signInWithEmailAndPassword').throws(new Error('Login failed'));
+
+        const res = await request(app).post('/login').send(fields).expect(400);
+
+        sinon.assert.calledOnce(signInWithEmailAndPasswordStub);
+
+        signInWithEmailAndPasswordStub.restore();
+    });
+
     it('should return success message when copy succeeds', async () => { 
         docStub.returns({id: "new_uml_id"});
         getStub.onCall(0).callsFake(() => ({
