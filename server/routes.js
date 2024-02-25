@@ -41,7 +41,7 @@ router.post('/signup', async (req, res) => {
         const UserInfo = {
             savedUML: []
         }
-        await firebase.firestore().collection("User").doc(data.user.uid)
+        await firebase.firestore().collection("User").doc(data.user.uid).set(UserInfo)
         res.status(200).send(data);
     } 
     catch (error)
