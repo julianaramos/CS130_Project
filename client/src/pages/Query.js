@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import { TextField, Card, CardMedia, Typography, Stack, IconButton, TextareaAutosize, CardContent } from '@mui/material';
 import './Query.css'
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Diagram_img from '../images/test.png'
 import NavBar from './NavBar';
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,7 +62,9 @@ const Prompt = ({handlePromptChange, promptText}) => {
 }
 
 const Query = () => {
-    const [umlText, setUMLText] = useState('');
+    const {state} = useLocation();
+
+    const [umlText, setUMLText] = useState(state ? state.content : '')
     const [data, setData] = useState({});
     const [feedback, setFeedback] = useState('');
     const [promptText, setPromptText] = useState('');
@@ -97,8 +99,8 @@ const Query = () => {
         uid: uid,
         content: umlText,
         privacy: 'public',
-        name: 'Untitled'
-
+        name: 'Untitled',
+        description: 'desc'
       }
       if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
         try {
@@ -157,9 +159,6 @@ const Query = () => {
 
           }
         }
-
-        if (JSON.stringify(data) === '{}')
-          loadUML();
 
         if (umlText != '')
           loadDiagram();

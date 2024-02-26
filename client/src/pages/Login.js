@@ -32,7 +32,7 @@ const Login = () => {
             const res = await axios.post('http://localhost:4000/login', body);
             // If the request is successful (status code 2xx)
             if(res.status === 200){
-                dispatch(login(res.data.user.id))
+                dispatch(login(res.data.user.uid))
                 navigate("/");
             }
         } catch (error) {
