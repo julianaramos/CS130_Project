@@ -14,6 +14,7 @@ describe('Firebase route testing', () => {
         uml_id: 'test-uml_id',
         content: 'content',
         privacy: 'privacy',
+        description: 'description',
         name: 'name'
     };
 
@@ -23,6 +24,7 @@ describe('Firebase route testing', () => {
         updateStub = sinon.stub();
         deleteStub = sinon.stub();
         docStub = sinon.stub();
+        dateStub = sinon.stub(Date, 'now').returns('CurrTime');
 
         runTransactionStub = sinon.stub().callsFake(async (fakeTransaction) => {
             await fakeTransaction({
@@ -142,14 +144,14 @@ describe('Firebase route testing', () => {
         }));
 
         getStub.onCall(1).callsFake(() => ({
-            data: () => ({ content: 'copy_uml_content', name: 'copy_uml_name' })
+            data: () => ({ content: 'copy_uml_content', name: 'copy_uml_name', description: 'copy_uml_description'})
         }));
 
         //await createNewUml(req, res);
         const res = await request(app).post('/copy-uml').send(req).expect(200);
 
         //make sure that the new uml is set with the data ffrom the copied one
-        assert(setStub.calledWith(sinon.match.any,{ content: 'copy_uml_content', privacy: 'public', name: 'copy_uml_name-copy'}));
+        assert(setStub.calledWith(sinon.match.any,{ content: 'copy_uml_content', privacy: 'public', name: 'copy_uml_name-copy', description: 'copy_uml_description', timestamp: 'CurrTime'}));
 
         //make sure that id from new uml doc ends up at the end of the array from the userDoc that we use in update
         assert(updateStub.calledWith(sinon.match.any,{ savedUML: ['saved_uml_id', 'new_uml_id']}));
@@ -170,7 +172,7 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/update-uml').send(req).expect(200);
 
         //make sure that the uml is set with the data we passed in
-        assert(setStub.calledWith(sinon.match.any,{ content: 'content', privacy: 'privacy', name: 'name'}));
+        assert(setStub.calledWith(sinon.match.any,{ content: 'content', privacy: 'privacy', name: 'name', description: 'description', timestamp: 'CurrTime'}));
 
     });
 
@@ -201,7 +203,7 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/delete-uml').send(req).expect(503);
     });
 
-    it('should return uml json when get-all-uml succeeds', async () => {
+    it('should return uml json when get-user-uml succeeds', async () => {
         getStub.onCall(0).callsFake(() => ({
             data: () => ({ savedUML: ['first_id', 'second_id'] })
         }));
@@ -214,7 +216,7 @@ describe('Firebase route testing', () => {
             data: () => ({ content: 'second_content', name: 'second_name' })
         }));
 
-        const res = await request(app).post('/get-all-uml').send(req).expect(200);
+        const res = await request(app).post('/get-user-uml').send(req).expect(200);
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);

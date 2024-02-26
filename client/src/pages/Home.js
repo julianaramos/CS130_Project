@@ -1,18 +1,21 @@
-import React from 'react'
-//import { useDispatch, useSelector } from 'react-redux';
-//import { login, logout } from '../redux/user';
+
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUML, removeUML } from '../redux/uml';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Masonry from '@mui/lab/Masonry';
-import { useMediaQuery } from '@mui/material';
+import { ButtonBase, CardActionArea, useMediaQuery } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 //import { useTheme } from '@mui/system'; add custom theme later
 import NavBar from './NavBar';
 import Diagram_img from '../images/UML-Class-Diagram.png'
+import axios from 'axios';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const Home = () => {
     /*const { uid } = useSelector((state) => state.user);
@@ -39,56 +42,36 @@ const Home = () => {
     const isSmallScreen = useMediaQuery('(max-width:600px)');
     const columns = isSmallScreen ? 1 : 3;
 
-    const userUML = [
-        {
-            username: "Logan",
-            Dname: "Starbucks app",
-            description: "A simplified design of the starbucks app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Ray",
-            Dname: "Tiktok app",
-            description: "A simplified design of the tiktok app. Some user generated description.",
-            diagram: Diagram_img       
-        },
-        {
-            username: "Roberto",
-            Dname: "Panera app",
-            description: "A simplified design of the panera app. Some user generated description.",
-            diagram: Diagram_img      
-        },
-        {
-            username: "Panaberta",
-            Dname: "AMC app",
-            description: "A simplified design of the AMC app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Logan",
-            Dname: "Starbucks app",
-            description: "A simplified design of the starbucks app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Ray",
-            Dname: "Tiktok app",
-            description: "A simplified design of the tiktok app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Roberto",
-            Dname: "Panera app",
-            description: "A simplified design of the panera app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Panaberta",
-            Dname: "AMC app",
-            description: "A simplified design of the AMC app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-    ]
+    var [loaded, setLoaded] = useState(false)
+    const [userUML, setUserUML] = useState([]);
+    const navigate = useNavigate()
+    const dispatch = useDispatch();
+
+
+    useEffect(() => {
+        async function loadUML() {
+            const body = {}
+            try {
+              const res = await axios.post('http://localhost:4000/get-all-uml', body);
+              console.log(res);
+              setUserUML(res.data);
+            }
+            catch(error)
+            {console.log(error);}
+        }
+
+        if (!loaded){
+            console.log('loading');
+            loadUML();
+            console.log('done');
+            setLoaded(true);
+        }
+    });
+
+    const handleCardClick = (event, UML) => {
+        console.log(UML);
+        navigate("/query", {state: UML});
+    }
 
     return (
         <div>
@@ -141,25 +124,27 @@ const Home = () => {
                 <Masonry columns={columns} spacing={2}>
                     {userUML.map((UML, index) => (
                     <Card key={index} sx={{ p: 1 }}>
-                        <CardMedia 
-                            sx={{ height: 150 }}
-                            image={UML.diagram}
-                            title='UML Diagram' 
-                        /> 
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                pr: 2,
-                            }}
-                        >
-                            <CardHeader
-                                uname={UML.username}
-                                title={UML.Dname}
-                                subheader={UML.description}
-                            />
-                        </Box>
+                        <CardActionArea
+                            onClick={event => handleCardClick(event, UML)}>
+                            <CardMedia 
+                                sx={{ height: 300, width: '100%'}}
+                                image={UML.diagram}
+                                title='UML Diagram' 
+                            /> 
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    pr: 2,
+                                }}
+                            >
+                                <CardHeader
+                                    title={UML.name}
+                                    subheader={UML.description}
+                                />
+                            </Box>
+                        </CardActionArea>
                     </Card>
                     ))}
                 </Masonry>
