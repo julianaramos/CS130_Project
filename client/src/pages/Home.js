@@ -64,6 +64,7 @@ const Home = () => {
             console.log('loading');
             loadUML();
             console.log('done');
+            console.log(userUML);
             setLoaded(true);
         }
     });

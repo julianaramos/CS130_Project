@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 //import TextField from '@mui/material/TextField';
 //import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -13,41 +13,60 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DownloadIcon from '@mui/icons-material/Download';
+import axios from 'axios';
 
 import Diagram_img from '../images/UML-Class-Diagram.png'
 import NavBar from './NavBar';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { setUML } from '../redux/uml';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Dashboard = () => {
 
     const isSmallScreen = useMediaQuery('(max-width:600px)');
     const columns = isSmallScreen ? 1 : 3;
     const navigate = useNavigate()
-    const userUML = [
-        {
-            username: "Logan",
-            Dname: "Starbucks app",
-            description: "A simplified design of the starbucks app. Some user generated description.",
-            diagram: Diagram_img 
-        },
-        {
-            username: "Ray",
-            Dname: "Tiktok app",
-            description: "A simplified design of the tiktok app. Some user generated description.",
-            diagram: Diagram_img       
-        },
-        {
-            username: "Roberto",
-            Dname: "Panera app",
-            description: "A simplified design of the panera app. Some user generated description.",
-            diagram: Diagram_img      
-        }
-
-    ]
+    const [loaded, setLoaded] = useState(false);
+    const [userUML, setUserUML] = useState([]);
+    const dispatch = useDispatch();
+    const { uid } = useSelector((state) => state.user);
 
     const handleCreateClick = () => {
         navigate('/query');
     }
+
+    const handleEditClick = (event, UML) => {
+        console.log(UML);
+        dispatch(setUML(UML.uml_id));
+        navigate("/query", {state: UML});   
+    }
+
+    const handleDownloadClick = (event, UML) => {
+        console.log(UML);
+    }
+
+    useEffect(() => {
+        async function loadUML() {
+            const body = {
+                uid: uid
+            }
+            try {
+              const res = await axios.post('http://localhost:4000/get-user-uml', body);
+              console.log(res);
+              setUserUML(res.data);
+            }
+            catch(error)
+            {console.log(error);}
+        }
+
+        if (!loaded){
+            console.log('loading');
+            loadUML();
+            console.log('done');
+            console.log(userUML)
+            setLoaded(true);
+        }
+    });
 
     return(
         <Container                 
@@ -68,12 +87,12 @@ const Dashboard = () => {
                 <Card key={index} sx={{ p: 1 }}>
                     <CardMedia 
                         sx={{ height: 180 }}
-                        image={UML.diagram}
+                        image={UML.diagram ? UML.diagram : Diagram_img}
                         title='UML Diagram' 
                     /> 
                     <ButtonGroup>
-                        <Button variant='filled' startIcon={<EditIcon/>}>Edit</Button>
-                        <Button variant='filled' startIcon={<DownloadIcon/>}>Download</Button>
+                        <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon/>}>Edit</Button>
+                        <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon/>}>Download</Button>
                     </ButtonGroup>
                     <Box
                         sx={{
@@ -83,8 +102,7 @@ const Dashboard = () => {
                         }}
                     >
                         <CardHeader
-                            uname={UML.username}
-                            title={UML.Dname}
+                            title={UML.name}
                             subheader={UML.description}
                         />
                     </Box>
