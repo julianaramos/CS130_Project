@@ -20,10 +20,10 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             variant="outlined"
             placeholder="Enter a search term"
             value={umlText}
-            rows = {20}
-            maxRows= {20}
+            rows = {23}
+            maxRows= {23}
             onChange={handleUMLChange}
-            style={{ width: '100%', height: '65vh'}} // Adjust the width as desired
+            style={{ width: '100%', height: '72vh'}} // Adjust the width as desired
           />
         </CardContent>
       </Card>
@@ -57,8 +57,58 @@ const Prompt = ({handlePromptChange, promptText}) => {
       onChange={handlePromptChange}
       value={promptText}
       fullWidth
+      label="Prompt"
     />
   )
+}
+
+const Description = ({handleDescriptionChange, descriptionText}) => {
+  return (
+  <TextField 
+    onChange={handleDescriptionChange}
+    value={descriptionText}
+    label="Description"
+    fullWidth
+  />
+  )
+}
+
+const Name = ({handleNameChange, nameText}) => {
+  return (
+    <TextField 
+      onChange={handleNameChange}
+      value={nameText}
+      label="Name"
+      fullWidth
+    />
+    )
+}
+
+const Privacy = ({handlePrivacyChange, privacy}) => {
+  return (
+    <div>
+        <button onClick={handlePrivacyChange}> {privacy} </button>
+    </div>
+    )
+}
+
+const SaveWork = ({handleSave, handleDescriptionChange, descriptionText, handleNameChange, nameText, handlePrivacyChange, privacy}) => {
+  const { uid } = useSelector((state) => state.user);
+  if (uid !== null)
+  {
+    return (
+    <div>
+      <div> Save your work! </div>
+      <Name handleNameChange={handleNameChange} nameText={nameText} />
+      <Description handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} />
+      <Privacy handlePrivacyChange={handlePrivacyChange} privacy={privacy} />
+      <Save handleSave={handleSave} />
+    </div>
+    )
+  }
+  else{
+    return <div> Login to save your work! </div>;
+  }
 }
 
 const Query = () => {
@@ -71,10 +121,15 @@ const Query = () => {
     const [diagram, setDiagram] = useState('');
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
+    const [descriptionText, setDescriptionText] = useState(state ? state.description: '');
+    const [nameText, setNameText] = useState(state ? state.name: 'untitled');
+    const [privacy, setPrivacy] = useState(state ? state.privacy: 'public');
+    const [loaded, setLoaded] = useState(false);
     const dispatch = useDispatch();
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
+        loadDiagram();
     };
 
     const handleSubmission = async () => {
@@ -93,14 +148,31 @@ const Query = () => {
       setPromptText(event.target.value);
     }
 
+    const handleDescriptionChange = (event) => {
+      setDescriptionText(event.target.value);
+    }
+
+    const handleNameChange = (event) => {
+      setNameText(event.target.value);
+    }
+
+    const handlePrivacyChange = (event) => {
+      if (privacy == 'public') {
+        setPrivacy('private');
+      }
+      else {
+        setPrivacy('public');
+      }
+    }
+
     const handleSave = async () => {
       const body = {
         uml_id : uml_id,
         uid: uid,
         content: umlText,
-        privacy: 'public',
-        name: 'Untitled',
-        description: 'desc',
+        privacy: privacy,
+        name: nameText,
+        description: descriptionText,
         diagram: diagram,
       }
       if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
@@ -120,49 +192,38 @@ const Query = () => {
       }
     }
 
+    async function loadDiagram() {
+      const scaleBody = {
+        uml_code: umlText,
+        scale_width: 1000,
+        scale_height: 1000
+      }
+      try {
+        //const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
+        //const uml_code_scaled = res1.data;
+        //console.log(res1);
+
+        //console.log(uml_code_scaled);
+        
+        const plantBody = {
+          uml_code: umlText, //not using scaled for now
+          response_type: 'SVG',
+          return_as_uri: true
+
+        }
+        const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
+        setDiagram(res.data);
+        console.log(res);
+      }
+      catch(error){
+
+      }
+    }
+
     useEffect(() => {
-        async function loadUML() {
-            const body = {
-              uml_id: uml_id
-            }
-            try {
-              const res = await axios.post('http://localhost:4000/get-uml', body);
-              setData(res.data);
-              setUMLText(res.data.content);
-            }
-            catch{}
-        }
-
-        async function loadDiagram() {
-          const scaleBody = {
-            uml_code: umlText,
-            scale_width: 1000,
-            scale_height: 1000
-          }
-          try {
-            //const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
-            //const uml_code_scaled = res1.data;
-            //console.log(res1);
-
-            //console.log(uml_code_scaled);
-            
-            const plantBody = {
-              uml_code: umlText, //not using scaled for now
-              response_type: 'SVG',
-              return_as_uri: true
-
-            }
-            const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
-            setDiagram(res.data);
-            console.log(res);
-          }
-          catch(error){
-
-          }
-        }
-
-        if (umlText != '')
+        if (umlText != '' && !loaded)
           loadDiagram();
+          setLoaded(true);
     });
 
     return (
@@ -177,7 +238,7 @@ const Query = () => {
       </Grid>
       <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
       <Submit handleSubmission={handleSubmission}/>
-      <Save handleSave={handleSave}/>
+      <SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
     </div>
 
     );
