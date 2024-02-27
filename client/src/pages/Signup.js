@@ -33,7 +33,7 @@ const Signup = () => {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/signup', body);
             if(res.status === 200){
-                dispatch(login(res.data.user.id))
+                dispatch(login(res.data.user.uid))
                 navigate("/");
             }
             // If the request is successful (status code 2xx)
