@@ -17,11 +17,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login, logout } from '../redux/user';
 import {setUml, removeUML} from '../redux/uml';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import axios from 'axios';  
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 function HideOnScroll(props) {
@@ -39,6 +41,7 @@ const UMenu = () => {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { uid } = useSelector((state) => state.user);
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -60,6 +63,17 @@ const UMenu = () => {
         dispatch(removeUML());
         navigate("/");
     }
+
+    const handleDeleteClick = async () => {
+        const body = {
+            uid: uid
+        };
+        await axios.post('http://localhost:4000/delete-account', body);
+        dispatch(logout());
+        dispatch(removeUML());
+        window.location.href = '/'; //need to refresh page
+    }
+
     return (
         <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
@@ -87,6 +101,7 @@ const UMenu = () => {
             <MenuItem component="a" onClick={handleDashboardClick}><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
             <MenuItem component="a" onClick={handleHomeClick}><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
             <MenuItem onClick={flogout}><ListItemIcon><Logout/></ListItemIcon>Logout</MenuItem>
+            <MenuItem onClick={handleDeleteClick}><ListItemIcon><DeleteIcon/></ListItemIcon>Delete Account</MenuItem>
             </Menu>
         </Box>
     )
