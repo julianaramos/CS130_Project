@@ -17,6 +17,7 @@ import axios from 'axios';
 
 import Diagram_img from '../images/UML-Class-Diagram.png'
 import NavBar from './NavBar';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { setUML } from '../redux/uml';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,6 +44,23 @@ const Dashboard = () => {
 
     const handleDownloadClick = (event, UML) => {
         console.log(UML);
+    }
+
+    const handleDeleteClick = async (event, UML) => {
+        const body = {
+            uid: uid,
+            uml_id: UML.uml_id
+        }
+        try{
+            const res = await axios.post('http://localhost:4000/delete-uml', body);
+            const newUserUML = userUML.filter(uml => uml.uml_id !== UML.uml_id);
+            setUserUML(newUserUML);
+            console.log(res);
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
     }
 
     useEffect(() => {
@@ -93,6 +111,7 @@ const Dashboard = () => {
                     <ButtonGroup>
                         <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon/>}>Edit</Button>
                         <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon/>}>Download</Button>
+                        <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon/>}>Delete</Button>
                     </ButtonGroup>
                     <Box
                         sx={{
