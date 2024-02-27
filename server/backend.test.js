@@ -15,7 +15,8 @@ describe('Firebase route testing', () => {
         content: 'content',
         privacy: 'privacy',
         description: 'description',
-        name: 'name'
+        name: 'name',
+        diagram: 'diagram'
     };
 
     beforeEach(() => {
@@ -144,14 +145,14 @@ describe('Firebase route testing', () => {
         }));
 
         getStub.onCall(1).callsFake(() => ({
-            data: () => ({ content: 'copy_uml_content', name: 'copy_uml_name', description: 'copy_uml_description'})
+            data: () => ({ content: 'copy_uml_content', name: 'copy_uml_name', description: 'copy_uml_description', diagram: 'copy_diagram'})
         }));
 
         //await createNewUml(req, res);
         const res = await request(app).post('/copy-uml').send(req).expect(200);
 
         //make sure that the new uml is set with the data ffrom the copied one
-        assert(setStub.calledWith(sinon.match.any,{ content: 'copy_uml_content', privacy: 'public', name: 'copy_uml_name-copy', description: 'copy_uml_description', timestamp: 'CurrTime'}));
+        assert(setStub.calledWith(sinon.match.any,{ content: 'copy_uml_content', privacy: 'public', name: 'copy_uml_name-copy', description: 'copy_uml_description', timestamp: 'CurrTime', diagram: 'copy_diagram'}));
 
         //make sure that id from new uml doc ends up at the end of the array from the userDoc that we use in update
         assert(updateStub.calledWith(sinon.match.any,{ savedUML: ['saved_uml_id', 'new_uml_id']}));
@@ -172,7 +173,7 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/update-uml').send(req).expect(200);
 
         //make sure that the uml is set with the data we passed in
-        assert(setStub.calledWith(sinon.match.any,{ content: 'content', privacy: 'privacy', name: 'name', description: 'description', timestamp: 'CurrTime'}));
+        assert(setStub.calledWith(sinon.match.any,{ content: 'content', privacy: 'privacy', name: 'name', description: 'description', timestamp: 'CurrTime', diagram: 'diagram'}));
 
     });
 
@@ -220,8 +221,7 @@ describe('Firebase route testing', () => {
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);
-        jsonExpected = JSON.stringify({first_id: { content: 'first_content', name: 'first_name' },
-        second_id: { content: 'second_content', name: 'second_name' }});
+        jsonExpected = JSON.stringify([{ content: 'first_content', name: 'first_name', uml_id: 'first_id'}, { content: 'second_content', name: 'second_name', uml_id: 'second_id' }]);
 
         assert(jsonRes == jsonExpected);
     });

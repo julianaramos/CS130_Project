@@ -78,7 +78,7 @@ router.post('/login', async (req, res) => {
 router.post('/get-user-uml', async(req,res) => {
     uid = req.body.uid;
 
-    var uml_map = {};
+    var res_obj = [];
 
     try{
         await firebase.firestore().runTransaction(async (t) => {
@@ -88,15 +88,42 @@ router.post('/get-user-uml', async(req,res) => {
             const userDoc = await t.get(userRef);
             const savedUML = userDoc.data().savedUML;
 
-            await savedUML.forEach(async uml_id => {
+            for (const uml_id of savedUML)
+            {
                 const umlRef = firebase.firestore().collection("UML").doc(uml_id);
-                const umlDoc = await t.get(umlRef);
-                uml_map[uml_id] = umlDoc.data();
-            });
-
-            uml_arr = savedUML;
+                var umlDoc = await t.get(umlRef);
+                var umlData = umlDoc.data();
+                umlData['uml_id'] = uml_id;
+                res_obj.push(umlData);
+            }
         });
-        res.status(200).send(uml_map);
+
+        // for (const doc of uml_no_image) {
+        //     try {
+        //         // //scale image
+        //         // const scaleBody = {
+        //         //     uml_code: doc.content,
+        //         //     scale_width: 300,
+        //         //     scale_height: 300
+        //         //     }
+            
+        //         // const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
+        //         // const uml_code_scaled = res1.data;
+
+        //         const image = await axios.post('http://localhost:4000/fetch-plant-uml', {
+        //             uml_code: doc.content,
+        //             response_type: 'PNG',
+        //             return_as_uri: true
+        //         });
+
+        //         doc['diagram'] = image.data;
+        //         res_obj.push(doc);
+        //     } catch (error) {
+        //         res_obj.push(doc);
+        //     }
+        // }
+        res_obj.sort((a,b) => b.timestamp - a.timestamp);
+        res.status(200).send(res_obj);
     }
     catch (error){
         res.status(503).send("Could not get user's uml diagrams.")
@@ -134,7 +161,6 @@ router.post('/get-uml', async(req,res) => {
 
 router.post('/get-all-uml', async(req,res) => {
     var uml_collection;
-    var res_obj = [];
 
     const mapFunc = (doc) => {
         var obj = doc.data();
@@ -145,36 +171,11 @@ router.post('/get-all-uml', async(req,res) => {
     try{
         await firebase.firestore().runTransaction(async (t) => {
             const snapshot = await firebase.firestore().collection("UML").get();
-            uml_collection = snapshot.docs.map(mapFunc).filter(doc => doc.privacy === 'public');
+            uml_collection = snapshot.docs.map(mapFunc).filter(doc => doc.privacy === 'public' && doc.diagram !== '');
         });
 
-        for (const doc of uml_collection) {
-            try {
-                // //scale image
-                // const scaleBody = {
-                //     uml_code: doc.content,
-                //     scale_width: 300,
-                //     scale_height: 300
-                //     }
-            
-                // const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
-                // const uml_code_scaled = res1.data;
-
-                const image = await axios.post('http://localhost:4000/fetch-plant-uml', {
-                    uml_code: doc.content,
-                    response_type: 'PNG',
-                    return_as_uri: true
-                });
-
-                //console.log(uml_code_scaled);
-                doc['diagram'] = image.data;
-                res_obj.push(doc);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        res_obj.sort((a,b) => a.timestamp - b.timestamp);
-        res.status(200).send(res_obj);
+        uml_collection.sort((a,b) => b.timestamp - a.timestamp);
+        res.status(200).send(uml_collection);
     }
     catch (error){
         console.log(error)
@@ -190,6 +191,7 @@ router.post('/create-new-uml', async(req, res) => {
         name: req.body.name,
         description: req.body.description,
         timestamp: Date.now(),
+        diagram: req.body.diagram,
     }
     uid = req.body.uid;
     let id;
@@ -213,6 +215,7 @@ router.post('/create-new-uml', async(req, res) => {
         res.status(200).send(id);
     }
     catch (error){
+        console.log(error);
         res.status(503).send("Could not create new uml, changes to db were not saved.")
     }
 });
@@ -238,7 +241,8 @@ router.post('/copy-uml', async(req, res) => {
                 privacy: 'public',
                 name:  umlDoc.data().name + '-copy',
                 description: umlDoc.data().description,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                diagram: umlDoc.data().diagram,
             }
 
             const newUmlRef = firebase.firestore().collection("UML").doc();
@@ -261,6 +265,7 @@ router.post('/update-uml', async(req, res) => {
     newPrivacy = req.body.privacy;
     newName = req.body.name;
     newDesc = req.body.description;
+    newDiagram = req.body.diagram;
 
     try{
         await firebase.firestore().runTransaction(async (t) => {
@@ -274,7 +279,8 @@ router.post('/update-uml', async(req, res) => {
                 privacy: newPrivacy,
                 name:  newName,
                 description: newDesc,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                diagram: newDiagram
             }
 
             // set existing uml ref

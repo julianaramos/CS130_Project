@@ -15,6 +15,7 @@ import Slide from '@mui/material/Slide';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, logout } from '../redux/user';
+import {setUml, removeUML} from '../redux/uml';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -36,7 +37,9 @@ function HideOnScroll(props) {
 
 const UMenu = () => {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
@@ -44,16 +47,17 @@ const UMenu = () => {
         setAnchorElUser(null);
     };
 
-    const dispatch = useDispatch();
     function flogout() {
         dispatch(logout());
     }
 
     const handleDashboardClick = () => {
+        dispatch(removeUML());
         navigate("/dashboard");
     }
 
     const handleHomeClick = () => {
+        dispatch(removeUML());
         navigate("/");
     }
     return (
@@ -106,7 +110,10 @@ const NavBar = () => {
     const { uid } = useSelector((state) => state.user);
     const pages = ['Something', "Something else"];
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    
     const handleHomeClick = () => {
+        dispatch(removeUML());
         navigate("/");
     }
 

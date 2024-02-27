@@ -100,7 +100,8 @@ const Query = () => {
         content: umlText,
         privacy: 'public',
         name: 'Untitled',
-        description: 'desc'
+        description: 'desc',
+        diagram: diagram,
       }
       if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
         try {
@@ -147,7 +148,7 @@ const Query = () => {
             
             const plantBody = {
               uml_code: umlText, //not using scaled for now
-              response_type: 'PNG',
+              response_type: 'SVG',
               return_as_uri: true
 
             }
