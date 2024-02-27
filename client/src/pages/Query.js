@@ -140,7 +140,8 @@ const Query = () => {
         console.log('loading');
         const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
         console.log('done');
-        setUMLText(res.data.uml_code)
+        setUMLText(res.data.uml_code);
+        setLoaded(false);
         console.log(res);
     };
 
