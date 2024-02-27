@@ -178,8 +178,10 @@ const Query = () => {
       }
       if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
         try {
+          console.log(body);
           const res = await axios.post('http://localhost:4000/create-new-uml', body);
           dispatch(setUML(res.data));
+          console.log(res);
         }
         catch(error)
         {}
@@ -187,7 +189,9 @@ const Query = () => {
       else if(uml_id != null) // if we know what uml we are changing
       {
         try{
+          console.log(body);
           const res = await axios.post('http://localhost:4000/update-uml', body);
+          console.log(res);
         }
         catch(error){}
       }
