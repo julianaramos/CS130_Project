@@ -325,6 +325,36 @@ router.post('/delete-uml', async(req, res) => {
     }
 });
 
+router.post('/delete-account', async(req, res) => {
+    uid = req.body.uid;
+
+    try {
+        var user = firebase.auth().currentUser;
+        await user.delete();
+        await firebase.firestore().runTransaction(async (t) => {
+
+            // Get the savedUML of a user
+            const userRef = firebase.firestore().collection("User").doc(uid);
+            const userDoc = await t.get(userRef);
+            const savedUML = userDoc.data().savedUML;
+
+            for (const uml_id of savedUML)
+            {
+                const umlRef = firebase.firestore().collection("UML").doc(uml_id);
+                t.delete(umlRef);
+            }
+            t.delete(userRef);
+        });
+        res.status(200).send("Successly deleted account");
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).send(error);
+    }
+
+
+});
+
 router.post('/fetch-plant-uml', async(req, res) => {
     // Default behavior is to return raw data, not as URI
     const { uml_code, response_type, return_as_uri = false } = req.body;
