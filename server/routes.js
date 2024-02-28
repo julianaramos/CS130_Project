@@ -550,4 +550,55 @@ router.post('/query-assistant-code-generator', async(req, res) => {
     });
 });
 
+router.post('/query-assistant-code-examiner', async(req, res) => {
+    const {
+        uml_code,           // current source code string AI will examine
+        query,              // query string about code for assistant
+        timeout = 10000,    // duration before query request times out (default 10 seconds)
+    } = req.body;
+    const assistant_id = process.env.CODE_EXAMINER_ASSISTANT_ID;
+    let assistant_response;
+
+    // Require uml_code parameter
+    if (!uml_code) {
+        return res.status(400).json({ type: 'MissingInput', message: 'uml_code is required as non-empty parameter.' });
+    }
+
+    // Require query parameter
+    if (!query) {
+        return res.status(400).json({ type: 'MissingInput', message: 'query is required as non-empty parameter.' });
+    }
+
+    // uml_code must be a string
+    if (typeof uml_code !== 'string') {
+        return res.status(400).json({ type: 'InvalidInput', message: 'uml_code must be a string.' });
+    }
+
+    // query must be a string
+    if (typeof query !== 'string') {
+        return res.status(400).json({ type: 'InvalidInput', message: 'query must be a string.' });
+    }
+
+    // timeout must be an int if it exists
+    if (timeout !== undefined && !Number.isInteger(timeout)) {
+        return res.status(400).json({ type: 'InvalidInput', message: 'timeout must be an int if it is passed.' });
+    }
+
+    // Construct assistant prompt based on UML code and passed query
+    const assistant_prompt =
+        `Here is my current code:\n${uml_code}\n\nAnswer this question based on the code:\n${query}`;
+
+    // Attempt to get response from assistant using helpers
+    try {
+        assistant_response = await AssistantUtils.handle_assistant_call(assistant_id, assistant_prompt, timeout);
+    }
+    catch (error) {
+        // All thrown objects are of form { status, to_send } due to handler structure
+        return res.status(error.status).json(error.to_send);
+    }
+
+    // Return the assistant response split by code
+    return res.status(200).send(assistant_response);
+});
+
 module.exports = router;

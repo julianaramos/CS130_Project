@@ -635,3 +635,96 @@ describe('Code generation assistant testing', () => {
         await check_assistant_response(req);
     });
 });
+
+describe('Code examination assistant testing', () => {
+    let handleAssistantCallStub;
+
+    const check_assistant_response = async (req) => {
+        const assistant_response = "Some response";
+        handleAssistantCallStub.resolves(assistant_response);
+
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(200);
+
+        assert.strictEqual(res.text, assistant_response);
+    };
+
+    beforeEach(() => {
+        handleAssistantCallStub = sinon.stub(AssistantUtils, 'handle_assistant_call');
+    });
+
+    afterEach(() => {
+        sinon.reset();
+        sinon.restore();
+    });
+
+    it('should return 400 when uml_code is missing', async () => {
+        const req = {
+            query: 'non-empty query'
+        };
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(400);
+    });
+    
+    it('should return 400 when query is missing', async () => {
+        const req = {
+            uml_code: 'non-empty code'
+        };
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(400);
+    });
+
+    it('should return 400 when uml_code is not a string', async () => {
+        const req = {
+            uml_code: 5,
+            query: 'non-empty query'
+        };
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(400);
+    });
+
+    it('should return 400 when query is not a string', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            query: 5
+        };
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(400);
+    });
+
+    it('should return 400 when timeout is not an integer', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            query: 'non-empty query',
+            timeout: false
+        };
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(400);
+    });
+
+    it('should return error when handle_assistant_call fails', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            query: 'non-empty query'
+        };
+        const error_status = 500;
+        const error_to_send = { message: 'Some error message.' };
+        const error_object = { status: error_status, to_send: error_to_send };
+        handleAssistantCallStub.rejects(error_object);
+
+        const res = await request(app).post('/query-assistant-code-examiner').send(req).expect(error_status);
+
+        assert.strictEqual(res.body.message, error_to_send.message);
+    });
+
+    it('should return proper response when no timeout provided', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            query: 'non-empty query'
+        };
+        await check_assistant_response(req);
+    });
+
+    it('should return proper response when timeout provided', async () => {
+        const req = {
+            uml_code: 'non-empty code',
+            query: 'non-empty query',
+            timeout: 20000
+        };
+        await check_assistant_response(req);
+    });
+});
