@@ -22,8 +22,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { setUML } from '../redux/uml';
 import { useDispatch, useSelector } from 'react-redux';
 
-const Dashboard = () => {
-
+const UserDiagrams = () => {
     const isSmallScreen = useMediaQuery('(max-width:600px)');
     const columns = isSmallScreen ? 1 : 3;
     const navigate = useNavigate()
@@ -31,10 +30,6 @@ const Dashboard = () => {
     const [userUML, setUserUML] = useState([]);
     const dispatch = useDispatch();
     const { uid } = useSelector((state) => state.user);
-
-    const handleCreateClick = () => {
-        navigate('/query');
-    }
 
     const handleEditClick = (event, UML) => {
         console.log(UML);
@@ -70,8 +65,11 @@ const Dashboard = () => {
             }
             try {
               const res = await axios.post('http://localhost:4000/get-user-uml', body);
+              if (res.status == 200){
+                setUserUML(res.data);
+                setLoaded(true);
+              }
               console.log(res);
-              setUserUML(res.data);
             }
             catch(error)
             {console.log(error);}
@@ -82,9 +80,51 @@ const Dashboard = () => {
             loadUML();
             console.log('done');
             console.log(userUML)
-            setLoaded(true);
         }
     });
+
+    if (!loaded){
+        return (<div class="loader"></div>)
+    }
+
+    return(
+        <Masonry columns={columns} spacing={2}>
+        {userUML.map((UML, index) => (
+        <Card key={index} sx={{ p: 1 }}>
+            <CardMedia 
+                sx={{ height: 180 }}
+                image={UML.diagram ? UML.diagram : Diagram_img}
+                title='UML Diagram' 
+            /> 
+            <ButtonGroup>
+                <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon/>}>Edit</Button>
+                <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon/>}>Download</Button>
+                <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon/>}>Delete</Button>
+            </ButtonGroup>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <CardHeader
+                    title={UML.name}
+                    subheader={UML.description}
+                />
+            </Box>
+        </Card>
+        ))}
+    </Masonry>
+    );
+}
+
+const Dashboard = () => {
+    const navigate = useNavigate()
+
+    const handleCreateClick = () => {
+        navigate('/query');
+    }
 
     return(
         <Container                 
@@ -100,34 +140,7 @@ const Dashboard = () => {
             <Box>
                 <Button onClick={handleCreateClick} variant='outlined' startIcon={<AddIcon/>}>Create</Button>
             </Box>
-            <Masonry columns={columns} spacing={2}>
-                {userUML.map((UML, index) => (
-                <Card key={index} sx={{ p: 1 }}>
-                    <CardMedia 
-                        sx={{ height: 180 }}
-                        image={UML.diagram ? UML.diagram : Diagram_img}
-                        title='UML Diagram' 
-                    /> 
-                    <ButtonGroup>
-                        <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon/>}>Edit</Button>
-                        <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon/>}>Download</Button>
-                        <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon/>}>Delete</Button>
-                    </ButtonGroup>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <CardHeader
-                            title={UML.name}
-                            subheader={UML.description}
-                        />
-                    </Box>
-                </Card>
-                ))}
-                </Masonry>
+            <UserDiagrams/>
         </Container>
     );
 }
