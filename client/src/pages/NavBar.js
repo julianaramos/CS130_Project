@@ -122,25 +122,24 @@ const UserMenu = () => {
     
 }
 
-const PageButtons = ({IndependentPageButtons=null}) =>{
+const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) =>{
     const {state} = useLocation();
-    const [loadingb, setLoadingb] = useState(false); //save loading button state
 
-    const [umlText, setUMLText] = useState(state ? state.content : '')
-    const [data, setData] = useState({});
-    const [feedback, setFeedback] = useState('');
-    const [promptText, setPromptText] = useState('');
-    const [diagram, setDiagram] = useState('');
+    //const [umlText, setUMLText] = useState(state ? state.content : '')
+    //const [data, setData] = useState({});
+    //const [feedback, setFeedback] = useState('');
+    //const [promptText, setPromptText] = useState('');
+    //const [diagram, setDiagram] = useState('');
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
-    const [nameText, setNameText] = useState(state ? state.name: 'untitled');
-    const [privacy, setPrivacy] = useState(state ? state.privacy: 'public');
-    const [loaded, setLoaded] = useState(false);
+    const [nameText, setNameText] = useState(state && state.name ? state.name: 'untitled');
+    const [privacy, setPrivacy] = useState(state && state.privacy ? state.privacy: 'public');
+    const [descriptionText, setDescriptionText] = useState(state && state.description ? state.description: '');
+    //const [loaded, setLoaded] = useState(false);
     const dispatch = useDispatch();
 
-    //description box and button
-    const [open, setOpen] = useState(false);
-    const [descriptionText, setDescriptionText] = useState(state ? state.description: '');
+    const [open, setOpen] = useState(false);    //description dialog button
+    const [loadingb, setLoadingb] = useState(false); //save loading button state
   
     const handleNameChange = (event) => {
         setNameText(event.target.value);
@@ -205,14 +204,14 @@ const PageButtons = ({IndependentPageButtons=null}) =>{
     }
     else if(IndependentPageButtons=="QueryPage"){
         return(
-            <Box sx={{ mx:'auto', display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
+            <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
-                    sx={{felxGrow:1, mr:'10rem'}}
+                    sx={{ml:"3rem", mr:'15rem'}}
                     onChange={handleNameChange}
                     placeholder='Untitled'
                     value={nameText}
                     hiddenLabel
-                    maxWidth='15rem'
+                    fullwidth
                 />
                 <Button sx={{ ml:'4rem', mr:'1rem'}} variant="filled" onClick={handleClickDescription}>
                     <EditNoteIcon/>Description
@@ -260,7 +259,7 @@ const PageButtons = ({IndependentPageButtons=null}) =>{
     }
 }
 
-const NavBar = ({IndependentPageButtons=null}) => {
+const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     
@@ -281,7 +280,7 @@ const NavBar = ({IndependentPageButtons=null}) => {
                         > <AccountTreeIcon sx={{ mr:"1rem" }} />
                         UML Lab
                     </Button>      
-                    <PageButtons IndependentPageButtons={IndependentPageButtons}/>
+                    <PageButtons IndependentPageButtons={IndependentPageButtons} umlText={umlText} diagram={diagram}/>
                     <UserMenu/>
                 </Toolbar>
                 </Container>
