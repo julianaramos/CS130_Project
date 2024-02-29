@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
+//import Switch from '@mui/material/Switch';
+//import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import { TextField, Card, CardMedia, Typography, Stack, IconButton, TextareaAutosize, CardContent } from '@mui/material';
 import './Query.css'
@@ -10,6 +10,10 @@ import Diagram_img from '../images/test.png'
 import NavBar from './NavBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUML } from '../redux/uml';
+
+import LoadingButton from '@mui/lab/LoadingButton';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -23,6 +27,7 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             rows = {23}
             maxRows= {23}
             onChange={handleUMLChange}
+            sx={{overflowY:'scroll', overflow:"auto"}}
             style={{ width: '100%', height: '72vh'}} // Adjust the width as desired
           />
         </CardContent>
@@ -47,9 +52,9 @@ const Submit = ({handleSubmission}) => {
   return (<button onClick={handleSubmission}> submit </button>)
 };
 
-const Save = ({handleSave}) => {
+/*const Save = ({handleSave}) => {
   return (<button onClick={handleSave}> save </button>)
-};
+};*/
 
 const Prompt = ({handlePromptChange, promptText}) => {
   return (
@@ -62,7 +67,7 @@ const Prompt = ({handlePromptChange, promptText}) => {
   )
 }
 
-const Description = ({handleDescriptionChange, descriptionText}) => {
+/*const Description = ({handleDescriptionChange, descriptionText}) => {
   return (
   <TextField 
     onChange={handleDescriptionChange}
@@ -71,9 +76,9 @@ const Description = ({handleDescriptionChange, descriptionText}) => {
     fullWidth
   />
   )
-}
+}*/
 
-const Name = ({handleNameChange, nameText}) => {
+/*const Name = ({handleNameChange, nameText}) => {
   return (
     <TextField 
       onChange={handleNameChange}
@@ -82,17 +87,17 @@ const Name = ({handleNameChange, nameText}) => {
       fullWidth
     />
     )
-}
+}*/
 
-const Privacy = ({handlePrivacyChange, privacy}) => {
+/*const Privacy = ({handlePrivacyChange, privacy}) => {
   return (
     <div>
         <button onClick={handlePrivacyChange}> {privacy} </button>
     </div>
     )
-}
+}*/
 
-const SaveWork = ({handleSave, handleDescriptionChange, descriptionText, handleNameChange, nameText, handlePrivacyChange, privacy}) => {
+/*const SaveWork = ({handleSave, handleDescriptionChange, descriptionText, handleNameChange, nameText, handlePrivacyChange, privacy}) => {
   const { uid } = useSelector((state) => state.user);
   if (uid !== null)
   {
@@ -110,22 +115,24 @@ const SaveWork = ({handleSave, handleDescriptionChange, descriptionText, handleN
     return <div> Login to save your work! </div>;
   }
 }
+*/
 
 const Query = () => {
     const {state} = useLocation();
 
-    const [umlText, setUMLText] = useState(state ? state.content : '')
+    const [umlText, setUMLText] = useState(state && state.content ? state.content : '')
     const [data, setData] = useState({});
     const [feedback, setFeedback] = useState('');
-    const [promptText, setPromptText] = useState('');
+    const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
     const [diagram, setDiagram] = useState('');
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
     const [descriptionText, setDescriptionText] = useState(state ? state.description: '');
-    const [nameText, setNameText] = useState(state ? state.name: 'untitled');
-    const [privacy, setPrivacy] = useState(state ? state.privacy: 'public');
+    const [nameText, setNameText] = useState(state && state.name ? state.name: 'untitled');
+    const [privacy, setPrivacy] = useState(state && state.privacy ? state.privacy: 'public');
     const [loaded, setLoaded] = useState(false);
     const dispatch = useDispatch();
+    const [prompttoggle, setPromptToggle] = useState(state && state.prompttoggle ? state.prompttoggle: 'prompt');
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
@@ -149,6 +156,11 @@ const Query = () => {
       setPromptText(event.target.value);
     }
 
+    const handlePromptClick = (event, newPrompt) => {
+      if (newPrompt !== null) {
+          setPromptToggle(newPrompt);
+      }
+  };
     const handleDescriptionChange = (event) => {
       setDescriptionText(event.target.value);
     }
@@ -233,7 +245,7 @@ const Query = () => {
 
     return (
     <div>
-      <NavBar IndependentPageButtons={"QueryPage"}/>
+      <NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram}/>
       <Grid container direction='row' className='query-container' spacing={2}>
           <Grid item className='uml-wrapper' xs = {6}>
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
@@ -242,13 +254,41 @@ const Query = () => {
             <Diagram image={diagram}/>
           </Grid>
       </Grid>
-      <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
-      <Submit handleSubmission={handleSubmission}/>
+      <Grid container direction='row' spacing={2} >
+        <Grid item xs={10} mt={2}>
+          <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
+        </Grid>
+        <Grid item xs={2} >
+          <ToggleButtonGroup
+              value={prompttoggle}
+              exclusive
+              onChange={handlePromptClick}
+              aria-label="UML Privacy"
+              >
+              <ToggleButton value="prompt" aria-label="Prompt">
+                  Prompt
+              </ToggleButton>
+              <ToggleButton value="query" aria-label="Query">
+                  Query
+              </ToggleButton>
+          </ToggleButtonGroup>
+          <LoadingButton
+              sx={{ my:'1rem'}}
+              onClick={handleSubmission}
+              loading={!loaded}
+              loadingPosition="start"
+              variant="contained"
+              >
+              <span>Submit</span>
+          </LoadingButton>
+        </Grid>
+      </Grid>
     </div>
 
     );
 };
-//      <SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
+//<Submit handleSubmission={handleSubmission}/>
+//<SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
 
 
 export default Query;
