@@ -233,7 +233,7 @@ const Query = () => {
 
     return (
     <div>
-      <NavBar/>
+      <NavBar IndependentPageButtons={"QueryPage"}/>
       <Grid container direction='row' className='query-container' spacing={2}>
           <Grid item className='uml-wrapper' xs = {6}>
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
@@ -244,11 +244,11 @@ const Query = () => {
       </Grid>
       <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
       <Submit handleSubmission={handleSubmission}/>
-      <SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
     </div>
 
     );
 };
+//      <SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
 
 
 export default Query;
