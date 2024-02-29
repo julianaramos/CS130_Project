@@ -21,6 +21,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 const Home = () => {
     return (
         <div>
+            <NavBar/>
             <Container
                 id="user-designs"
                 sx={{

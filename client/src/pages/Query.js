@@ -233,6 +233,7 @@ const Query = () => {
 
     return (
     <div>
+      <NavBar/>
       <Grid container direction='row' className='query-container' spacing={2}>
           <Grid item className='uml-wrapper' xs = {6}>
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>

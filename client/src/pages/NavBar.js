@@ -1,18 +1,11 @@
 import React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
+import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide} from '@mui/material';
+import {IconButton,ListItemIcon} from '@mui/material';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
-import Slide from '@mui/material/Slide';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { login, logout } from '../redux/user';
 import {setUml, removeUML} from '../redux/uml';
@@ -20,11 +13,9 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';  
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import Settings from '@mui/icons-material/Settings';
-import Logout from '@mui/icons-material/Logout';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import {Settings, Logout} from '@mui/icons-material';
 
 function HideOnScroll(props) {
     const { children} = props;
@@ -76,9 +67,9 @@ const UMenu = () => {
 
     return (
         <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <Tooltip title="Open options">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Remy Sharp" src="/broken-image.jpg" />
                 </IconButton>
             </Tooltip>
             <Menu
@@ -108,11 +99,18 @@ const UMenu = () => {
 }
 
 const LogMenu = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const handleLoginClick = () => {
+        dispatch(removeUML());
+        navigate("/login");
+    }
+
     return (
         <Box sx={{ flexGrow: 0 }}>
             <Button
             key="Log in"
-            href='/login'
+            onClick={handleLoginClick}
             sx={{ my: 2, color: 'white', display: 'block', fontWeight:600 }}
             >
             Log In
@@ -123,7 +121,7 @@ const LogMenu = () => {
 
 const NavBar = () => {
     const { uid } = useSelector((state) => state.user);
-    const pages = ['Something', "Something else"];
+    const pages = [];
     const navigate = useNavigate()
     const dispatch = useDispatch()
     
@@ -142,24 +140,13 @@ const NavBar = () => {
             <AppBar>
                 <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <AccountTreeIcon sx={{ display: { xs: 'none', md: 'flex' }, mr:"1rem" }} />
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
+                    <Button
+                        variant='text'
                         onClick = {handleHomeClick}
-                        sx={{
-                            mr: 8,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.2rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                        >
+                        style={{ color:"white" , fontSize: '1.6rem', fontWeight: 650, letterSpacing:".2rem"}}
+                        > <AccountTreeIcon sx={{ mr:"1rem" }} />
                         UML Lab
-                    </Typography>      
+                    </Button>      
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Button
