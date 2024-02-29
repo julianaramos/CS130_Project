@@ -160,7 +160,14 @@ router.post('/get-uml', async(req,res) => {
 });
 
 router.post('/get-all-uml', async(req,res) => {
+    const c = req.body.c;
+    const s = req.body.s;
+    const u = req.body.u;
+    const a = req.body.a;
+    const nameContains = req.body.nameContains;
     var uml_collection;
+
+    console.log(req.body);
 
     const mapFunc = (doc) => {
         var obj = doc.data();
@@ -168,10 +175,33 @@ router.post('/get-all-uml', async(req,res) => {
         return obj;
     }
 
+    const filterFunc = (doc) => {
+        const base = doc.privacy === 'public' && doc.diagram !== '';
+
+        if (!base){
+            return false;
+        }
+
+        if (nameContains != '' && !doc.name.includes(nameContains))
+        {
+            return false;
+        }
+
+        console.log(doc.content);
+        const classPred = c && doc.content.includes("class");
+        const statePred = s && doc.content.includes("[*]");
+        const useCasePred = u && doc.content.includes("actor");
+        const activityPred = a && doc.content.includes("start\n");
+
+        console.log (classPred, statePred, useCasePred, activityPred);
+
+        return classPred || statePred || useCasePred || activityPred;
+    }
+
     try{
         await firebase.firestore().runTransaction(async (t) => {
             const snapshot = await firebase.firestore().collection("UML").get();
-            uml_collection = snapshot.docs.map(mapFunc).filter(doc => doc.privacy === 'public' && doc.diagram !== '');
+            uml_collection = snapshot.docs.map(mapFunc).filter(filterFunc);
         });
 
         uml_collection.sort((a,b) => b.timestamp - a.timestamp);
