@@ -64,6 +64,7 @@ const Signup = () => {
         //     <Link to = "/login"> To login </Link>
         // </div>
         <div> 
+            <NavBar/>
             <Container component="main" maxWidth="xs">
                 <Box
                 sx={{
