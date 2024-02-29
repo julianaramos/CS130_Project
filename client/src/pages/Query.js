@@ -129,7 +129,7 @@ const Query = () => {
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
-        loadDiagram();
+        setLoaded(false);
     };
 
     const handleSubmission = async () => {
