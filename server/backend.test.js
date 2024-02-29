@@ -9,23 +9,31 @@ const assert = require('assert');
 describe('Firebase route testing', () => {
     let dbStub, runTransactionStub, docStub, getStub, setStub, updateStub, deleteStub;
 
-    const req = {
-        uid: 'test-uid',
-        uml_id: 'test-uml_id',
-        content: 'content',
-        privacy: 'privacy',
-        description: 'description',
-        name: 'name',
-        diagram: 'diagram'
-    };
+    var req;
 
     beforeEach(() => {
+        req = {
+            uid: 'test-uid',
+            uml_id: 'test-uml_id',
+            content: 'content',
+            privacy: 'privacy',
+            description: 'description',
+            name: 'name',
+            diagram: 'diagram',
+            c: true,
+            s: true,
+            u: true,
+            a: true,
+            nameContains: ''
+        };
+
         getStub = sinon.stub();
         setStub = sinon.stub();
         updateStub = sinon.stub();
         deleteStub = sinon.stub();
         docStub = sinon.stub();
         dateStub = sinon.stub(Date, 'now').returns('CurrTime');
+        collectionGetStub = sinon.stub();
 
         runTransactionStub = sinon.stub().callsFake(async (fakeTransaction) => {
             await fakeTransaction({
@@ -40,6 +48,7 @@ describe('Firebase route testing', () => {
             collection: sinon.stub().returnsThis(),
             doc: docStub,
             runTransaction: runTransactionStub,
+            get: collectionGetStub,
         });
 
     });
@@ -86,7 +95,7 @@ describe('Firebase route testing', () => {
         }));
 
         const res = await request(app).post('/signup').send(newUser).expect(200);
-        console.log(res)
+        //console.log(res)
 
         sinon.assert.calledOnce(createUserWithEmailAndPasswordStub);
 
@@ -210,18 +219,18 @@ describe('Firebase route testing', () => {
         }));
 
         getStub.onCall(1).callsFake(() => ({
-            data: () => ({ content: 'first_content', name: 'first_name' })
+            data: () => ({ content: 'first_content', name: 'first_name', timestamp: 2 })
         }));
 
         getStub.onCall(2).callsFake(() => ({
-            data: () => ({ content: 'second_content', name: 'second_name' })
+            data: () => ({ content: 'second_content', name: 'second_name', timestamp: 1 })
         }));
 
         const res = await request(app).post('/get-user-uml').send(req).expect(200);
 
         //make sure res contains map with each uml id to its content
         jsonRes = JSON.stringify(res.body);
-        jsonExpected = JSON.stringify([{ content: 'first_content', name: 'first_name', uml_id: 'first_id'}, { content: 'second_content', name: 'second_name', uml_id: 'second_id' }]);
+        jsonExpected = JSON.stringify([{ content: 'first_content', name: 'first_name', timestamp: 2, uml_id: 'first_id'}, { content: 'second_content', name: 'second_name', timestamp: 1, uml_id: 'second_id'}]);
 
         assert(jsonRes == jsonExpected);
     });
@@ -239,6 +248,105 @@ describe('Firebase route testing', () => {
         jsonExpected = JSON.stringify({ content: 'content', name: 'uml_name' });
 
         assert(jsonRes == jsonExpected);
+    });
+
+    it('should return only public content from get-all-uml sorted by timestamp', async () => {
+        var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
+        var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
+        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
+        var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
+
+        collectionGetStub.callsFake(() => (
+            {
+                docs: [
+                    {data: () => (classObj), id: 'uml_id_1'},
+                    {data: () => (activityObj), id: 'uml_id_4'},
+                    {data: () => (useCaseObj), id: 'uml_id_3'},
+                    {data: () => (stateObj), id: 'uml_id_2'},
+                    {data: () => (privateObj), id: 'uml_id_5'}
+                ]
+            }));
+
+        const res = await request(app).post('/get-all-uml').send(req).expect(200);
+
+        classObj['uml_id'] = 'uml_id_1';
+        stateObj['uml_id'] = 'uml_id_2';
+        useCaseObj['uml_id'] = 'uml_id_3';
+        activityObj['uml_id'] = 'uml_id_4';
+
+        assert(res.body.length == 4);
+        assert(JSON.stringify(res.body[0]) == JSON.stringify(classObj));
+        assert(JSON.stringify(res.body[1]) == JSON.stringify(stateObj));
+        assert(JSON.stringify(res.body[2]) == JSON.stringify(useCaseObj));
+        assert(JSON.stringify(res.body[3]) == JSON.stringify(activityObj));
+
+        //make sure res contains map with each uml id to its content
+    });
+
+    it('should return only content filtered by name from get-all-uml', async () => {
+        var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
+        var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
+        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
+        var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
+
+        req['nameContains'] = 'uSeCaSe'
+
+        collectionGetStub.callsFake(() => (
+            {
+                docs: [
+                    {data: () => (classObj), id: 'uml_id_1'},
+                    {data: () => (activityObj), id: 'uml_id_4'},
+                    {data: () => (useCaseObj), id: 'uml_id_3'},
+                    {data: () => (stateObj), id: 'uml_id_2'},
+                    {data: () => (privateObj), id: 'uml_id_5'}
+                ]
+            }));
+
+        const res = await request(app).post('/get-all-uml').send(req).expect(200);
+
+        classObj['uml_id'] = 'uml_id_1';
+        stateObj['uml_id'] = 'uml_id_2';
+        useCaseObj['uml_id'] = 'uml_id_3';
+        activityObj['uml_id'] = 'uml_id_4';
+
+        assert(res.body.length == 1);
+        assert(JSON.stringify(res.body[0]) == JSON.stringify(useCaseObj));
+    });
+
+    it('should return only content filtered by type from get-all-uml', async () => {
+        var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
+        var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
+        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
+        var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
+
+        req['c'] = false;
+        req['a'] = false;
+        req['u'] = false;
+        req['s'] = true;
+
+        collectionGetStub.callsFake(() => (
+            {
+                docs: [
+                    {data: () => (classObj), id: 'uml_id_1'},
+                    {data: () => (activityObj), id: 'uml_id_4'},
+                    {data: () => (useCaseObj), id: 'uml_id_3'},
+                    {data: () => (stateObj), id: 'uml_id_2'},
+                    {data: () => (privateObj), id: 'uml_id_5'}
+                ]
+            }));
+
+        const res = await request(app).post('/get-all-uml').send(req).expect(200);
+
+        classObj['uml_id'] = 'uml_id_1';
+        stateObj['uml_id'] = 'uml_id_2';
+        useCaseObj['uml_id'] = 'uml_id_3';
+        activityObj['uml_id'] = 'uml_id_4';
+
+        assert(res.body.length == 1);
+        assert(JSON.stringify(res.body[0]) == JSON.stringify(stateObj));
     });
 });
 

@@ -7,7 +7,7 @@ const router = express.Router();
 require('dotenv').config({ path: './.env' });
 
 router.post('/test', async(req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     res.send('Test route');
 });
 
@@ -98,30 +98,6 @@ router.post('/get-user-uml', async(req,res) => {
             }
         });
 
-        // for (const doc of uml_no_image) {
-        //     try {
-        //         // //scale image
-        //         // const scaleBody = {
-        //         //     uml_code: doc.content,
-        //         //     scale_width: 300,
-        //         //     scale_height: 300
-        //         //     }
-            
-        //         // const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
-        //         // const uml_code_scaled = res1.data;
-
-        //         const image = await axios.post('http://localhost:4000/fetch-plant-uml', {
-        //             uml_code: doc.content,
-        //             response_type: 'PNG',
-        //             return_as_uri: true
-        //         });
-
-        //         doc['diagram'] = image.data;
-        //         res_obj.push(doc);
-        //     } catch (error) {
-        //         res_obj.push(doc);
-        //     }
-        // }
         res_obj.sort((a,b) => b.timestamp - a.timestamp);
         res.status(200).send(res_obj);
     }
@@ -137,7 +113,7 @@ router.post('/get-uml', async(req,res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
 
-    console.log(req.body);
+    //console.log(req.body);
 
     var uml;
 
@@ -148,7 +124,7 @@ router.post('/get-uml', async(req,res) => {
             const umlDoc = await t.get(umlRef);
             uml = umlDoc.data();
         });
-        console.log(uml);
+        //console.log(uml);
         res.status(200).send(uml);
     }
     catch (error){
@@ -167,8 +143,6 @@ router.post('/get-all-uml', async(req,res) => {
     const nameContains = req.body.nameContains;
     var uml_collection;
 
-    console.log(req.body);
-
     const mapFunc = (doc) => {
         var obj = doc.data();
         obj['uml_id'] = doc.id
@@ -182,18 +156,18 @@ router.post('/get-all-uml', async(req,res) => {
             return false;
         }
 
-        if (nameContains != '' && !doc.name.includes(nameContains))
+        if (nameContains != '' && !doc.name.toLowerCase().includes(nameContains.toLowerCase()))
         {
             return false;
         }
 
-        console.log(doc.content);
+        //console.log(doc.content);
         const classPred = c && doc.content.includes("class");
         const statePred = s && doc.content.includes("[*]");
         const useCasePred = u && doc.content.includes("actor");
         const activityPred = a && doc.content.includes("start\n");
 
-        console.log (classPred, statePred, useCasePred, activityPred);
+        //console.log (classPred, statePred, useCasePred, activityPred);
 
         return classPred || statePred || useCasePred || activityPred;
     }
@@ -208,7 +182,7 @@ router.post('/get-all-uml', async(req,res) => {
         res.status(200).send(uml_collection);
     }
     catch (error){
-        console.log(error)
+        //console.log(error)
         res.status(400).send(error)
     }
 
@@ -245,7 +219,7 @@ router.post('/create-new-uml', async(req, res) => {
         res.status(200).send(id);
     }
     catch (error){
-        console.log(error);
+        //console.log(error);
         res.status(503).send("Could not create new uml, changes to db were not saved.")
     }
 });
