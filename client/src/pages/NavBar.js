@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar';
 import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide} from '@mui/material';
 import {IconButton,ListItemIcon} from '@mui/material';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
+import Avatar from '@mui/icons-material/AccountCircle';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ToggleButton from '@mui/material/ToggleButton';

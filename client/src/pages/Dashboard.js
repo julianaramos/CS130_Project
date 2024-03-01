@@ -84,7 +84,7 @@ const UserDiagrams = () => {
     });
 
     if (!loaded){
-        return (<div class="loader"></div>)
+        return (<div class="loaderlong"></div>)
     }
 
     return(
