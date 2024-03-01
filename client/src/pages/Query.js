@@ -259,28 +259,33 @@ const Query = () => {
           <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
         </Grid>
         <Grid item xs={2} >
-          <ToggleButtonGroup
-              value={prompttoggle}
-              exclusive
-              onChange={handlePromptClick}
-              aria-label="UML Privacy"
-              >
-              <ToggleButton value="prompt" aria-label="Prompt">
-                  Prompt
-              </ToggleButton>
-              <ToggleButton value="query" aria-label="Query">
-                  Query
-              </ToggleButton>
-          </ToggleButtonGroup>
-          <LoadingButton
-              sx={{ my:'1rem'}}
-              onClick={handleSubmission}
-              loading={!loaded}
-              loadingPosition="start"
-              variant="contained"
-              >
-              <span>Submit</span>
-          </LoadingButton>
+          <Grid container item direction='column' rowSpacing={1}>
+            <Grid item >
+            <ToggleButtonGroup
+                value={prompttoggle}
+                exclusive
+                onChange={handlePromptClick}
+                aria-label="UML Privacy"
+                >
+                <ToggleButton value="prompt" aria-label="Prompt">
+                    Prompt
+                </ToggleButton>
+                <ToggleButton value="query" aria-label="Query">
+                    Query
+                </ToggleButton>
+            </ToggleButtonGroup>
+            </Grid>
+            <Grid item >
+            <LoadingButton
+                onClick={handleSubmission}
+                loading={!loaded}
+                loadingPosition="start"
+                variant="contained"
+                >
+                <span>Submit</span>
+            </LoadingButton>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </div>
