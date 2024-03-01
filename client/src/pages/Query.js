@@ -14,7 +14,8 @@ import { setUML } from '../redux/uml';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Missing from '../images/Loading.gif';
+import Loading from '../images/Loading.gif';
+import Missing from '../images/Missing.svg';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -25,9 +26,9 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             variant="outlined"
             placeholder="Enter a search term"
             value={umlText}
-            rows = {35}
-            minRows= {35}
-            maxRows= {35}
+            rows = {33}
+            minRows= {33}
+            maxRows= {33}
             onChange={handleUMLChange}
           />
         </CardContent>
@@ -35,14 +36,27 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
     );
 };
 
-const Diagram = ({image}) => {
+const Diagram = ({image, umlText}) => {
+  var imageX = null;
+
+  if (image !== ''){
+    imageX = image;
+  }
+  else if (umlText == '')
+  {
+    imageX = Missing;
+  }
+  else{
+    imageX = Loading;
+  }
+
   return (    
   <Card className='diagram-card'>
     <CardMedia
       sx={{ height: '78vh', width: '50vw', objectFit: "contain"}}
       component="img"
       alt="UML Diagram"
-      src={image !== '' ? image : Missing}
+      src={imageX}
     />
   </Card>)
 };
@@ -173,7 +187,7 @@ const Query = () => {
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
           </Grid>
           <Grid item className='diagram-wrapper' xs = {6}>
-            <Diagram image={diagram}/>
+            <Diagram image={diagram} umlText={umlText}/>
           </Grid>
       </Grid>
       <Grid container direction='row' spacing={2} >
