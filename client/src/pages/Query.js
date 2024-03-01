@@ -14,7 +14,7 @@ import { setUML } from '../redux/uml';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Missing from '../images/Not-Found.svg'
+import Missing from '../images/Loading.gif';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -94,6 +94,7 @@ const Query = () => {
 
         if (prompttoggle == 'prompt'){
           setPromptLoaded(false);
+          setDiagram('');
           const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
           console.log('done');
           if (res.status == 200){
