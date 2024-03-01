@@ -66,6 +66,7 @@ const Home = () => {
             value= {{
                 stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
             }}>
+            <NavBar/>
             <Container
                 id="user-designs"
                 sx={{
@@ -218,7 +219,8 @@ const UserGenerations = () => {
                 <CardActionArea
                     onClick={event => handleCardClick(event, UML)}>
                     <CardMedia 
-                        sx={{ height: 300, width: '100%'}}
+                        sx={{ height: 300, width: '100%', objectFit: "contain"}}
+                        component="img"
                         image={UML.diagram}
                         title='UML Diagram' 
                     /> 

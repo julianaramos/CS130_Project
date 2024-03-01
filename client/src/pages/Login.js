@@ -65,7 +65,8 @@ const Login = () => {
         //     <button onClick={togglelogin}>togglelogin</button>
         //     <Link to = "/signup"> To Signup </Link>
         // </div>
-        <div>   
+        <div> 
+            <NavBar/>  
             <Container component="main" maxWidth="xs">
                     <Box
                     sx={{
