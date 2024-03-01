@@ -78,7 +78,7 @@ const UserMenu = () => {
             <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Open options">
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt="Remy Sharp" src="/broken-image.jpg" />
+                        <Avatar fontSize ="large" sx={{color: '#FFFFFF'}}/>
                     </IconButton>
                 </Tooltip>
                 <Menu
