@@ -66,6 +66,7 @@ const Home = () => {
             value= {{
                 stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
             }}>
+            <NavBar/>
             <Container
                 id="user-designs"
                 sx={{
