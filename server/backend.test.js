@@ -24,6 +24,7 @@ describe('Firebase route testing', () => {
             s: true,
             u: true,
             a: true,
+            seq: true,
             nameContains: ''
         };
 
@@ -251,9 +252,10 @@ describe('Firebase route testing', () => {
     });
 
     it('should return only public content from get-all-uml sorted by timestamp', async () => {
+        var sequenceObj = { content: 'participant', name: 'uml_sueq', privacy: 'public', diagram: 'not_empty', timestamp: 5 };
         var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
         var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
-        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var useCaseObj = { content: 'usecase', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
         var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
         var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
 
@@ -264,7 +266,8 @@ describe('Firebase route testing', () => {
                     {data: () => (activityObj), id: 'uml_id_4'},
                     {data: () => (useCaseObj), id: 'uml_id_3'},
                     {data: () => (stateObj), id: 'uml_id_2'},
-                    {data: () => (privateObj), id: 'uml_id_5'}
+                    {data: () => (privateObj), id: 'uml_id_5'},
+                    {data: () => (sequenceObj), id: 'uml_id_6'}
                 ]
             }));
 
@@ -274,20 +277,23 @@ describe('Firebase route testing', () => {
         stateObj['uml_id'] = 'uml_id_2';
         useCaseObj['uml_id'] = 'uml_id_3';
         activityObj['uml_id'] = 'uml_id_4';
+        sequenceObj['uml_id'] = 'uml_id_6';
 
-        assert(res.body.length == 4);
-        assert(JSON.stringify(res.body[0]) == JSON.stringify(classObj));
-        assert(JSON.stringify(res.body[1]) == JSON.stringify(stateObj));
-        assert(JSON.stringify(res.body[2]) == JSON.stringify(useCaseObj));
-        assert(JSON.stringify(res.body[3]) == JSON.stringify(activityObj));
+        assert(res.body.length == 5);
+        assert(JSON.stringify(res.body[0]) == JSON.stringify(sequenceObj));
+        assert(JSON.stringify(res.body[1]) == JSON.stringify(classObj));
+        assert(JSON.stringify(res.body[2]) == JSON.stringify(stateObj));
+        assert(JSON.stringify(res.body[3]) == JSON.stringify(useCaseObj));
+        assert(JSON.stringify(res.body[4]) == JSON.stringify(activityObj));
 
         //make sure res contains map with each uml id to its content
     });
 
     it('should return only content filtered by name from get-all-uml', async () => {
+        var sequenceObj = { content: 'participant', name: 'uml_sueq', privacy: 'public', diagram: 'not_empty', timestamp: 5 };
         var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
         var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
-        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var useCaseObj = { content: 'usecase', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
         var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
         var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
 
@@ -300,7 +306,8 @@ describe('Firebase route testing', () => {
                     {data: () => (activityObj), id: 'uml_id_4'},
                     {data: () => (useCaseObj), id: 'uml_id_3'},
                     {data: () => (stateObj), id: 'uml_id_2'},
-                    {data: () => (privateObj), id: 'uml_id_5'}
+                    {data: () => (privateObj), id: 'uml_id_5'},
+                    {data: () => (sequenceObj), id: 'uml_id_6'}
                 ]
             }));
 
@@ -310,15 +317,17 @@ describe('Firebase route testing', () => {
         stateObj['uml_id'] = 'uml_id_2';
         useCaseObj['uml_id'] = 'uml_id_3';
         activityObj['uml_id'] = 'uml_id_4';
+        sequenceObj['uml_id'] = 'uml_id_6';
 
         assert(res.body.length == 1);
         assert(JSON.stringify(res.body[0]) == JSON.stringify(useCaseObj));
     });
 
     it('should return only content filtered by type from get-all-uml', async () => {
+        var sequenceObj = { content: 'participant', name: 'uml_sueq', privacy: 'public', diagram: 'not_empty', timestamp: 5 };
         var classObj = { content: 'class', name: 'uml_class', privacy: 'public', diagram: 'not_empty', timestamp: 4 };
         var stateObj = { content: '[*]', name: 'uml_state', privacy: 'public', diagram: 'not_empty', timestamp: 3 };
-        var useCaseObj = { content: 'actor', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
+        var useCaseObj = { content: 'usecase', name: 'uml_useCase', privacy: 'public', diagram: 'not_empty', timestamp: 2 };
         var activityObj = { content: 'start\n', name: 'uml_activity', privacy: 'public', diagram: 'not_empty', timestamp: 1 };
         var privateObj = { content: 'class', name: 'uml_class', privacy: 'private', diagram: 'not_empty', timestamp: 0 };
 
@@ -326,6 +335,7 @@ describe('Firebase route testing', () => {
         req['a'] = false;
         req['u'] = false;
         req['s'] = true;
+        req['seq'] = false;
 
         collectionGetStub.callsFake(() => (
             {
@@ -334,7 +344,8 @@ describe('Firebase route testing', () => {
                     {data: () => (activityObj), id: 'uml_id_4'},
                     {data: () => (useCaseObj), id: 'uml_id_3'},
                     {data: () => (stateObj), id: 'uml_id_2'},
-                    {data: () => (privateObj), id: 'uml_id_5'}
+                    {data: () => (privateObj), id: 'uml_id_5'},
+                    {data: () => (sequenceObj), id: 'uml_id_6'}
                 ]
             }));
 
@@ -344,6 +355,7 @@ describe('Firebase route testing', () => {
         stateObj['uml_id'] = 'uml_id_2';
         useCaseObj['uml_id'] = 'uml_id_3';
         activityObj['uml_id'] = 'uml_id_4';
+        sequenceObj['uml_id'] = 'uml_id_6';
 
         assert(res.body.length == 1);
         assert(JSON.stringify(res.body[0]) == JSON.stringify(stateObj));

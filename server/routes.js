@@ -140,6 +140,7 @@ router.post('/get-all-uml', async(req,res) => {
     const s = req.body.s;
     const u = req.body.u;
     const a = req.body.a;
+    const seq = req.body.seq;
     const nameContains = req.body.nameContains;
     var uml_collection;
 
@@ -164,12 +165,13 @@ router.post('/get-all-uml', async(req,res) => {
         //console.log(doc.content);
         const classPred = c && doc.content.includes("class");
         const statePred = s && doc.content.includes("[*]");
-        const useCasePred = u && doc.content.includes("actor");
+        const useCasePred = u && doc.content.includes("usecase");
         const activityPred = a && doc.content.includes("start\n");
+        const sequencePred = seq && doc.content.includes("participant");
 
         //console.log (classPred, statePred, useCasePred, activityPred);
 
-        return classPred || statePred || useCasePred || activityPred;
+        return classPred || statePred || useCasePred || activityPred || sequencePred;
     }
 
     try{

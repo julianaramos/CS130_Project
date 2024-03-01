@@ -26,6 +26,7 @@ const Home = () => {
   const [classChecked, setClassChecked] = useState(true);
   const [activityChecked, setActivityChecked] = useState(true);
   const [useCaseChecked, setUseCaseChecked] = useState(true);
+  const [sequenceChecked, setSequenceChecked] = useState(true);
   const [nameContains, setNameContains] = useState('');
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const [loaded, setLoaded] = useState(false)
@@ -38,6 +39,7 @@ const Home = () => {
         c: classChecked,
         a: activityChecked,
         u: useCaseChecked,
+        seq: sequenceChecked,
         nameContains: nameContains
     }
     try {
@@ -64,7 +66,7 @@ const Home = () => {
     return (
         <UserDesignContext.Provider
             value= {{
-                stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
+                stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
             }}>
             <NavBar/>
             <Container
@@ -89,7 +91,7 @@ const Home = () => {
 }
 
 const Filter = () => {
-  const { stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, nameContains, setNameContains, loadUML } = useContext(UserDesignContext);
+  const { stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML } = useContext(UserDesignContext);
 
   const handleFormSubmit = () => {
     loadUML();
@@ -119,6 +121,10 @@ const Filter = () => {
           <Grid item xs={12}>
             <Checkbox checked={useCaseChecked} onChange={() => setUseCaseChecked(!useCaseChecked)} />
             Use Case
+          </Grid>
+          <Grid item xs={12}>
+            <Checkbox checked={sequenceChecked} onChange={() => setSequenceChecked(!sequenceChecked)} />
+            Sequence
           </Grid>
           <Grid item xs={12}>
             <TextField
