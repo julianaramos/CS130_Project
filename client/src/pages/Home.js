@@ -134,7 +134,8 @@ const UserGenerations = () => {
                 <CardActionArea
                     onClick={event => handleCardClick(event, UML)}>
                     <CardMedia 
-                        sx={{ height: 300, width: '100%'}}
+                        sx={{ height: 300, width: '100%', objectFit: "contain"}}
+                        component="img"
                         image={UML.diagram}
                         title='UML Diagram' 
                     /> 

@@ -43,7 +43,7 @@ const Diagram = ({image}) => {
       component="img"
       alt="UML Diagram"
       src={image}
-      scale='86%'
+      //scale='86%' idk what htis is doing but if stuff breaks try this
     />
   </Card>)
 };

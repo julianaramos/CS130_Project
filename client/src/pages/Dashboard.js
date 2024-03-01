@@ -15,7 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
 
-import Diagram_img from '../images/UML-Class-Diagram.png'
+import Diagram_img from '../images/Not-Found.svg'
 import NavBar from './NavBar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link, Navigate, useNavigate } from 'react-router-dom';

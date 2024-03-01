@@ -206,14 +206,16 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
-                    sx={{ml:"3rem", mr:'15rem'}}
+                    sx={{ml:"8rem", mr:'5rem', input: {color: 'white'}}}
                     onChange={handleNameChange}
                     placeholder='Untitled'
                     value={nameText}
                     hiddenLabel
+                    variant="outlined"
+                    color="grey"
                     fullwidth
                 />
-                <Button sx={{ ml:'4rem', mr:'1rem'}} variant="filled" onClick={handleClickDescription}>
+                <Button sx={{ mr:'5rem', color:'white', borderColor:'#135ba2', '&:hover': {borderColor: 'black', backgroundColor: '#176cc1'},}} variant="outlined" onClick={handleClickDescription}>
                     <EditNoteIcon/>Description
                 </Button>
                 <Dialog onClose={handleClose} open={open} fullWidth         
@@ -231,7 +233,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                         
                     />
                 </Dialog>
-                <ToggleButtonGroup sx={{ ml:'3rem', mr:'1rem'}}
+                <ToggleButtonGroup sx={{ ml:'2rem', mr:'5rem'}}
                     value={privacy}
                     exclusive
                     onChange={handlePrivacyClick}
@@ -245,7 +247,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     </ToggleButton></Tooltip>
                 </ToggleButtonGroup>
                 <LoadingButton
-                    sx={{ mx:'2rem'}}
+                    sx={{ mx:'4rem'}}
                     onClick={handleSaveClick}
                     loading={loadingb}
                     loadingPosition="start"
