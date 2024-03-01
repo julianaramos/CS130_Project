@@ -92,8 +92,10 @@ const UserDiagrams = () => {
             {userUML.map((UML, index) => (
             <Card key={index} sx={{ p: 1 }}>
                 <CardMedia 
-                    sx={{ height: 180 }}
+                    sx={{ height: 180, objectFit: "contain"}}
+                    component="img"
                     image={UML.diagram ? UML.diagram : Diagram_img}
+                    scale='20'
                     title='UML Diagram' 
                 /> 
                 <ButtonGroup>

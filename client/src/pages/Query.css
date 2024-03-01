@@ -36,7 +36,7 @@ body{
     height: 70vh;
     width: 100%;
     resize: none;
-    overflow: auto;
+    overflow-y: scroll;
 }
 
 .diagram-wrapper {
