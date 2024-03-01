@@ -168,7 +168,7 @@ const PromptBar = () => {
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault(); // Prevent the default behavior (inserting a newline)
-                  navigate("/query", {state: {prompt: prompt}});
+                  navigate("/query", {state: {prompt: prompt, oneTimeLoad: true}});
                 }
               }}
         />
