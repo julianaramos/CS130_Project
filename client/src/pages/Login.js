@@ -91,7 +91,8 @@ const Login = () => {
         //     <button onClick={togglelogin}>togglelogin</button>
         //     <Link to = "/signup"> To Signup </Link>
         // </div>
-        <div>   
+        <div> 
+            <NavBar/>  
             <Container component="main" maxWidth="xs">
                     <Box
                     sx={{
@@ -129,9 +130,14 @@ const Login = () => {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                                autoFocus
                                 value = {password}
                                 onChange = {(e) => SetPassword(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleLogIn();
+                                    }
+                                  }}
                                 />
                                 <Button
                                 type="button"
