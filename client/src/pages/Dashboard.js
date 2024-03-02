@@ -50,7 +50,6 @@ const UserDiagrams = () => {
             const res = await axios.post('http://localhost:4000/delete-uml', body);
             const newUserUML = userUML.filter(uml => uml.uml_id !== UML.uml_id);
             setUserUML(newUserUML);
-            console.log(res);
         }
         catch(error)
         {
@@ -84,7 +83,7 @@ const UserDiagrams = () => {
     });
 
     if (!loaded){
-        return (<div class="loaderlong"></div>)
+        return (<div className="loaderlong"></div>)
     }
 
     return(
