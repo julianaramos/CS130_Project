@@ -51,7 +51,7 @@ describe("Dashboard Testing", () => {
         expect(await screen.findByText('name1')).toBeInTheDocument();
         expect(await screen.findByText('description1')).toBeInTheDocument();
         expect(await screen.findByText('name2')).toBeInTheDocument();
-        expect(await screen.findByText('description2')).toBeInTheDocument();
+        expect(await screen.findByText('NOT FOUND')).toBeInTheDocument();
     });
 
     it("should take user to query page w/ loaded uml if edit is clicked", async () => {
