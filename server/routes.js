@@ -498,7 +498,7 @@ router.post('/query-assistant-code-generator', async(req, res) => {
     const {
         uml_code = null,    // current source code string from which AI will work; if empty, will generate from scratch
         prompt,             // prompt string from which code will be generated
-        timeout = 30000,    // duration before query request times out (default 10 seconds)
+        timeout = 60000,    // duration before query request times out (default 10 seconds)
     } = req.body;
     const assistant_id = process.env.CODE_GENERATOR_ASSISTANT_ID;
     let assistant_response;

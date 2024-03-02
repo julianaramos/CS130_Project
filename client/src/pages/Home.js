@@ -46,8 +46,8 @@ const Home = () => {
       const res = await axios.post('http://localhost:4000/get-all-uml', body);
       console.log(res);
       if (res.status == 200){
-        setUserUML(res.data);
         setLoaded(true);
+        setUserUML(res.data);
       }
     }
     catch(error)
@@ -55,13 +55,8 @@ const Home = () => {
     }
 
     useEffect(() => {
-        if (!loaded){
-            console.log('loading');
-            loadUML();
-            console.log('done');
-            console.log(userUML);
-        }
-    });
+      loadUML();
+    }, []);
 
     return (
         <UserDesignContext.Provider
@@ -107,7 +102,7 @@ const Filter = () => {
       <AccordionDetails>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Checkbox checked={stateChecked} onChange={() => setStateChecked(!stateChecked)} />
+            <Checkbox data-testid="state" checked={stateChecked} onChange={() => setStateChecked(!stateChecked)} />
             State
           </Grid>
           <Grid item xs={12}>
@@ -215,7 +210,7 @@ const UserGenerations = () => {
     const columns = isSmallScreen ? 1 : 3;
 
     if (!loaded){
-        return (<div class="loader"></div>)
+        return (<div className="loaderlong"></div>)
     }
 
     return(
