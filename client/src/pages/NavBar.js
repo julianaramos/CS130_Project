@@ -165,6 +165,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
     };
 
     const handleSaveClick = async () => {
+        console.log("SACING");
         setLoadingb(true);
         const body = {
           uml_id : uml_id,

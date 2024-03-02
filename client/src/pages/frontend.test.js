@@ -240,6 +240,7 @@ describe("Home Testing", () => {
 
     const nameContainsBox = await screen.findByLabelText("Name Contains");
     fireEvent.change(nameContainsBox, { target: { value: "name" } });
+    expect(await screen.findByDisplayValue('name')).toBeInTheDocument();
 
     const applyButton = await screen.findByText('Apply');
     fireEvent.click(applyButton);
@@ -270,6 +271,9 @@ describe("Home Testing", () => {
 
     const promptBar = await screen.findByLabelText('unload your ideas...');
     fireEvent.change(promptBar, { target: { value: "prompt" } });
+
+    expect(await screen.findByDisplayValue('prompt')).toBeInTheDocument();
+
     fireEvent.keyDown(promptBar, { key: "Enter", code: 13 });
 
     await waitFor(() => {
@@ -299,10 +303,11 @@ describe("Query Testing", () => {
       cleanup();
     });
 
-  it("should call plant uml visualizer after editing uml text box", async () => {
+  it("should call plant uml visualizer after editing uml text box and display the result", async () => {
       axiosStub.mockImplementationOnce(() =>
       Promise.resolve({
-        status: 200
+        status: 200,
+        data: 'diagram'
       }));
 
       render(
@@ -314,18 +319,44 @@ describe("Query Testing", () => {
       const umlBox = await screen.findByTestId("uml-box")
       fireEvent.change(umlBox, { target: { value: "uml_code" } });
 
+      expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
       await waitFor(() => {
         expect(axiosStub).toHaveBeenCalledTimes(1);
         expect(axiosStub).toBeCalledWith("http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
       });
 
+      const diagramBox = await screen.findByAltText('UML Diagram');
+      
+      await waitFor(() => {
+        expect(diagramBox.src).toContain('diagram');
+      });
+
   });
 
-  it("should query ai with info from prompt box and uml code", async () => {
-    axiosStub.mockImplementation(() =>
+  it("should query ai with info from prompt box and uml code and then display & visualize the generated code", async () => {
+    axiosStub.mockImplementationOnce(() =>
     Promise.resolve({
       status: 200,
-      data: {uml_code: "test"}
+      data: "first_diagram"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "first_diagram_refreshed"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: {uml_code: "generated_code"}
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "final_diagram"
     }));
 
     render(
@@ -337,6 +368,8 @@ describe("Query Testing", () => {
     const umlBox = await screen.findByTestId("uml-box")
     fireEvent.change(umlBox, { target: { value: "uml_code" } });
 
+    expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
     await waitFor(() => {
       expect(axiosStub).toHaveBeenCalledTimes(1);
       expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
@@ -345,14 +378,81 @@ describe("Query Testing", () => {
     const promptBox = await screen.findByLabelText("Your Prompt");
     fireEvent.change(promptBox, { target: { value: "prompt" } });
 
+    expect(await screen.findByDisplayValue('prompt')).toBeInTheDocument();
+
     const submitButton = await screen.findByText("Submit");
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(axiosStub).toHaveBeenCalledTimes(3); // 1 for after code is enter, 1 after prompt is entered, 1 after submit
+      expect(axiosStub).toHaveBeenCalledTimes(3); // 1 for after code is entered, 1 after prompt is entered, 1 after submit
       expect(axiosStub).toHaveBeenNthCalledWith(3, "http://localhost:4000/query-assistant-code-generator", {uml_code: "uml_code", prompt: "prompt", query: "prompt"});
     });
-});
+
+    expect(await screen.findByDisplayValue('generated_code')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(4);
+      expect(axiosStub).toHaveBeenNthCalledWith(4, "http://localhost:4000/fetch-plant-uml", {uml_code: "generated_code", response_type: 'SVG', return_as_uri: true});
+    });
+
+    const diagramBox = await screen.findByAltText('UML Diagram');
+
+    await waitFor(() => {
+      expect(diagramBox.src).toContain('final_diagram');
+    });
+  });
+
+  it("should create new uml if this is a new document", async () => {
+    const mockStore1 = configureStore([]);
+    const store1 = mockStore1({
+        user: {uid: 'uid'},
+        uml: {uml_id: null}
+      });
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "diagram"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "save result"
+    }));
+
+
+    render(
+        <Provider store={store1}>
+          <Query />
+        </Provider>
+      );
+
+    const umlBox = await screen.findByTestId("uml-box")
+    fireEvent.change(umlBox, { target: { value: "uml_code" } });
+
+    expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
+    });
+
+    const diagramBox = await screen.findByAltText('UML Diagram');
+      
+    await waitFor(() => {
+      expect(diagramBox.src).toContain('diagram');
+    });
+
+    const saveButton = await screen.findByText("Save");
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(2);
+      expect(axiosStub).toHaveBeenNthCalledWith(2, "http://localhost:4000/create-new-uml", {content: "uml_code", description: "", diagram: "diagram", privacy: "public", name: "untitled", uid: "uid", "uml_id": null});
+    });
+
+  });
 
 // tests to add
 // should load in data based on useLocation state
