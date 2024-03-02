@@ -95,7 +95,7 @@ describe('Firebase route testing', () => {
             set: () => ({})
         }));
 
-        const res = await request(app).post('/signup').send(newUser).expect(200);
+        const res = await request(app).post('/signup').send(newUser).expect(9000);
         //console.log(res)
 
         sinon.assert.calledOnce(createUserWithEmailAndPasswordStub);
