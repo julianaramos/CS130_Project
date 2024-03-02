@@ -213,12 +213,12 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     hiddenLabel
                     variant="outlined"
                     color="grey"
-                    fullwidth
                 />
                 <Button sx={{ mr:'5rem', color:'white', borderColor:'#135ba2', '&:hover': {borderColor: 'black', backgroundColor: '#176cc1'},}} variant="outlined" onClick={handleClickDescription}>
                     <EditNoteIcon/>Description
                 </Button>
-                <Dialog onClose={handleClose} open={open} fullWidth         
+                <Dialog onClose={handleClose} open={open} 
+                    fullWidth         
                     sx={{
                     display: 'flex',
                     flexDirection: 'column',
