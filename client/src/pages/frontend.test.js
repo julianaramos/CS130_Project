@@ -741,7 +741,74 @@ describe("NavBar Testing", () => {
     await waitFor(() => {
       expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined }]);
     });
-
-
   });
+
+  it("should call delete account route if clicked", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200
+    }));
+
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const userIcon = await screen.findByTestId('usericon');
+    fireEvent.click(userIcon);
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Logout')).toBeInTheDocument();
+    expect(await screen.findByText('Delete Account')).toBeInTheDocument();
+
+    const deleteButton = await screen.findByText('Delete Account');
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/delete-account", {"uid": "uid"});
+      expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined },  {type: 'uml/removeUML', payload: undefined }]);
+    });
+  });
+
+  it("should display use location state values if coming from query page", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200
+    }));
+
+    useLocationStub.mockImplementationOnce(() => ({
+      state: {
+        name: 'file_name',
+        description: 'file_description',
+        privacy: 'private',
+        content: 'file_content',
+      }
+    }));
+
+    render(
+        <Provider store={store}>
+          <NavBar IndependentPageButtons={"QueryPage"} umlText={"umlText"} diagram={"diagram"}/>
+        </Provider>
+      );
+
+      expect(await screen.findByDisplayValue('file_name')).toBeInTheDocument();
+  
+      const descriptionButton = await screen.findByText('Description');
+      fireEvent.click(descriptionButton);
+
+      const descriptionBox = await screen.findByLabelText('Description...');
+      expect(await screen.findByDisplayValue('file_description')).toBeInTheDocument();
+      fireEvent.keyDown(descriptionBox, { key: "Escape", code: 27 });
+  
+      const saveButton = await screen.findByText("Save");
+      fireEvent.click(saveButton);
+
+      await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+        expect(axiosStub).toHaveBeenCalledTimes(1);
+        expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/update-uml", {content: "umlText", description: "file_description", diagram: "diagram", privacy: "private", name: "file_name", uid: "uid", uml_id: "uml_id"});
+    });
+  });
+
+
 });
