@@ -73,6 +73,11 @@ const UserMenu = () => {
         navigate("/login");
     }
 
+    const handleSignUpClick = () => {
+        dispatch(removeUML());
+        navigate("/signup");
+    }
+
     if (uid !== null){
         return (
             <Box sx={{ flexGrow: 0 }}>
@@ -108,7 +113,15 @@ const UserMenu = () => {
     }
     else{
         return (
-            <Box sx={{ flexGrow: 0 }}>
+            
+            <Box sx={{ flexGrow: 0 , display: 'flex'}}>
+                <Button
+                key="Log in"
+                onClick={handleSignUpClick}
+                sx={{ mr: 2, my: 2, color: 'white', display: 'block', fontWeight:600 }}
+                >
+                Register
+                </Button>
                 <Button
                 key="Log in"
                 onClick={handleLoginClick}

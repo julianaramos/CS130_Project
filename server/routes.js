@@ -64,6 +64,7 @@ router.post('/login', async (req, res) => {
     if(fields.password.length < 6){
         return res.status(400).send("Invalid password.")
     }
+    console.log(fields);
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
@@ -72,6 +73,17 @@ router.post('/login', async (req, res) => {
     catch (error) 
     {
         res.status(400).send(error);
+        // console.log("In route", error);
+        // console.error('Firebase Authentication Error:', error.code, error.message);
+        // let errorMessage = 'Invalid email or password';
+
+        // if (error.code === 'auth/user-not-found') {
+        //     errorMessage = 'User not found';
+        // } else if (error.code === 'auth/wrong-password') {
+        //     errorMessage = 'Wrong password';
+        // }
+
+        // res.status(400).send({ error: errorMessage });
     }
 });
 
