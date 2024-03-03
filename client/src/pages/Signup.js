@@ -25,10 +25,47 @@ const Signup = () => {
     const [email,setEmail] = useState('');
     const [password,SetPassword] =useState('')
     const [conPassword,SetConPassword] =useState('')
+    const [emailerror,setEmailerror] = useState(false);
+    const [passworderror,SetPassworderror] =useState(false)
+    const [conPassworderror,SetConPassworderror] =useState(false)
+    const [emailerrorMsg,setEmailerrorMsg] = useState('');
+    const [passworderrorMsg,SetPassworderrorMsg] =useState('')
+    const [conPassworderrorMsg,SetConPassworderrorMsg] =useState('')
     const body = {email: email, password:password ,confirmPassword:conPassword}
     const navigate = useNavigate()
 
+    const handleValidation = () =>{
+        setEmailerror(false);
+        SetPassworderror(false);
+        SetConPassworderror(false);
+        if(email===''){
+            setEmailerror(true);
+            setEmailerrorMsg('Please enter an email');
+        }
+        if(password===''){
+            SetPassworderror(true);
+            SetPassworderrorMsg('Please enter a password');
+        }
+        if(conPassword===''){
+            SetConPassworderror(true);
+            SetConPassworderrorMsg('Please confirm your password.')
+        }
+        const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailRegEx.test(email)){
+            setEmailerror(true);
+            setEmailerrorMsg('Invalid email address');
+        }
+        if(password.length < 6){
+            SetPassworderror(true);
+            SetPassworderrorMsg('Please enter a password with length greater at least 6 characters');
+        }
+        if(conPassword!==password){
+            SetConPassworderror(true);
+            SetConPassworderrorMsg('Confirm password does not match your password.')
+        }
+    }
     const handleSignup = async () => {
+        handleValidation();
         try {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/signup', body);
@@ -40,7 +77,11 @@ const Signup = () => {
             console.log('Response data:', res);
         } catch (error) {
             // If the request encounters an error (status code outside 2xx range)
-            console.error('Error:', error);
+            console.error('Error:', error.message,'with',error.response.data.message);
+            if(error.response.data.message){
+                setEmailerror(true);
+                setEmailerrorMsg(error.response.data.message);
+            }
         }
     }
     let x = <div> Not Logged In </div>
@@ -92,6 +133,8 @@ const Signup = () => {
                         autoComplete="email"
                         value = {email}
                         onChange = {(e) => setEmail(e.target.value)}
+                        error={emailerror}
+                        helperText={emailerrorMsg}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -105,6 +148,8 @@ const Signup = () => {
                         autoComplete="new-password"
                         value = {password}
                         onChange = {(e) => SetPassword(e.target.value)}
+                        error={passworderror}
+                        helperText={passworderrorMsg}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -118,6 +163,8 @@ const Signup = () => {
                         autoComplete="new-password"
                         value = {conPassword}
                         onChange = {(e) => SetConPassword(e.target.value)}
+                        error={conPassworderror}
+                        helperText={conPassworderrorMsg}
                         />
                     </Grid>
                     </Grid>

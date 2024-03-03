@@ -24,17 +24,17 @@ router.post('/signup', async (req, res) => {
         confirmPassword: req.body.confirmPassword,
     }
     //VALIDATE DATA
-    const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!emailRegEx.test(newUser.email)){
-        return res.status(400).send("Invalid email address.")
-    }
-    if(newUser.password.length < 6){
-        return res.status(400).send("Invalid password.")
-    }    
-    // validation for password and confirmpassword 
-    if(newUser.password !== newUser.confirmPassword){
-        res.status(400).send("Password does not match with confirm password. ")
-    }
+    // const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if(!emailRegEx.test(newUser.email)){
+    //     return res.status(400).send("Invalid email address.")
+    // }
+    // if(newUser.password.length < 6){
+    //     return res.status(400).send("Invalid password.")
+    // }    
+    // // validation for password and confirmpassword 
+    // if(newUser.password !== newUser.confirmPassword){
+    //     res.status(400).send("Password does not match with confirm password. ")
+    // }
     try 
     {
         data = await firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password);
@@ -57,13 +57,14 @@ router.post('/login', async (req, res) => {
     }
 
     //VALIDATE DATA
-    const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!emailRegEx.test(fields.email)){
-        return res.status(400).send("Invalid email address.")
-    }
-    if(fields.password.length < 6){
-        return res.status(400).send("Invalid password.")
-    }
+    // const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if(!emailRegEx.test(fields.email)){
+    //     return res.status(400).send("Invalid email address.")
+    // }
+    // if(fields.password.length < 6){
+    //     return res.status(400).send("Invalid password.")
+    // }
+    console.log(fields);
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
@@ -71,7 +72,18 @@ router.post('/login', async (req, res) => {
     } 
     catch (error) 
     {
-        res.status(400).send(error);
+        //  res.status(400).send(error);
+        console.log("In route", error);
+        console.error('Firebase Authentication Error:', error.code, error.message);
+        let errorMessage = 'Invalid email or password';
+
+        if (error.code === 'auth/user-not-found') {
+            errorMessage = 'User not found';
+        } else if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Wrong password';
+        }
+
+        res.status(400).send({ error: errorMessage });
     }
 });
 
