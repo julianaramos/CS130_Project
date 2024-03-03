@@ -16,6 +16,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Loading from '../images/Loading.gif';
 import Missing from '../images/Missing.svg';
+import SubmitIcon from '@mui/icons-material/ArrowUpward';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -30,6 +31,7 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             minRows= {33}
             maxRows= {33}
             onChange={handleUMLChange}
+            data-testid = 'uml-box'
           />
         </CardContent>
       </Card>
@@ -68,7 +70,7 @@ const Prompt = ({handlePromptChange, promptText}) => {
       onChange={handlePromptChange}
       value={promptText}
       fullWidth
-      label="Prompt"
+      label="Your Prompt"
     />
   )
 }
@@ -108,7 +110,10 @@ const Query = () => {
 
         if (prompttoggle == 'prompt'){
           setPromptLoaded(false);
-          setDiagram('');
+          if (umlText == '') // remove this if and just do setDiagram if this are wonky
+          {
+            setDiagram('');
+          }
           const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
           console.log('done');
           if (res.status == 200){
@@ -216,6 +221,7 @@ const Query = () => {
                 onClick={handleSubmission}
                 loading={(!assistLoaded || !promptLoaded)}
                 loadingPosition="start"
+                startIcon={<SubmitIcon />}
                 variant="contained"
                 >
                 <span>Submit</span>
