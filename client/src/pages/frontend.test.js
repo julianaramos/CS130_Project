@@ -7,6 +7,7 @@ import Dashboard from "./Dashboard";
 import Home from "./Home";
 import * as router from 'react-router'
 import Query from "./Query";
+import NavBar from "./NavBar";
 
 jest.mock("axios");
 
@@ -562,10 +563,6 @@ describe("Query Testing", () => {
       expect(axiosStub).toHaveBeenCalledTimes(1);
       expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/update-uml", {content: "", description: "newdescription", diagram: "", privacy: "private", name: "name", uid: "uid", uml_id: "uml_id"});
     });
-
-
-
-
   });
 
   it("should ask for assistance from ai when button is toggled and display result to screen", async () => {
@@ -626,5 +623,125 @@ describe("Query Testing", () => {
     });
 
     // TODO Do something with output
+  });
+});
+
+describe("NavBar Testing", () => {
+  let store, navigateStub, useLocationStub, axiosStub;
+
+  beforeEach(() => {
+      const mockStore = configureStore([]);
+      store = mockStore({
+          user: {uid: 'uid'},
+          uml: {uml_id: 'uml_id'}
+        });
+      navigateStub = jest.fn();
+      axiosStub = jest.spyOn(axios, 'post');
+      jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
+      useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+    });
+
+  afterEach(() => {
+      cleanup();
+    });
+
+  it("should route to home page if image is clicked", async () => {
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const homeButton = await screen.findByText('UML Lab');
+    fireEvent.click(homeButton);
+
+    await waitFor(() => {
+      expect(navigateStub).toBeCalledWith("/");
+    });
+  });
+
+  it("should route to login page if not logged in ", async () => {
+    const mockStore1 = configureStore([]);
+    const store1 = mockStore1({
+        user: {uid: null},
+        uml: {uml_id: null}
+      });
+
+    render(
+        <Provider store={store1}>
+          <NavBar />
+        </Provider>
+      );
+
+    const loginButton = await screen.findByText('Log In');
+    fireEvent.click(loginButton);
+
+    await waitFor(() => {
+      expect(navigateStub).toBeCalledWith("/login");
+    });
+  });
+
+  it("should display user settings menu on click if logged in", async () => {
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const userIcon = await screen.findByTestId('usericon');
+    fireEvent.click(userIcon);
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Logout')).toBeInTheDocument();
+    expect(await screen.findByText('Delete Account')).toBeInTheDocument();
+  });
+
+  it("should navigate to dashboard if dashboard is clicked", async () => {
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const userIcon = await screen.findByTestId('usericon');
+    fireEvent.click(userIcon);
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Logout')).toBeInTheDocument();
+    expect(await screen.findByText('Delete Account')).toBeInTheDocument();
+
+    const dashboardButton = await screen.findByText('Dashboard');
+    fireEvent.click(dashboardButton);
+
+    await waitFor(() => {
+      expect(navigateStub).toBeCalledWith("/dashboard");
+    });
+
+
+  });
+
+  
+  it("should logout user if logout is clicked", async () => {
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const userIcon = await screen.findByTestId('usericon');
+    fireEvent.click(userIcon);
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Logout')).toBeInTheDocument();
+    expect(await screen.findByText('Delete Account')).toBeInTheDocument();
+
+    const logoutButton = await screen.findByText('Logout');
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined }]);
+    });
+
+
   });
 });
