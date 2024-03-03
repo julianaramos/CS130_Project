@@ -38,7 +38,20 @@ const UserDiagrams = () => {
     }
 
     const handleDownloadClick = (event, UML) => {
-        console.log(UML);
+        const umlContent = UML.content;
+
+        const blob = new Blob([umlContent], { type: 'text/plain' });
+    
+        const url = window.URL.createObjectURL(blob);
+    
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${UML.name}.txt`; 
+        document.body.appendChild(link);
+        link.click();
+    
+        // Clean up the URL
+        window.URL.revokeObjectURL(url);
     }
 
     const handleDeleteClick = async (event, UML) => {
