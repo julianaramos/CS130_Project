@@ -1035,6 +1035,96 @@ describe("Login Testing", () => {
 
     expect(navigateStub).toBeCalledWith('/signup', expect.anything());
   });
+
+  it("should allow user to log in with google account", async () => {
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200
+    }));
+
+    const popUpStub = jest.fn().mockImplementation((x) => ({
+      user: {
+        uid: "google_uid",
+        email: "google_email"
+      }
+    }));
+
+    firebase.auth.mockImplementation(() => ({
+      signOut: jest.fn(),
+      currentUser: null,
+      signInWithPopup: popUpStub,
+    }));
+
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/singup' element={<div> Sign Up </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByText('Sign In with Google');
+    fireEvent.click(link);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(firebase.auth.GoogleAuthProvider).toHaveBeenCalledTimes(1);
+      expect(popUpStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith('http://localhost:4000/google-login', { uid: "google_uid", user: {uid: "google_uid", email: "google_email"}});
+      expect(store.getActions()).toEqual([{ type: 'user/login', payload: "google_uid" }]);
+    });
+  });
+
+  it("should tell user if google account is not already associated with webapp", async () => {
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      response: {
+        data: 'User does not exist',
+        status: 400
+      }
+    }));
+
+    const popUpStub = jest.fn().mockImplementation((x) => ({
+      user: {
+        uid: "google_uid",
+        email: "google_email"
+      }
+    }));
+
+    const deleteStub = jest.fn();
+
+    firebase.auth.mockImplementation(() => ({
+      signOut: jest.fn(),
+      currentUser: {
+        delete: deleteStub
+      },
+      signInWithPopup: popUpStub,
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/signup' element={<div> Sign Up </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByText('Sign In with Google');
+    fireEvent.click(link);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(firebase.auth.GoogleAuthProvider).toHaveBeenCalledTimes(1);
+      expect(popUpStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith('http://localhost:4000/google-login', { uid: "google_uid", user: {uid: "google_uid", email: "google_email"}});
+      expect(deleteStub).toHaveBeenCalledTimes(1);
+    });
+
+    expect(await screen.findByText('User does not exist. Please sign up instead.')).toBeInTheDocument();
+  });
 });
 
 describe("Signup Testing", () => {
