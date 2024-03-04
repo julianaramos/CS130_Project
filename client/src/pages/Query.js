@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
+//import Switch from '@mui/material/Switch';
+//import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import { TextField, Card, CardMedia, Typography, Stack, IconButton, TextareaAutosize, CardContent } from '@mui/material';
 import './Query.css'
@@ -11,6 +11,13 @@ import NavBar from './NavBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUML } from '../redux/uml';
 
+import LoadingButton from '@mui/lab/LoadingButton';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Loading from '../images/Loading.gif';
+import Missing from '../images/Missing.svg';
+import SubmitIcon from '@mui/icons-material/ArrowUpward';
+
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
       <Card className='uml-wrapper'>
@@ -20,36 +27,42 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             variant="outlined"
             placeholder="Enter a search term"
             value={umlText}
-            rows = {23}
-            maxRows= {23}
+            rows = {33}
+            minRows= {33}
+            maxRows= {33}
             onChange={handleUMLChange}
-            style={{ width: '100%', height: '72vh'}} // Adjust the width as desired
+            data-testid = 'uml-box'
           />
         </CardContent>
       </Card>
     );
 };
 
-const Diagram = ({image}) => {
+const Diagram = ({image, umlText}) => {
+  var imageX = null;
+
+  if (image !== ''){
+    imageX = image;
+  }
+  else if (umlText == '')
+  {
+    imageX = Missing;
+  }
+  else{
+    imageX = Loading;
+  }
+
   return (    
   <Card className='diagram-card'>
     <CardMedia
       sx={{ height: '78vh', width: '50vw', objectFit: "contain"}}
       component="img"
       alt="UML Diagram"
-      src={image}
-      scale='86%'
+      src={imageX}
     />
   </Card>)
 };
 
-const Submit = ({handleSubmission}) => {
-  return (<button onClick={handleSubmission}> submit </button>)
-};
-
-const Save = ({handleSave}) => {
-  return (<button onClick={handleSave}> save </button>)
-};
 
 const Prompt = ({handlePromptChange, promptText}) => {
   return (
@@ -57,145 +70,78 @@ const Prompt = ({handlePromptChange, promptText}) => {
       onChange={handlePromptChange}
       value={promptText}
       fullWidth
-      label="Prompt"
+      label="Your Prompt"
     />
   )
 }
 
-const Description = ({handleDescriptionChange, descriptionText}) => {
-  return (
-  <TextField 
-    onChange={handleDescriptionChange}
-    value={descriptionText}
-    label="Description"
-    fullWidth
-  />
-  )
-}
-
-const Name = ({handleNameChange, nameText}) => {
-  return (
-    <TextField 
-      onChange={handleNameChange}
-      value={nameText}
-      label="Name"
-      fullWidth
-    />
-    )
-}
-
-const Privacy = ({handlePrivacyChange, privacy}) => {
-  return (
-    <div>
-        <button onClick={handlePrivacyChange}> {privacy} </button>
-    </div>
-    )
-}
-
-const SaveWork = ({handleSave, handleDescriptionChange, descriptionText, handleNameChange, nameText, handlePrivacyChange, privacy}) => {
-  const { uid } = useSelector((state) => state.user);
-  if (uid !== null)
-  {
-    return (
-    <div>
-      <div> Save your work! </div>
-      <Name handleNameChange={handleNameChange} nameText={nameText} />
-      <Description handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} />
-      <Privacy handlePrivacyChange={handlePrivacyChange} privacy={privacy} />
-      <Save handleSave={handleSave} />
-    </div>
-    )
-  }
-  else{
-    return <div> Login to save your work! </div>;
-  }
-}
 
 const Query = () => {
     const {state} = useLocation();
 
-    const [umlText, setUMLText] = useState(state ? state.content : '')
+    const [umlText, setUMLText] = useState(state && state.content ? state.content : '')
     const [data, setData] = useState({});
     const [feedback, setFeedback] = useState('');
-    const [promptText, setPromptText] = useState('');
+    const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
     const [diagram, setDiagram] = useState('');
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
-    const [descriptionText, setDescriptionText] = useState(state ? state.description: '');
-    const [nameText, setNameText] = useState(state ? state.name: 'untitled');
-    const [privacy, setPrivacy] = useState(state ? state.privacy: 'public');
-    const [loaded, setLoaded] = useState(false);
+    const [descriptionText, setDescriptionText] = useState(state && state.description ? state.description: '');
+    const [nameText, setNameText] = useState(state && state.name ? state.name: 'untitled');
+    const [privacy, setPrivacy] = useState(state && state.privacy ? state.privacy: 'public');
+    const [diagramLoaded, setDiagramLoaded] = useState(false);
+    const [promptLoaded, setPromptLoaded] = useState(true);
+    const [assistLoaded, setAssistLoaded] = useState(true);
     const dispatch = useDispatch();
+    const [prompttoggle, setPromptToggle] = useState(state && state.prompttoggle ? state.prompttoggle: 'prompt');
+    const [oneTimeLoad, setOneTimeLoad] = useState(state && state.oneTimeLoad ? state.oneTimeLoad : false)
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
-        loadDiagram();
+        setDiagramLoaded(false);
     };
 
     const handleSubmission = async () => {
         const body = {
           uml_code: umlText,
-          prompt: promptText
+          prompt: promptText,
+          query: promptText
         }
-        console.log('loading');
-        const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
-        console.log('done');
-        setUMLText(res.data.uml_code);
-        setLoaded(false);
-        console.log(res);
+
+        if (prompttoggle == 'prompt'){
+          setPromptLoaded(false);
+          if (umlText == '') // remove this if and just do setDiagram if this are wonky
+          {
+            setDiagram('');
+          }
+          const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
+          console.log('done');
+          if (res.status == 200){
+            setUMLText(res.data.uml_code);
+            setPromptLoaded(true);
+            setDiagramLoaded(false);
+          }
+        }
+        else{
+          setAssistLoaded(false);
+          const res = await axios.post('http://localhost:4000/query-assistant-code-examiner', body);
+          if (res.status == 200){
+            setAssistLoaded(true);
+            console.log(res.data);
+            setFeedback(res.data);
+          }
+        }
     };
 
     const handlePromptChange = (event) => {
       setPromptText(event.target.value);
     }
 
-    const handleDescriptionChange = (event) => {
-      setDescriptionText(event.target.value);
-    }
-
-    const handleNameChange = (event) => {
-      setNameText(event.target.value);
-    }
-
-    const handlePrivacyChange = (event) => {
-      if (privacy == 'public') {
-        setPrivacy('private');
+    const handlePromptClick = (event, newPrompt) => {
+      if (newPrompt !== null) {
+          setPromptToggle(newPrompt);
       }
-      else {
-        setPrivacy('public');
-      }
-    }
-
-    const handleSave = async () => {
-      const body = {
-        uml_id : uml_id,
-        uid: uid,
-        content: umlText,
-        privacy: privacy,
-        name: nameText,
-        description: descriptionText,
-        diagram: diagram,
-      }
-      if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
-        try {
-          console.log(body);
-          const res = await axios.post('http://localhost:4000/create-new-uml', body);
-          dispatch(setUML(res.data));
-          console.log(res);
-        }
-        catch(error)
-        {}
-      }
-      else if(uml_id != null) // if we know what uml we are changing
-      {
-        try{
-          console.log(body);
-          const res = await axios.post('http://localhost:4000/update-uml', body);
-          console.log(res);
-        }
-        catch(error){}
-      }
-    }
+  };
 
     async function loadDiagram() {
       const scaleBody = {
@@ -217,7 +163,10 @@ const Query = () => {
 
         }
         const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
-        setDiagram(res.data);
+        if (res.status == 200){
+          setDiagram(res.data);
+          setDiagramLoaded(true);
+        }
         console.log(res);
       }
       catch(error){
@@ -226,28 +175,64 @@ const Query = () => {
     }
 
     useEffect(() => {
-        if (umlText != '' && !loaded)
+        if (umlText != '' && !diagramLoaded)
           loadDiagram();
-          setLoaded(true);
+        if (oneTimeLoad && promptText != ''){
+          console.log('here');
+          handleSubmission();
+        }
+        setOneTimeLoad(false);
     });
 
     return (
     <div>
+      <NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram}/>
       <Grid container direction='row' className='query-container' spacing={2}>
           <Grid item className='uml-wrapper' xs = {6}>
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
           </Grid>
           <Grid item className='diagram-wrapper' xs = {6}>
-            <Diagram image={diagram}/>
+            <Diagram image={diagram} umlText={umlText}/>
           </Grid>
       </Grid>
-      <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
-      <Submit handleSubmission={handleSubmission}/>
-      <SaveWork handleSave={handleSave} handleDescriptionChange={handleDescriptionChange} descriptionText={descriptionText} handleNameChange={handleNameChange} nameText={nameText} handlePrivacyChange={handlePrivacyChange} privacy={privacy}/>
+      <Grid container direction='row' spacing={2} >
+        <Grid item xs={10} mt={2}>
+          <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
+        </Grid>
+        <Grid item xs={2} >
+          <Grid container item direction='column' rowSpacing={1}>
+            <Grid item >
+            <ToggleButtonGroup
+                value={prompttoggle}
+                exclusive
+                onChange={handlePromptClick}
+                aria-label="UML Privacy"
+                >
+                <ToggleButton value="prompt" aria-label="Prompt">
+                    Prompt
+                </ToggleButton>
+                <ToggleButton value="query" aria-label="Query">
+                    Query
+                </ToggleButton>
+            </ToggleButtonGroup>
+            </Grid>
+            <Grid item >
+            <LoadingButton
+                onClick={handleSubmission}
+                loading={(!assistLoaded || !promptLoaded)}
+                loadingPosition="start"
+                startIcon={<SubmitIcon />}
+                variant="contained"
+                >
+                <span>Submit</span>
+            </LoadingButton>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </div>
 
     );
 };
-
 
 export default Query;

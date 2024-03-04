@@ -7,7 +7,7 @@ const router = express.Router();
 require('dotenv').config({ path: './.env' });
 
 router.post('/test', async(req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     res.send('Test route');
 });
 
@@ -64,6 +64,7 @@ router.post('/login', async (req, res) => {
     if(fields.password.length < 6){
         return res.status(400).send("Invalid password.")
     }
+    console.log(fields);
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
@@ -72,6 +73,17 @@ router.post('/login', async (req, res) => {
     catch (error) 
     {
         res.status(400).send(error);
+        // console.log("In route", error);
+        // console.error('Firebase Authentication Error:', error.code, error.message);
+        // let errorMessage = 'Invalid email or password';
+
+        // if (error.code === 'auth/user-not-found') {
+        //     errorMessage = 'User not found';
+        // } else if (error.code === 'auth/wrong-password') {
+        //     errorMessage = 'Wrong password';
+        // }
+
+        // res.status(400).send({ error: errorMessage });
     }
 });
 
@@ -139,30 +151,6 @@ router.post('/get-user-uml', async(req,res) => {
             }
         });
 
-        // for (const doc of uml_no_image) {
-        //     try {
-        //         // //scale image
-        //         // const scaleBody = {
-        //         //     uml_code: doc.content,
-        //         //     scale_width: 300,
-        //         //     scale_height: 300
-        //         //     }
-            
-        //         // const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
-        //         // const uml_code_scaled = res1.data;
-
-        //         const image = await axios.post('http://localhost:4000/fetch-plant-uml', {
-        //             uml_code: doc.content,
-        //             response_type: 'PNG',
-        //             return_as_uri: true
-        //         });
-
-        //         doc['diagram'] = image.data;
-        //         res_obj.push(doc);
-        //     } catch (error) {
-        //         res_obj.push(doc);
-        //     }
-        // }
         res_obj.sort((a,b) => b.timestamp - a.timestamp);
         res.status(200).send(res_obj);
     }
@@ -178,7 +166,7 @@ router.post('/get-uml', async(req,res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
 
-    console.log(req.body);
+    //console.log(req.body);
 
     var uml;
 
@@ -189,7 +177,7 @@ router.post('/get-uml', async(req,res) => {
             const umlDoc = await t.get(umlRef);
             uml = umlDoc.data();
         });
-        console.log(uml);
+        //console.log(uml);
         res.status(200).send(uml);
     }
     catch (error){
@@ -201,6 +189,12 @@ router.post('/get-uml', async(req,res) => {
 });
 
 router.post('/get-all-uml', async(req,res) => {
+    const c = req.body.c;
+    const s = req.body.s;
+    const u = req.body.u;
+    const a = req.body.a;
+    const seq = req.body.seq;
+    const nameContains = req.body.nameContains;
     var uml_collection;
 
     const mapFunc = (doc) => {
@@ -209,17 +203,41 @@ router.post('/get-all-uml', async(req,res) => {
         return obj;
     }
 
+    const filterFunc = (doc) => {
+        const base = doc.privacy === 'public' && doc.diagram !== '';
+
+        if (!base){
+            return false;
+        }
+
+        if (nameContains != '' && !doc.name.toLowerCase().includes(nameContains.toLowerCase()))
+        {
+            return false;
+        }
+
+        //console.log(doc.content);
+        const classPred = c && doc.content.includes("class");
+        const statePred = s && doc.content.includes("[*]");
+        const useCasePred = u && doc.content.includes("usecase");
+        const activityPred = a && doc.content.includes("start\n");
+        const sequencePred = seq && doc.content.includes("participant");
+
+        //console.log (classPred, statePred, useCasePred, activityPred);
+
+        return classPred || statePred || useCasePred || activityPred || sequencePred;
+    }
+
     try{
         await firebase.firestore().runTransaction(async (t) => {
             const snapshot = await firebase.firestore().collection("UML").get();
-            uml_collection = snapshot.docs.map(mapFunc).filter(doc => doc.privacy === 'public' && doc.diagram !== '');
+            uml_collection = snapshot.docs.map(mapFunc).filter(filterFunc);
         });
 
         uml_collection.sort((a,b) => b.timestamp - a.timestamp);
         res.status(200).send(uml_collection);
     }
     catch (error){
-        console.log(error)
+        //console.log(error)
         res.status(400).send(error)
     }
 
@@ -256,7 +274,7 @@ router.post('/create-new-uml', async(req, res) => {
         res.status(200).send(id);
     }
     catch (error){
-        console.log(error);
+        //console.log(error);
         res.status(503).send("Could not create new uml, changes to db were not saved.")
     }
 });
@@ -533,7 +551,7 @@ router.post('/query-assistant-code-generator', async(req, res) => {
     const {
         uml_code = null,    // current source code string from which AI will work; if empty, will generate from scratch
         prompt,             // prompt string from which code will be generated
-        timeout = 10000,    // duration before query request times out (default 10 seconds)
+        timeout = 60000,    // duration before query request times out (default 10 seconds)
     } = req.body;
     const assistant_id = process.env.CODE_GENERATOR_ASSISTANT_ID;
     let assistant_response;

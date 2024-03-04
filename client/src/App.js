@@ -14,7 +14,6 @@ class App extends Component {
     render() {
         return (
           <Router>
-            <NavBar/>
             <Routes>
               <Route
                 exact path={"/"}
