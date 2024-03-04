@@ -173,11 +173,11 @@ const Login = () => {
                                 Sign In
                                 </Button>
                                 <Grid container>
-                                {/* <Grid item>
+                                <Grid item>
                                     <Link to ="/signup" variant="body2">
                                     {"Don't have an account? Sign Up"}
                                     </Link>
-                                </Grid> */}
+                                </Grid>
                                 </Grid>
                             </Box>
                     </Box>

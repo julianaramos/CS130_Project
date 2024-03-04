@@ -38,34 +38,43 @@ const Signup = () => {
         setEmailerror(false);
         SetPassworderror(false);
         SetConPassworderror(false);
-        if(email===''){
-            setEmailerror(true);
-            setEmailerrorMsg('Please enter an email');
-        }
+        setEmailerrorMsg('');
+        SetPassworderrorMsg('');
+        SetConPassworderrorMsg('');
+        var valid = true;
         if(password===''){
             SetPassworderror(true);
             SetPassworderrorMsg('Please enter a password');
+            valid = false;
         }
         if(conPassword===''){
             SetConPassworderror(true);
-            SetConPassworderrorMsg('Please confirm your password.')
+            SetConPassworderrorMsg('Please confirm your password');
+            valid = false;
         }
         const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(!emailRegEx.test(email)){
             setEmailerror(true);
             setEmailerrorMsg('Invalid email address');
+            valid = false;
         }
         if(password.length < 6){
             SetPassworderror(true);
-            SetPassworderrorMsg('Please enter a password with length greater at least 6 characters');
+            SetPassworderrorMsg('Password must be at least 6 characters');
+            valid = false;
         }
         if(conPassword!==password){
             SetConPassworderror(true);
-            SetConPassworderrorMsg('Confirm password does not match your password.')
+            SetConPassworderrorMsg('Confirm password does not match your password')
+            valid = false;
         }
+
+        return valid;
     }
     const handleSignup = async () => {
-        handleValidation();
+        if (!handleValidation()){
+            return;
+        }
         try {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/signup', body);
@@ -125,6 +134,7 @@ const Signup = () => {
                     <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <TextField
+                        inputProps={{ "data-testid": "email-box" }}
                         required
                         fullWidth
                         id="email"
@@ -139,6 +149,7 @@ const Signup = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                        inputProps={{ "data-testid": "password-box" }}
                         required
                         fullWidth
                         name="password"
@@ -154,6 +165,7 @@ const Signup = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                        inputProps={{ "data-testid": "cpassword-box" }}
                         required
                         fullWidth
                         name="confirmpassword"
@@ -179,7 +191,7 @@ const Signup = () => {
                     </Button>
                     <Grid container justifyContent="flex-end">
                     <Grid item>
-                        <Link to ="/Login" variant="body2">
+                        <Link to ="/login" variant="body2">
                         Already have an account? Sign in
                         </Link>
                     </Grid>
