@@ -17,6 +17,7 @@ import TextField from '@mui/material/TextField';
 import NavBar from './NavBar'
 import axios from 'axios';
 import firebase from '../firebase';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 
 const Signup = () => {
@@ -31,8 +32,10 @@ const Signup = () => {
     const [passworderror,SetPassworderror] =useState(false)
     const [conPassworderror,SetConPassworderror] =useState(false)
     const [emailerrorMsg,setEmailerrorMsg] = useState('');
-    const [passworderrorMsg,SetPassworderrorMsg] =useState('')
-    const [conPassworderrorMsg,SetConPassworderrorMsg] =useState('')
+    const [passworderrorMsg,SetPassworderrorMsg] =useState('');
+    const [conPassworderrorMsg,SetConPassworderrorMsg] =useState('');
+    const [normalLoading, setNormalLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const body = {email: email, password:password ,confirmPassword:conPassword}
     const navigate = useNavigate()
 
@@ -74,19 +77,23 @@ const Signup = () => {
         return valid;
     }
     const handleSignup = async () => {
+        setNormalLoading(true);
         if (!handleValidation()){
+            setNormalLoading(false);
             return;
         }
         try {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/signup', body);
             if(res.status === 200){
+                setNormalLoading(false);
                 dispatch(login(res.data.user.uid))
                 navigate("/");
             }
             // If the request is successful (status code 2xx)
             console.log('Response data:', res);
         } catch (error) {
+            setNormalLoading(false);
             // If the request encounters an error (status code outside 2xx range)
             console.error('Error:', error.message,'with',error.response.data.message);
             if(error.response.data.message){
@@ -97,6 +104,7 @@ const Signup = () => {
     }
 
     const handleGoogleSignup = async () => {
+        setGoogleLoading(true);
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             const result = await firebase.auth().signInWithPopup(provider);
@@ -105,11 +113,13 @@ const Signup = () => {
 
             const res = await axios.post('http://localhost:4000/google-signup', { uid: userId, email: user.email });
             if (res.status === 200) {
+                setGoogleLoading(false);
                 dispatch(login(userId));
                 navigate('/');
             }
             console.log('Response data:', res);
         } catch (error) {
+            setGoogleLoading(false);
             if (error.response && error.response.status === 400 && error.response.data === "User already exists.") {
                 setErrorMessage('User already exists. Please sign in instead.');
             } else {
@@ -147,6 +157,7 @@ const Signup = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    marginBottom: 10,
                 }}
                 >
                 <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: 48, height: 48  }}>
@@ -205,28 +216,30 @@ const Signup = () => {
                         />
                     </Grid>
                     </Grid>
-                    <Button
+                    <LoadingButton
                     type="button"
                     fullWidth
                     variant="contained"
                     sx={{ mt: 5, mb: 2 }}
                     onClick={handleSignup}
+                    loading={normalLoading}
                     >
                     Sign Up
-                    </Button>
-                    <Button
+                    </LoadingButton>
+                    <LoadingButton
                         type="button"
                         fullWidth
                         variant="contained"
                         sx={{ mt: 1, mb: 2 }}
                         onClick={handleGoogleSignup}
+                        loading={googleLoading}
                     >
                         Sign Up with Google
-                    </Button>
+                    </LoadingButton>
                     <p style={{ color: 'red' }}>{errorMessage}</p>
                     <Grid container justifyContent="flex-end">
                     <Grid item>
-                        <Link to ="/login" variant="body2">
+                        <Link to ="/login">
                         Already have an account? Sign in
                         </Link>
                     </Grid>

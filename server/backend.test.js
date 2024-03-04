@@ -418,7 +418,7 @@ describe('Firebase route testing', () => {
         assert(JSON.stringify(res.body[0]) == JSON.stringify(stateObj));
     });
 
-    it('should delete delete user content when delete-account is caleld', async () => {
+    it('should delete user content when delete-account is caleld', async () => {
         const authDeleteStub = sinon.stub();
 
         const firebaseAuthStub = sinon.stub(firebase, 'auth').returns({
@@ -440,6 +440,28 @@ describe('Firebase route testing', () => {
         const res = await request(app).post('/delete-account').send(req).expect(200);
 
         sinon.assert.calledOnce(authDeleteStub);
+        assert(deleteStub.getCall(0).args[0] == 'id1');
+        assert(deleteStub.getCall(1).args[0] == 'id2');
+        assert(deleteStub.getCall(2).args[0] == 'test-uid');
+
+    });
+
+    it('should delete user content when delete-google-account is caleld', async () => {
+
+        getStub.callsFake(() => ({
+            data: () => ({ savedUML: ['id1', 'id2'] })
+        }));
+
+        docStub.onCall(0).callsFake((uid) => {
+            return uid
+        });
+
+        docStub.callsFake((uml_id) => {
+            return uml_id
+        });
+
+        const res = await request(app).post('/delete-google-account').send(req).expect(200);
+
         assert(deleteStub.getCall(0).args[0] == 'id1');
         assert(deleteStub.getCall(1).args[0] == 'id2');
         assert(deleteStub.getCall(2).args[0] == 'test-uid');

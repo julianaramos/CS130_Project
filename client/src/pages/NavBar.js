@@ -26,6 +26,7 @@ import {Settings, Logout} from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import firebase from '../firebase';
 
 function HideOnScroll(props) {
     const { children} = props;
@@ -52,6 +53,7 @@ const UserMenu = () => {
 
     function flogout() {
         dispatch(logout());
+        firebase.auth().signOut();
     }
 
     const handleDashboardClick = () => {
@@ -63,9 +65,23 @@ const UserMenu = () => {
         const body = {
             uid: uid
         };
-        await axios.post('http://localhost:4000/delete-account', body);
+
+        if (firebase.auth().currentUser === null)
+        {
+            try {
+                await axios.post('http://localhost:4000/delete-account', body);
+            }
+            catch (error){}
+        }
+        else{
+            try {
+                await axios.post('http://localhost:4000/delete-google-account', body);
+            }
+            catch (error){}
+        }
         dispatch(logout());
         dispatch(removeUML());
+        firebase.auth().signOut();
         window.location.href = '/'; //need to refresh page
     }
     const handleLoginClick = () => {

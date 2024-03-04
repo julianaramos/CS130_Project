@@ -17,6 +17,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import NavBar from './NavBar';
 import axios from 'axios';
 import firebase from '../firebase';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const Login = () => {
     //const { uid } = useSelector((state) => state.user);
@@ -30,6 +31,8 @@ const Login = () => {
     const [emailerrorMsg,setEmailerrorMsg] = useState('');
     const [passworderrorMsg,SetPassworderrorMsg] =useState('')
     const body = {email: email, password:password }
+    const [normalLoading, setNormalLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const navigate = useNavigate()
 
     const handleValidation = () =>{
@@ -62,8 +65,10 @@ const Login = () => {
         return valid;
     }
     const handleLogIn = async () => {
+        setNormalLoading(true);
         if (!handleValidation())
         {
+            setNormalLoading(false);
             return;
         }
         try {
@@ -71,12 +76,14 @@ const Login = () => {
             const res = await axios.post('http://localhost:4000/login', body);
             // If the request is successful (status code 2xx)
             if(res.status === 200){
+                setNormalLoading(false);
                 dispatch(login(res.data.user.uid))
                 navigate("/");
             }
             console.log('there');
             console.log(res);
         } catch (error) {
+            setNormalLoading(false);
             console.log('here');
             // If the request encounters an error (status code outside 2xx range)
             console.error('Error:', error.message,'with',error);
@@ -88,6 +95,7 @@ const Login = () => {
     }
 
     const handleGoogleLogIn = async () => {
+        setGoogleLoading(true);
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             const result = await firebase.auth().signInWithPopup(provider);
@@ -96,11 +104,13 @@ const Login = () => {
             // Check if user exists in your database
             const res = await axios.post('http://localhost:4000/google-login', { user: user, uid: userId });
             if (res.status === 200) {
+                setGoogleLoading(false);
                 dispatch(login(userId));
                 navigate('/');
             }
             console.log('Response data:', res);
         } catch (error) {
+            setGoogleLoading(false);
             if (error.response && error.response.status === 400 && error.response.data === "User does not exist") {
                 await firebase.auth().currentUser.delete();
                 setErrorMessage('User does not exist. Please sign up instead.');
@@ -144,6 +154,7 @@ const Login = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        marginBottom: 10,
                     }}
                     >
                         <Avatar sx={{ m: 1, bgcolor: 'primary.main' , width: 48, height: 48 }}>
@@ -189,28 +200,30 @@ const Login = () => {
                                 //     }
                                 //   }}
                                 />
-                                <Button
+                                <LoadingButton
                                 type="button"
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 5, mb: 2 }}
                                 onClick={handleLogIn}
+                                loading={normalLoading}
                                 >
                                 Sign In
-                                </Button>
-                                <Button
+                                </LoadingButton>
+                                <LoadingButton
                                 type="button"
                                 fullWidth
                                 variant="contained"
-                                sx={{mt: 5, mb: 2}}
+                                sx={{mt: 1, mb: 2}}
                                 onClick={handleGoogleLogIn}
+                                loading={googleLoading}
                                 >
                                 Sign In with Google
-                                </Button>
+                                </LoadingButton>
                                 <p style={{color: 'red'}}>{errorMessage}</p>
-                                <Grid container>
+                                <Grid container justifyContent="flex-end">
                                 <Grid item>
-                                    <Link to ="/signup" variant="body2">
+                                    <Link to ="/signup">
                                     {"Don't have an account? Sign Up"}
                                     </Link>
                                 </Grid>

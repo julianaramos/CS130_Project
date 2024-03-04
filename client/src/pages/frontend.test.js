@@ -11,8 +11,13 @@ import NavBar from "./NavBar";
 import Login from "./Login";
 import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import Signup from "./Signup";
+import {auth} from '../firebase'
 
 jest.mock("axios");
+
+jest.mock('../firebase', () => ({
+  auth: jest.fn()
+}));
 
 describe("Dashboard Testing", () => {
     let store, navigateStub, useLocationStub, axiosStub;
@@ -680,6 +685,10 @@ describe("NavBar Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+      auth.mockImplementation(() => ({
+        signOut: jest.fn(),
+        currentUser: null
+      }));
     });
 
   afterEach(() => {
@@ -785,7 +794,7 @@ describe("NavBar Testing", () => {
     });
   });
 
-  it("should call delete account route if clicked", async () => {
+  it("should call delete account route if clicked and user is email/password", async () => {
     axiosStub.mockImplementationOnce(() =>
     Promise.resolve({
       status: 200
@@ -809,6 +818,40 @@ describe("NavBar Testing", () => {
 
     await waitFor(() => {
       expect(axiosStub).toBeCalledWith("http://localhost:4000/delete-account", {"uid": "uid"});
+      expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined },  {type: 'uml/removeUML', payload: undefined }]);
+    });
+  });
+
+  it("should call delete google account route if clicked and user is from google provider", async () => {
+
+    auth.mockImplementationOnce(() => ({
+      signOut: jest.fn(),
+      currentUser: {a: "a", b: "b"}
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200
+    }));
+
+    render(
+        <Provider store={store}>
+          <NavBar />
+        </Provider>
+      );
+
+    const userIcon = await screen.findByTestId('usericon');
+    fireEvent.click(userIcon);
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Logout')).toBeInTheDocument();
+    expect(await screen.findByText('Delete Account')).toBeInTheDocument();
+
+    const deleteButton = await screen.findByText('Delete Account');
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/delete-google-account", {"uid": "uid"});
       expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined },  {type: 'uml/removeUML', payload: undefined }]);
     });
   });
@@ -868,6 +911,10 @@ describe("Login Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+      auth.mockImplementation(() => ({
+        signOut: jest.fn(),
+        currentUser: null
+      }));
     });
 
   afterEach(() => {
@@ -1001,6 +1048,10 @@ describe("Signup Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+      auth.mockImplementation(() => ({
+        signOut: jest.fn(),
+        currentUser: null
+      }));
     });
 
   afterEach(() => {
