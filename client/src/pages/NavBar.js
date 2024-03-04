@@ -73,11 +73,16 @@ const UserMenu = () => {
         navigate("/login");
     }
 
+    const handleSignUpClick = () => {
+        dispatch(removeUML());
+        navigate("/signup");
+    }
+
     if (uid !== null){
         return (
             <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Open options">
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <IconButton data-testid = 'usericon' onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                         <Avatar fontSize ="large" sx={{color: '#FFFFFF'}}/>
                     </IconButton>
                 </Tooltip>
@@ -108,7 +113,15 @@ const UserMenu = () => {
     }
     else{
         return (
-            <Box sx={{ flexGrow: 0 }}>
+            
+            <Box sx={{ flexGrow: 0 , display: 'flex'}}>
+                <Button
+                key="Log in"
+                onClick={handleSignUpClick}
+                sx={{ mr: 2, my: 2, color: 'white', display: 'block', fontWeight:600 }}
+                >
+                Register
+                </Button>
                 <Button
                 key="Log in"
                 onClick={handleLoginClick}
@@ -165,6 +178,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
     };
 
     const handleSaveClick = async () => {
+        console.log("SACING");
         setLoadingb(true);
         const body = {
           uml_id : uml_id,
@@ -213,12 +227,12 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     hiddenLabel
                     variant="outlined"
                     color="grey"
-                    fullwidth
                 />
                 <Button sx={{ mr:'5rem', color:'white', borderColor:'#135ba2', '&:hover': {borderColor: 'black', backgroundColor: '#176cc1'},}} variant="outlined" onClick={handleClickDescription}>
                     <EditNoteIcon/>Description
                 </Button>
-                <Dialog onClose={handleClose} open={open} fullWidth         
+                <Dialog onClose={handleClose} open={open} 
+                    fullWidth         
                     sx={{
                     display: 'flex',
                     flexDirection: 'column',

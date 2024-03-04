@@ -25,10 +25,36 @@ const Login = () => {
     const [email,setEmail] = useState('');
     const [password,SetPassword] =useState('')
     const [errorMessage, setErrorMessage] = useState('');
+    const [emailerror,setEmailerror] = useState(false);
+    const [passworderror,SetPassworderror] =useState(false)
+    const [emailerrorMsg,setEmailerrorMsg] = useState('');
+    const [passworderrorMsg,SetPassworderrorMsg] =useState('')
     const body = {email: email, password:password }
     const navigate = useNavigate()
 
+    const handleValidation = () =>{
+        setEmailerror(false);
+        SetPassworderror(false);
+        const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(email===''){
+            setEmailerror(true);
+            setEmailerrorMsg('Please enter an email');
+        }
+        else if(!emailRegEx.test(email)){
+            setEmailerror(true);
+            setEmailerrorMsg('Invalid email address');
+        }
+        if(password===''){
+            SetPassworderror(true);
+            SetPassworderrorMsg('Please enter a password');
+        }
+        else if(password.length < 6){
+            SetPassworderror(true);
+            SetPassworderrorMsg('Invalid password');
+        }
+    }
     const handleLogIn = async () => {
+        handleValidation();
         try {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/login', body);
@@ -39,7 +65,11 @@ const Login = () => {
             }
         } catch (error) {
             // If the request encounters an error (status code outside 2xx range)
-            console.error('Error:', error);
+            console.error('Error:', error.message,'with',error);
+            setEmailerror(true);
+            setEmailerrorMsg('Invalid email address or password');
+            SetPassworderror(true);
+            SetPassworderrorMsg('Invalid email address or password');
         }
     }
 
@@ -120,6 +150,8 @@ const Login = () => {
                                 autoFocus
                                 value = {email}
                                 onChange = {(e) => setEmail(e.target.value)}
+                                error={emailerror}
+                                helperText={emailerrorMsg}
                                 />
                                 <TextField
                                 margin="normal"
@@ -132,12 +164,14 @@ const Login = () => {
                                 autoComplete="current-password"
                                 value = {password}
                                 onChange = {(e) => SetPassword(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      handleLogIn();
-                                    }
-                                  }}
+                                error={passworderror}
+                                helperText={passworderrorMsg}
+                                // onKeyDown={(e) => {
+                                //     if (e.key === 'Enter') {
+                                //       e.preventDefault();
+                                //       handleLogIn();
+                                //     }
+                                //   }}
                                 />
                                 <Button
                                 type="button"
