@@ -14,9 +14,10 @@ import { setUML } from '../redux/uml';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Loading from '../images/Loading.gif';
 import Missing from '../images/Missing.svg';
 import SubmitIcon from '@mui/icons-material/ArrowUpward';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -38,27 +39,14 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
     );
 };
 
-const Diagram = ({image, umlText}) => {
-  var imageX = null;
-
-  if (image !== ''){
-    imageX = image;
-  }
-  else if (umlText == '')
-  {
-    imageX = Missing;
-  }
-  else{
-    imageX = Loading;
-  }
-
+const Diagram = ({image}) => {
   return (    
   <Card className='diagram-card'>
     <CardMedia
       sx={{ height: '78vh', width: '50vw', objectFit: "contain"}}
       component="img"
       alt="UML Diagram"
-      src={imageX}
+      src={image}
     />
   </Card>)
 };
@@ -83,7 +71,7 @@ const Query = () => {
     const [data, setData] = useState({});
     const [feedback, setFeedback] = useState('');
     const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
-    const [diagram, setDiagram] = useState('');
+    const [diagram, setDiagram] = useState(Missing);
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
     const [descriptionText, setDescriptionText] = useState(state && state.description ? state.description: '');
@@ -94,7 +82,9 @@ const Query = () => {
     const [assistLoaded, setAssistLoaded] = useState(true);
     const dispatch = useDispatch();
     const [prompttoggle, setPromptToggle] = useState(state && state.prompttoggle ? state.prompttoggle: 'prompt');
-    const [oneTimeLoad, setOneTimeLoad] = useState(state && state.oneTimeLoad ? state.oneTimeLoad : false)
+    const [oneTimeLoad, setOneTimeLoad] = useState(state && state.oneTimeLoad ? state.oneTimeLoad : false);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [alertText, setAlertText] = useState('');
 
     const handleUMLChange = (event) => {
         setUMLText(event.target.value);
@@ -144,34 +134,32 @@ const Query = () => {
   };
 
     async function loadDiagram() {
-      const scaleBody = {
-        uml_code: umlText,
-        scale_width: 1000,
-        scale_height: 1000
-      }
       try {
-        //const res1 = await axios.post('http://localhost:4000/add-scale-to-uml', scaleBody);
-        //const uml_code_scaled = res1.data;
-        //console.log(res1);
-
-        //console.log(uml_code_scaled);
-        
         const plantBody = {
-          uml_code: umlText, //not using scaled for now
+          uml_code: umlText,
           response_type: 'SVG',
           return_as_uri: true
-
         }
         const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
-        if (res.status == 200){
-          setDiagram(res.data);
-          setDiagramLoaded(true);
-        }
-        console.log(res);
+        setDiagram(res.data);
+        setDiagramLoaded(true);
+        setOpenSnackbar(false);
       }
       catch(error){
-
-      }
+        switch (error.response.data.type) {
+          case 'InvalidUMLCodeError':
+            setAlertText('Invalid UML Code');
+            break;
+          case 'TimeoutError':
+            setAlertText('PlantUML Server Timeout');
+            break;
+          case 'ServerError':
+            setAlertText('PlantUML Server Unavailable');
+          default:
+            setAlertText('Unknown PlantUML Server Error');
+        }
+        setOpenSnackbar(true);
+      }      
     }
 
     useEffect(() => {
@@ -191,8 +179,18 @@ const Query = () => {
           <Grid item className='uml-wrapper' xs = {6}>
               <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box'/>
           </Grid>
-          <Grid item className='diagram-wrapper' xs = {6}>
-            <Diagram image={diagram} umlText={umlText}/>
+          <Grid item className='diagram-wrapper' xs = {6} sx={{ position: 'relative' }}>
+            <Diagram image={diagram}/>
+            <Snackbar
+              open={openSnackbar}
+              onClose={() => setOpenSnackbar(false)}
+              sx={{ position: 'absolute'}}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+              <Alert onClose={() => setOpenSnackbar(false)} severity="error" sx={{ width: '100%' }}>
+                {alertText}
+              </Alert>
+            </Snackbar>
           </Grid>
       </Grid>
       <Grid container direction='row' spacing={2} >
