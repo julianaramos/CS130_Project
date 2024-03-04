@@ -16,6 +16,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import NavBar from './NavBar';
 import axios from 'axios';
+import firebase from '../firebase';
 
 const Login = () => {
     //const { uid } = useSelector((state) => state.user);
@@ -23,6 +24,7 @@ const Login = () => {
     
     const [email,setEmail] = useState('');
     const [password,SetPassword] =useState('')
+    const [errorMessage, setErrorMessage] = useState('');
     const [emailerror,setEmailerror] = useState(false);
     const [passworderror,SetPassworderror] =useState(false)
     const [emailerrorMsg,setEmailerrorMsg] = useState('');
@@ -84,6 +86,30 @@ const Login = () => {
             SetPassworderrorMsg('Invalid email address or password');
         }
     }
+
+    const handleGoogleLogIn = async () => {
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await firebase.auth().signInWithPopup(provider);
+            const user = result.user;
+            const userId = user.uid;
+            // Check if user exists in your database
+            const res = await axios.post('http://localhost:4000/google-login', { user: user, uid: userId });
+            if (res.status === 200) {
+                dispatch(login(userId));
+                navigate('/');
+            }
+            console.log('Response data:', res);
+        } catch (error) {
+            if (error.response && error.response.status === 400 && error.response.data === "User does not exist") {
+                await firebase.auth().currentUser.delete();
+                setErrorMessage('User does not exist. Please sign up instead.');
+            } else {
+                setErrorMessage('An error occurred. Please try again.');
+            }
+        }
+    };
+
     // let x = <div> Not Logged In </div>
     // if (uid !== null){
     //     x = <div> Logged In </div>
@@ -172,6 +198,16 @@ const Login = () => {
                                 >
                                 Sign In
                                 </Button>
+                                <Button
+                                type="button"
+                                fullWidth
+                                variant="contained"
+                                sx={{mt: 5, mb: 2}}
+                                onClick={handleGoogleLogIn}
+                                >
+                                Sign In with Google
+                                </Button>
+                                <p style={{color: 'red'}}>{errorMessage}</p>
                                 <Grid container>
                                 <Grid item>
                                     <Link to ="/signup" variant="body2">

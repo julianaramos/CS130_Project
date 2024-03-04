@@ -16,6 +16,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import TextField from '@mui/material/TextField';
 import NavBar from './NavBar'
 import axios from 'axios';
+import firebase from '../firebase';
 
 
 const Signup = () => {
@@ -25,6 +26,7 @@ const Signup = () => {
     const [email,setEmail] = useState('');
     const [password,SetPassword] =useState('')
     const [conPassword,SetConPassword] =useState('')
+    const [errorMessage, setErrorMessage] = useState('');
     const [emailerror,setEmailerror] = useState(false);
     const [passworderror,SetPassworderror] =useState(false)
     const [conPassworderror,SetConPassworderror] =useState(false)
@@ -93,6 +95,29 @@ const Signup = () => {
             }
         }
     }
+
+    const handleGoogleSignup = async () => {
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await firebase.auth().signInWithPopup(provider);
+            const user = result.user;
+            const userId = user.uid;
+
+            const res = await axios.post('http://localhost:4000/google-signup', { uid: userId, email: user.email });
+            if (res.status === 200) {
+                dispatch(login(userId));
+                navigate('/');
+            }
+            console.log('Response data:', res);
+        } catch (error) {
+            if (error.response && error.response.status === 400 && error.response.data === "User already exists.") {
+                setErrorMessage('User already exists. Please sign in instead.');
+            } else {
+                setErrorMessage('An error occurred. Please try again.');
+            }
+        }
+    }
+
     let x = <div> Not Logged In </div>
     if (uid !== null){
         x = <div> Logged In </div>
@@ -113,7 +138,7 @@ const Signup = () => {
         //     <button onClick={togglelogin}>togglelogin</button>
         //     <Link to = "/login"> To login </Link>
         // </div>
-        <div> 
+        <div>
             <NavBar/>
             <Container component="main" maxWidth="xs">
                 <Box
@@ -189,6 +214,16 @@ const Signup = () => {
                     >
                     Sign Up
                     </Button>
+                    <Button
+                        type="button"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 1, mb: 2 }}
+                        onClick={handleGoogleSignup}
+                    >
+                        Sign Up with Google
+                    </Button>
+                    <p style={{ color: 'red' }}>{errorMessage}</p>
                     <Grid container justifyContent="flex-end">
                     <Grid item>
                         <Link to ="/login" variant="body2">

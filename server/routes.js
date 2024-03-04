@@ -87,6 +87,47 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/google-signup', async (req, res) => {
+    const newUser = {
+        uid: req.body.uid,
+        email: req.body.email,
+    };
+
+    try {
+        const existingUser = await firebase.firestore().collection("User").doc(newUser.uid).get();
+        if (existingUser.exists) {
+            return res.status(400).send("User already exists.");
+        }
+
+        const UserInfo = {
+            savedUML: []
+        };
+
+        await firebase.firestore().collection("User").doc(newUser.uid).set(UserInfo);
+        res.status(200).send(newUser);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
+router.post('/google-login', async (req, res) => {
+    const curUser = {
+        user: req.body.user,
+        uid: req.body.uid
+    };
+
+    try {
+        const existingUser = await firebase.firestore().collection("User").doc(curUser.uid).get();
+        if (existingUser.exists) {
+            res.status(200).send("User exists");
+        } else {
+            res.status(400).send("User does not exist");
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
 router.post('/get-user-uml', async(req,res) => {
     uid = req.body.uid;
 
