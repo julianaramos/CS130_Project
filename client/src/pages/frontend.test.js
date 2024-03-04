@@ -28,6 +28,7 @@ describe("Dashboard Testing", () => {
 
     afterEach(() => {
         cleanup();
+        jest.restoreAllMocks();
       });
 
     it("should fetch user uml diagrams based on the uid in redux", async () => {
@@ -136,6 +137,41 @@ describe("Dashboard Testing", () => {
             expect(screen.queryByText('name1')).toBeNull();
         });
     });
+
+    it("should download uml content if download button is pressed", async () => {
+      axiosStub.mockImplementationOnce(() =>
+          Promise.resolve({
+          status: 200,
+          data: [{content: "c", description: "description1", diagram: '', name: 'name1', privacy: 'public', timestamp: 1, uml_id: '1'}, {content: "c", description: "description2", diagram: '', name: 'name2', privacy: 'public', timestamp: 2, uml_id: '2'}]
+      }));
+
+      axiosStub.mockImplementationOnce(() =>
+          Promise.resolve({
+          status: 200,
+      }));
+
+      window.URL.createObjectURL = jest.fn(() => 'details');
+      window.URL.revokeObjectURL = jest.fn(() => 'details');
+      const blobStub = jest.spyOn(global, 'Blob').mockImplementationOnce((a, b) => {
+        return {a: a, b: b};
+      });
+
+      render(
+          <Provider store={store}>
+            <Dashboard />
+          </Provider>
+        );
+
+      const downloadButton = await screen.findAllByText('Download');
+      fireEvent.click(downloadButton[0]);
+      
+      await waitFor(() => {
+        expect(blobStub).toBeCalledWith(["c"], {"type": "text/plain"});
+        expect(window.URL.createObjectURL).toBeCalledWith({"a": ["c"], "b": {"type": "text/plain"}} );
+        expect(window.URL.revokeObjectURL).toBeCalledWith('details');
+
+      });
+  });
 });
 
 describe("Home Testing", () => {
@@ -155,6 +191,7 @@ describe("Home Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should fetch public user uml diagrams on home page", async () => {
@@ -299,6 +336,7 @@ describe("Query Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should call plant uml visualizer after editing uml text box and display the result", async () => {
@@ -643,6 +681,7 @@ describe("NavBar Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should route to home page if image is clicked", async () => {
