@@ -11,13 +11,15 @@ import NavBar from "./NavBar";
 import Login from "./Login";
 import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import Signup from "./Signup";
-import {auth} from '../firebase'
+import firebase from '../firebase'
 
 jest.mock("axios");
 
-jest.mock('../firebase', () => ({
-  auth: jest.fn()
-}));
+jest.mock('../firebase', () => {
+  const auth = jest.fn();
+  auth.GoogleAuthProvider = jest.fn();
+  return {auth};
+});
 
 describe("Dashboard Testing", () => {
     let store, navigateStub, useLocationStub, axiosStub;
@@ -685,7 +687,7 @@ describe("NavBar Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
-      auth.mockImplementation(() => ({
+      firebase.auth.mockImplementation(() => ({
         signOut: jest.fn(),
         currentUser: null
       }));
@@ -824,7 +826,7 @@ describe("NavBar Testing", () => {
 
   it("should call delete google account route if clicked and user is from google provider", async () => {
 
-    auth.mockImplementationOnce(() => ({
+    firebase.auth.mockImplementationOnce(() => ({
       signOut: jest.fn(),
       currentUser: {a: "a", b: "b"}
     }));
@@ -911,7 +913,7 @@ describe("Login Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
-      auth.mockImplementation(() => ({
+      firebase.auth.mockImplementation(() => ({
         signOut: jest.fn(),
         currentUser: null
       }));
@@ -1048,7 +1050,7 @@ describe("Signup Testing", () => {
       axiosStub = jest.spyOn(axios, 'post');
       jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
       useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
-      auth.mockImplementation(() => ({
+      firebase.auth.mockImplementation(() => ({
         signOut: jest.fn(),
         currentUser: null
       }));
@@ -1149,5 +1151,90 @@ describe("Signup Testing", () => {
     fireEvent.click(link);
 
     expect(navigateStub).toBeCalledWith('/login', expect.anything());
+  });
+
+  it("should allow user to sign up with google account", async () => {
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200
+    }));
+
+    const popUpStub = jest.fn().mockImplementation((x) => ({
+      user: {
+        uid: "google_uid",
+        email: "google_email"
+      }
+    }));
+
+    firebase.auth.mockImplementation(() => ({
+      signOut: jest.fn(),
+      currentUser: null,
+      signInWithPopup: popUpStub,
+    }));
+
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <Routes>
+          <Route path='/signup' element={<Provider store={store}><Signup /></Provider>} />
+          <Route path='/login' element={<div> Log In </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByText('Sign Up with Google');
+    fireEvent.click(link);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(firebase.auth.GoogleAuthProvider).toHaveBeenCalledTimes(1);
+      expect(popUpStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith('http://localhost:4000/google-signup', { uid: "google_uid", email: "google_email" });
+      expect(store.getActions()).toEqual([{ type: 'user/login', payload: "google_uid" }]);
+    });
+  });
+
+  it("should tell user if google account is already associated with webapp", async () => {
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      response: {
+        data: 'User already exists.',
+        status: 400
+      }
+    }));
+
+    const popUpStub = jest.fn().mockImplementation((x) => ({
+      user: {
+        uid: "google_uid",
+        email: "google_email"
+      }
+    }));
+
+    firebase.auth.mockImplementation(() => ({
+      signOut: jest.fn(),
+      currentUser: null,
+      signInWithPopup: popUpStub,
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <Routes>
+          <Route path='/signup' element={<Provider store={store}><Signup /></Provider>} />
+          <Route path='/login' element={<div> Log In </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByText('Sign Up with Google');
+    fireEvent.click(link);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(firebase.auth.GoogleAuthProvider).toHaveBeenCalledTimes(1);
+      expect(popUpStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith('http://localhost:4000/google-signup', { uid: "google_uid", email: "google_email" });
+    });
+
+    expect(await screen.findByText('User already exists. Please sign in instead.')).toBeInTheDocument();
   });
 });
