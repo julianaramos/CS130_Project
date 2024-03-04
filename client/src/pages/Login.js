@@ -57,7 +57,7 @@ const Login = () => {
             }
             console.log('Response data:', res);
         } catch (error) {
-            if (error.response && error.response.status === 404 && error.response.data === "User does not exist") {
+            if (error.response && error.response.status === 400 && error.response.data === "User does not exist") {
                 await firebase.auth().currentUser.delete();
                 setErrorMessage('User does not exist. Please sign up instead.');
             } else {

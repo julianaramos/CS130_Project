@@ -86,7 +86,6 @@ describe('Firebase route testing', () => {
         }));
 
         const res = await request(app).post('/signup').send(newUser).expect(200);
-        console.log(res)
 
         sinon.assert.calledOnce(createUserWithEmailAndPasswordStub);
 
@@ -136,6 +135,64 @@ describe('Firebase route testing', () => {
         sinon.assert.calledOnce(signInWithEmailAndPasswordStub);
 
         signInWithEmailAndPasswordStub.restore();
+    });
+
+    it('should return success message when Google signup succeeds', async () => {
+        const newUser = {
+            uid: 'test-uid',
+            email: 'goodtest@example.com',
+        };
+
+        docStub.returns({
+            get: () => Promise.resolve({ exists: false }),
+            set: () => Promise.resolve(),
+        });
+
+        const res = await request(app).post('/google-signup').send(newUser).expect(200);
+        console.log(res);
+
+        sinon.assert.calledTwice(docStub);
+    });
+
+    it('should return error message when Google signup fails due to existing user', async () => {
+        const newUser = {
+            uid: 'test-uid',
+            email: 'existinguser@example.com',
+        };
+
+        docStub.onFirstCall().returns({ exists: true });
+
+        const res = await request(app).post('/google-signup').send(newUser).expect(400);
+
+        sinon.assert.calledOnce(docStub);
+    });
+
+    it('should return success message when Google login succeeds', async () => {
+        const curUser = {
+            user: 'test-user',
+            uid: 'test-uid'
+        };
+
+        docStub.returns({
+            get: () => Promise.resolve({ exists: true })
+        });
+
+        const res = await request(app).post('/google-login').send(curUser).expect(200);
+
+        sinon.assert.calledOnce(docStub);
+    });
+
+    it('should return error message when Google login fails due to non-existing user', async () => {
+        const curUser = {
+            user: 'test-user',
+            uid: 'non-existing-uid'
+        };
+
+        docStub.onFirstCall().returns({ exists: false });
+
+        const res = await request(app).post('/google-login').send(curUser).expect(400);
+
+        sinon.assert.calledOnce(docStub);
     });
 
     it('should return success message when copy succeeds', async () => { 

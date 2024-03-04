@@ -109,7 +109,7 @@ router.post('/google-login', async (req, res) => {
         if (existingUser.exists) {
             res.status(200).send("User exists");
         } else {
-            res.status(404).send("User does not exist");
+            res.status(400).send("User does not exist");
         }
     } catch (error) {
         res.status(400).send(error);
