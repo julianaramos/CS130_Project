@@ -10,6 +10,7 @@ import Query from "./Query";
 import NavBar from "./NavBar";
 import Login from "./Login";
 import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
+import Signup from "./Signup";
 
 jest.mock("axios");
 
@@ -969,5 +970,133 @@ describe("Login Testing", () => {
 
     expect((await screen.findAllByText('Invalid email address or password'))[0]).toBeInTheDocument();
 
+  });
+
+  it("signup link should link to signup page", async () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/signup' element={<div> Sign Up Page </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByRole('link', { name: "Don't have an account? Sign Up" });
+    fireEvent.click(link);
+
+    expect(navigateStub).toBeCalledWith('/signup', expect.anything());
+  });
+});
+
+describe("Signup Testing", () => {
+  let store, navigateStub, useLocationStub, axiosStub;
+
+  beforeEach(() => {
+      const mockStore = configureStore([]);
+      store = mockStore({
+          user: {uid: 'uid'},
+          uml: {uml_id: 'uml_id'}
+        });
+      navigateStub = jest.fn();
+      axiosStub = jest.spyOn(axios, 'post');
+      jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
+      useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+    });
+
+  afterEach(() => {
+      cleanup();
+      jest.restoreAllMocks(); 
+    });
+
+  it("should signup user based on values within text boxes, route to home page, and set redux", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: {user: {uid: "uid"}}
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <Routes>
+          <Route path='/signup' element={<Provider store={store}><Signup /></Provider>} />
+          <Route path='/login' element={<div> Log In </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const emailBox = await screen.findByTestId('email-box');
+    fireEvent.change(emailBox, { target: { value: "email@gmail.com" } });
+
+    const passwordBox = await screen.findByTestId('password-box');
+    fireEvent.change(passwordBox, { target: { value: "password" } });
+
+    const cpasswordBox = await screen.findByTestId('cpassword-box');
+    fireEvent.change(cpasswordBox, { target: { value: "password" } });
+
+    expect(await screen.findByDisplayValue('email@gmail.com')).toBeInTheDocument();
+
+    const signinButton = await screen.findByText('Sign Up');
+    fireEvent.click(signinButton);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/signup", {email: "email@gmail.com", password: "password", confirmPassword: "password"});
+      expect(navigateStub).toBeCalledWith('/');
+      expect(store.getActions()).toEqual([{ type: 'user/login', payload: "uid" }]);
+    });
+
+  });
+
+  it("should display errors if input fields are invalid", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: {user: {uid: "uid"}}
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <Routes>
+          <Route path='/signup' element={<Provider store={store}><Signup /></Provider>} />
+          <Route path='/login' element={<div> Log In </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const emailBox = await screen.findByTestId('email-box');
+    fireEvent.change(emailBox, { target: { value: "abc" } });
+
+    const passwordBox = await screen.findByTestId('password-box');
+    fireEvent.change(passwordBox, { target: { value: "p" } });
+
+    const cpasswordBox = await screen.findByTestId('cpassword-box');
+    fireEvent.change(cpasswordBox, { target: { value: "password" } });
+
+    expect(await screen.findByDisplayValue('abc')).toBeInTheDocument();
+
+    const signinButton = await screen.findByText('Sign Up');
+    fireEvent.click(signinButton);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(axiosStub).toHaveBeenCalledTimes(0);
+    });
+
+    expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
+    expect(await screen.findByText('Password must be at least 6 characters')).toBeInTheDocument();
+    expect(await screen.findByText('Confirm password does not match your password')).toBeInTheDocument();
+  });
+
+
+  it("login link should link to login page", async () => {
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <Routes>
+          <Route path='/signup' element={<Provider store={store}><Signup /></Provider>} />
+          <Route path='/login' element={<div> Log In </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const link = await screen.getByRole('link', { name: "Already have an account? Sign in" });
+    fireEvent.click(link);
+
+    expect(navigateStub).toBeCalledWith('/login', expect.anything());
   });
 });
