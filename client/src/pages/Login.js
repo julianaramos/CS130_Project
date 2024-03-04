@@ -90,7 +90,7 @@ const Login = () => {
             setEmailerror(true);
             setEmailerrorMsg('Invalid email address or password');
             SetPassworderror(true);
-            SetPassworderrorMsg('Invalid email address or password');
+            SetPassworderrorMsg('Invalid email address or password'); 
         }
     }
 
