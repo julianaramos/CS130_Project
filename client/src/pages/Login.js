@@ -18,7 +18,7 @@ import NavBar from './NavBar';
 import axios from 'axios';
 
 const Login = () => {
-    const { uid } = useSelector((state) => state.user);
+    //const { uid } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     
     const [email,setEmail] = useState('');
@@ -31,28 +31,39 @@ const Login = () => {
     const navigate = useNavigate()
 
     const handleValidation = () =>{
+        var valid = true;
+        setEmailerrorMsg('')
+        SetPassworderrorMsg('')
         setEmailerror(false);
         SetPassworderror(false);
         const emailRegEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(email===''){
             setEmailerror(true);
             setEmailerrorMsg('Please enter an email');
+            valid = false;
         }
         else if(!emailRegEx.test(email)){
             setEmailerror(true);
             setEmailerrorMsg('Invalid email address');
+            valid = false;
         }
         if(password===''){
             SetPassworderror(true);
             SetPassworderrorMsg('Please enter a password');
+            valid = false;
         }
         else if(password.length < 6){
             SetPassworderror(true);
             SetPassworderrorMsg('Invalid password');
+            valid = false;
         }
+        return valid;
     }
     const handleLogIn = async () => {
-        handleValidation();
+        if (!handleValidation())
+        {
+            return;
+        }
         try {
             console.log('loading')
             const res = await axios.post('http://localhost:4000/login', body);
@@ -61,7 +72,10 @@ const Login = () => {
                 dispatch(login(res.data.user.uid))
                 navigate("/");
             }
+            console.log('there');
+            console.log(res);
         } catch (error) {
+            console.log('here');
             // If the request encounters an error (status code outside 2xx range)
             console.error('Error:', error.message,'with',error);
             setEmailerror(true);
@@ -114,6 +128,7 @@ const Login = () => {
                         </Typography>
                             <Box component="form"  noValidate sx={{ mt: 5 }}>
                                 <TextField
+                                inputProps={{ "data-testid": "email-box" }}
                                 margin="normal"
                                 required
                                 fullWidth
@@ -128,6 +143,7 @@ const Login = () => {
                                 helperText={emailerrorMsg}
                                 />
                                 <TextField
+                                inputProps={{ "data-testid": "password-box" }}
                                 margin="normal"
                                 required
                                 fullWidth
@@ -157,11 +173,11 @@ const Login = () => {
                                 Sign In
                                 </Button>
                                 <Grid container>
-                                <Grid item>
+                                {/* <Grid item>
                                     <Link to ="/signup" variant="body2">
                                     {"Don't have an account? Sign Up"}
                                     </Link>
-                                </Grid>
+                                </Grid> */}
                                 </Grid>
                             </Box>
                     </Box>
