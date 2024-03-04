@@ -8,6 +8,8 @@ import Home from "./Home";
 import * as router from 'react-router'
 import Query from "./Query";
 import NavBar from "./NavBar";
+import Login from "./Login";
+import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 
 jest.mock("axios");
 
@@ -28,6 +30,7 @@ describe("Dashboard Testing", () => {
 
     afterEach(() => {
         cleanup();
+        jest.restoreAllMocks();
       });
 
     it("should fetch user uml diagrams based on the uid in redux", async () => {
@@ -136,6 +139,41 @@ describe("Dashboard Testing", () => {
             expect(screen.queryByText('name1')).toBeNull();
         });
     });
+
+    it("should download uml content if download button is pressed", async () => {
+      axiosStub.mockImplementationOnce(() =>
+          Promise.resolve({
+          status: 200,
+          data: [{content: "c", description: "description1", diagram: '', name: 'name1', privacy: 'public', timestamp: 1, uml_id: '1'}, {content: "c", description: "description2", diagram: '', name: 'name2', privacy: 'public', timestamp: 2, uml_id: '2'}]
+      }));
+
+      axiosStub.mockImplementationOnce(() =>
+          Promise.resolve({
+          status: 200,
+      }));
+
+      window.URL.createObjectURL = jest.fn(() => 'details');
+      window.URL.revokeObjectURL = jest.fn(() => 'details');
+      const blobStub = jest.spyOn(global, 'Blob').mockImplementationOnce((a, b) => {
+        return {a: a, b: b};
+      });
+
+      render(
+          <Provider store={store}>
+            <Dashboard />
+          </Provider>
+        );
+
+      const downloadButton = await screen.findAllByText('Download');
+      fireEvent.click(downloadButton[0]);
+      
+      await waitFor(() => {
+        expect(blobStub).toBeCalledWith(["c"], {"type": "text/plain"});
+        expect(window.URL.createObjectURL).toBeCalledWith({"a": ["c"], "b": {"type": "text/plain"}} );
+        expect(window.URL.revokeObjectURL).toBeCalledWith('details');
+
+      });
+  });
 });
 
 describe("Home Testing", () => {
@@ -155,6 +193,7 @@ describe("Home Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should fetch public user uml diagrams on home page", async () => {
@@ -299,6 +338,7 @@ describe("Query Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should call plant uml visualizer after editing uml text box and display the result", async () => {
@@ -643,6 +683,7 @@ describe("NavBar Testing", () => {
 
   afterEach(() => {
       cleanup();
+      jest.restoreAllMocks(); 
     });
 
   it("should route to home page if image is clicked", async () => {
@@ -811,4 +852,122 @@ describe("NavBar Testing", () => {
   });
 
 
+});
+
+describe("Login Testing", () => {
+  let store, navigateStub, useLocationStub, axiosStub;
+
+  beforeEach(() => {
+      const mockStore = configureStore([]);
+      store = mockStore({
+          user: {uid: 'uid'},
+          uml: {uml_id: 'uml_id'}
+        });
+      navigateStub = jest.fn();
+      axiosStub = jest.spyOn(axios, 'post');
+      jest.spyOn(router, 'useNavigate').mockImplementation(() => navigateStub);
+      useLocationStub = jest.spyOn(router, 'useLocation').mockImplementation(() => {return {state: ''}});
+    });
+
+  afterEach(() => {
+      cleanup();
+      jest.restoreAllMocks(); 
+    });
+
+  it("should signin user based on values within text boxes, route to home page, and set redux", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: {user: {uid: "uid"}}
+    }));
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/signup' element={<div> Sign Up </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const emailBox = await screen.findByTestId('email-box');
+    fireEvent.change(emailBox, { target: { value: "email@gmail.com" } });
+
+    const passwordBox = await screen.findByTestId('password-box');
+    fireEvent.change(passwordBox, { target: { value: "password" } });
+
+    expect(await screen.findByDisplayValue('email@gmail.com')).toBeInTheDocument();
+
+    const signinButton = await screen.findByText('Sign In');
+    fireEvent.click(signinButton);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/login", {email: "email@gmail.com", password: "password"});
+      expect(navigateStub).toBeCalledWith('/');
+      expect(store.getActions()).toEqual([{ type: 'user/login', payload: "uid" }]);
+    });
+
+  });
+
+  it("should display errors if form fields are invalid", async () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/signup' element={<div> Sign Up </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const emailBox = await screen.findByTestId('email-box');
+    fireEvent.change(emailBox, { target: { value: "bademail" } });
+
+    const passwordBox = await screen.findByTestId('password-box');
+    fireEvent.change(passwordBox, { target: { value: "p" } });
+
+    expect(await screen.findByDisplayValue('bademail')).toBeInTheDocument();
+
+    const signinButton = await screen.findByText('Sign In');
+    fireEvent.click(signinButton);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(axiosStub).toHaveBeenCalledTimes(0);
+    });
+
+    expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
+    expect(await screen.findByText('Invalid password')).toBeInTheDocument();
+
+  });
+
+  it("should tell user if no account exists with credentials", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      status: 400
+    }))
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path='/login' element={<Provider store={store}><Login /></Provider>} />
+          <Route path='/signup' element={<div> Sign Up </div>} />
+        </Routes>
+      </MemoryRouter>);
+
+    const emailBox = await screen.findByTestId('email-box');
+    fireEvent.change(emailBox, { target: { value: "no_exist@gmail.com" } });
+
+    const passwordBox = await screen.findByTestId('password-box');
+    fireEvent.change(passwordBox, { target: { value: "password" } });
+
+    expect(await screen.findByDisplayValue('no_exist@gmail.com')).toBeInTheDocument();
+
+    const signinButton = await screen.findByText('Sign In');
+    fireEvent.click(signinButton);
+
+    await waitFor(() => { // Wait for the apis to be called, wont fail immediately
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/login", {email: "no_exist@gmail.com", password: "password"});
+    });
+
+    expect((await screen.findAllByText('Invalid email address or password'))[0]).toBeInTheDocument();
+
+  });
 });
