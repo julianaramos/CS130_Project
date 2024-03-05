@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import { TextField, Card, CardMedia, TextareaAutosize, CardContent, IconButton } from '@mui/material';
 import './Query.css'
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import NavBar from './NavBar';
-import { useSelector } from 'react-redux';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -15,7 +14,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
 
-const UmlInputBox = ({umlText, handleUMLChange}) => {    
+const UmlInputBox = ({umlText, handleUMLChange}) => {
     return (
       <Card className='uml-wrapper'>
         <CardContent>
@@ -36,7 +35,7 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
 };
 
 const Diagram = ({image}) => {
-  return (    
+  return (
     <Card className='diagram-card'>
       <CardMedia
         sx={{ height: '78vh', width: '50vw', objectFit: "contain" }}
@@ -75,7 +74,6 @@ const Query = () => {
   const [openDiagramSnackbar, setOpenDiagramSnackbar] = useState(false);
   const [diagramAlertText, setDiagramAlertText] = useState('');
   const [openUMLResponseSnackbar, setOpenUMLResponseSnackbar] = useState(false);
-  const [umlResponseAlertText, setUMLResponseAlertText] = useState('');
   const [openUMLErrorSnackbar, setOpenUMLErrorSnackbar] = useState(false);
   const [umlErrorAlertText, setUMLErrorAlertText] = useState('');
 
@@ -84,44 +82,47 @@ const Query = () => {
     setDiagramLoaded(false);
   };
 
-  const handleSubmission = async () => {
-    const body = {
-      uml_code: umlText,
-      prompt: promptText,
-      query: promptText
-    };
+  const handleSubmission = useCallback(
+    async () => {
+      const body = {
+        uml_code: umlText,
+        prompt: promptText,
+        query: promptText
+      };
 
-    if (prompttoggle === 'prompt') {
-      setGeneratorResponded(false);
-      try {
-        const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
-        setUMLText(res.data.uml_code);
-        setDiagramLoaded(false);
+      if (prompttoggle === 'prompt') {
+        setGeneratorResponded(false);
+        try {
+          const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
+          setUMLText(res.data.uml_code);
+          setDiagramLoaded(false);
+        }
+        catch (error) {
+          setUMLErrorAlertText('Prompt failed with status: ' + error.response.data.type);
+          setOpenUMLErrorSnackbar(true);
+        }
+        finally {
+          setGeneratorResponded(true);
+        }
       }
-      catch (error) {
-        setUMLErrorAlertText('Prompt failed with status: ' + error.response.data.type);
-        setOpenUMLErrorSnackbar(true);
+      else {
+        setExaminerResponded(false);
+        try {
+          const res = await axios.post('http://localhost:4000/query-assistant-code-examiner', body);
+          setExaminerResponse(res.data);
+          setOpenUMLResponseSnackbar(true);
+        }
+        catch (error) {
+          setUMLErrorAlertText('Query failed with status: ' + error.response.data.type);
+          setOpenUMLErrorSnackbar(true);
+        }
+        finally {
+          setExaminerResponded(true);
+        }
       }
-      finally {
-        setGeneratorResponded(true);
-      }
-    }
-    else {
-      setExaminerResponded(false);
-      try {
-        const res = await axios.post('http://localhost:4000/query-assistant-code-examiner', body);
-        setExaminerResponse(res.data);
-        setOpenUMLResponseSnackbar(true);
-      }
-      catch (error) {
-        setUMLErrorAlertText('Query failed with status: ' + error.response.data.type);
-        setOpenUMLErrorSnackbar(true);
-      }
-      finally {
-        setExaminerResponded(true);
-      }
-    }
-  };
+    },
+    [umlText, promptText, prompttoggle]
+  );
 
   const handlePromptChange = (event) => {
     setPromptText(event.target.value);
@@ -133,43 +134,50 @@ const Query = () => {
     }
   };
 
-  async function loadDiagram() {
-    try {
-      const plantBody = {
-        uml_code: umlText,
-        response_type: 'SVG',
-        return_as_uri: true
-      };
-      const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
-      setDiagram(res.data);
-      setDiagramLoaded(true);
-      setOpenDiagramSnackbar(false);
-    }
-    catch(error) {
-      switch (error.response.data.type) {
-        case 'InvalidUMLCodeError':
-          setDiagramAlertText('Invalid UML Code');
-          break;
-        case 'TimeoutError':
-          setDiagramAlertText('PlantUML Server Timeout');
-          break;
-        case 'ServerError':
-          setDiagramAlertText('PlantUML Server Unavailable');
-        default:
-          setDiagramAlertText('Unknown PlantUML Server Error');
+  const loadDiagram = useCallback(
+    async () => {
+      try {
+        const plantBody = {
+          uml_code: umlText,
+          response_type: 'SVG',
+          return_as_uri: true
+        };
+        const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
+        setDiagram(res.data);
+        setDiagramLoaded(true);
+        setOpenDiagramSnackbar(false);
       }
-      setOpenDiagramSnackbar(true);
-    }      
-  };
+      catch(error) {
+        switch (error.response.data.type) {
+          case 'InvalidUMLCodeError':
+            setDiagramAlertText('Invalid UML Code');
+            break;
+          case 'TimeoutError':
+            setDiagramAlertText('PlantUML Server Timeout');
+            break;
+          case 'ServerError':
+            setDiagramAlertText('PlantUML Server Unavailable');
+            break;
+          default:
+            setDiagramAlertText('Unknown PlantUML Server Error');
+        }
+        setOpenDiagramSnackbar(true);
+      }      
+    },
+    [umlText]
+  );
 
-  useEffect(() => {
-    if (umlText != '' && !diagramLoaded)
-      loadDiagram();
-    if (oneTimeLoad && promptText != ''){
-      handleSubmission();
-    }
-    setOneTimeLoad(false);
-  });
+  useEffect(
+    () => {
+      if (umlText !== '' && !diagramLoaded)
+        loadDiagram();
+      if (oneTimeLoad && promptText !== '') {
+        handleSubmission();
+      }
+      setOneTimeLoad(false);
+    },
+    [umlText, diagramLoaded, loadDiagram, oneTimeLoad, promptText, handleSubmission]
+  );
 
   return (
     <div>

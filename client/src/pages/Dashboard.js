@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const UserDiagrams = () => {
     const isSmallScreen = useMediaQuery('(max-width:600px)');
     const columns = isSmallScreen ? 1 : 3;
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [loaded, setLoaded] = useState(false);
     const [userUML, setUserUML] = useState([]);
     const dispatch = useDispatch();
@@ -32,7 +32,7 @@ const UserDiagrams = () => {
     const handleEditClick = (event, UML) => {
         dispatch(setUML(UML.uml_id));
         navigate("/query", {state: UML});   
-    }
+    };
 
     const handleDownloadClick = (event, UML) => {
         const umlContent = UML.content;
@@ -49,109 +49,116 @@ const UserDiagrams = () => {
     
         // Clean up the URL
         window.URL.revokeObjectURL(url);
-    }
+    };
 
     const handleDeleteClick = async (event, UML) => {
         const body = {
             uid: uid,
             uml_id: UML.uml_id
-        }
-        try{
-            const res = await axios.post('http://localhost:4000/delete-uml', body);
+        };
+        try {
+            await axios.post('http://localhost:4000/delete-uml', body);
             const newUserUML = userUML.filter(uml => uml.uml_id !== UML.uml_id);
             setUserUML(newUserUML);
         }
         catch(error)
         {
         }
-    }
+    };
 
     useEffect(() => {
         async function loadUML() {
             const body = {
                 uid: uid
-            }
+            };
             try {
-              const res = await axios.post('http://localhost:4000/get-user-uml', body);
-              if (res.status == 200){
+                const res = await axios.post('http://localhost:4000/get-user-uml', body);
                 setUserUML(res.data);
                 setLoaded(true);
-              }
             }
-            catch(error)
-            {}
+            catch(error) {
+            }
         }
 
-        if (!loaded){
+        if (!loaded) {
             loadUML();
         }
     });
 
-    if (!loaded){
-        return (<div className="loaderlong"></div>)
+    if (!loaded) {
+        return (<div className="loaderlong" />);
     }
 
-    return(
+    return (
         <Masonry columns={columns} spacing={2}>
             {userUML.map((UML, index) => (
-            <Card key={index} sx={{ p: 1 }}>
-                <CardMedia 
-                    sx={{ height: 180, objectFit: "contain"}}
-                    component="img"
-                    image={UML.diagram ? UML.diagram : Diagram_img}
-                    scale='20'
-                    title='UML Diagram' 
-                /> 
-                <ButtonGroup>
-                    <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon/>}>Edit</Button>
-                    <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon/>}>Download</Button>
-                    <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon/>}>Delete</Button>
-                </ButtonGroup>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}
-                >
-                    <CardHeader
-                        title={UML.name}
-                        subheader={UML.description}
-                    />
-                </Box>
-            </Card>
+                <Card key={index} sx={{ p: 1 }}>
+                    <CardMedia 
+                        sx={{ height: 180, objectFit: "contain"}}
+                        component="img"
+                        image={UML.diagram ? UML.diagram : Diagram_img}
+                        scale='20'
+                        title='UML Diagram' 
+                    /> 
+                    <ButtonGroup>
+                        <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon />}>
+                            Edit
+                        </Button>
+                        <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon />}>
+                            Download
+                        </Button>
+                        <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon />}>
+                            Delete
+                        </Button>
+                    </ButtonGroup>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <CardHeader
+                            title={UML.name}
+                            subheader={UML.description}
+                        />
+                    </Box>
+                </Card>
             ))}
         </Masonry>
     );
-}
+};
 
 const Dashboard = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleCreateClick = () => {
         navigate('/query');
-    }
+    };
 
-    return(
+    return (
         <div>
-            <NavBar/>
+            <NavBar />
             <Container                 
                 sx={{
-                pt: "7rem",
-                pb: "5rem",
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: { xs: 3, sm: 6 },
-            }}>
+                    pt: "7rem",
+                    pb: "5rem",
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: { xs: 3, sm: 6 },
+                }}
+            >
                 <Box>
-                    <Button onClick={handleCreateClick} variant='outlined' startIcon={<AddIcon/>}>Create</Button>
+                    <Button onClick={handleCreateClick} variant='outlined' startIcon={<AddIcon />}>
+                        Create
+                    </Button>
                 </Box>
-                <UserDiagrams/>
+                <UserDiagrams />
             </Container>
         </div>
     );
-}
+};
 
 export default Dashboard;
