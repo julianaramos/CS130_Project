@@ -74,7 +74,7 @@ const Query = () => {
 
   const [umlText, setUMLText] = useState(state && state.content ? state.content : '');
   const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
-  const [diagram, setDiagram] = useState("");
+  const [diagram, setDiagram] = useState(state && state.diagram ? state.diagram : ''); // i think this works nicely
   const [diagramLoaded, setDiagramLoaded] = useState(false);
   const [generatorResponded, setGeneratorResponded] = useState(true);
   const [examinerResponded, setExaminerResponded] = useState(true);
