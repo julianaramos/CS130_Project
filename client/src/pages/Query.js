@@ -35,13 +35,23 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
 };
 
 const Diagram = ({image}) => {
+  var displayImage = null;
+
+  if (image !== ''){
+    displayImage = image;
+  }
+  else
+  {
+    displayImage = Missing;
+  }
+
   return (
     <Card className='diagram-card'>
       <CardMedia
-        sx={{ height: '78vh', width: '50vw', objectFit: "contain" }}
+        sx={{ height: '78vh', width: '49vw', objectFit: "contain" }}
         component="img"
         alt="UML Diagram"
-        src={image}
+        src={displayImage}
       />
     </Card>
   );
@@ -64,7 +74,7 @@ const Query = () => {
 
   const [umlText, setUMLText] = useState(state && state.content ? state.content : '');
   const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
-  const [diagram, setDiagram] = useState(Missing);
+  const [diagram, setDiagram] = useState("");
   const [diagramLoaded, setDiagramLoaded] = useState(false);
   const [generatorResponded, setGeneratorResponded] = useState(true);
   const [examinerResponded, setExaminerResponded] = useState(true);
