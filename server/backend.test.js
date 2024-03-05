@@ -159,7 +159,6 @@ describe('Firebase route testing', () => {
         });
 
         const res = await request(app).post('/google-signup').send(newUser).expect(200);
-        console.log(res);
 
         sinon.assert.calledTwice(docStub);
     });

@@ -1,17 +1,12 @@
 import React , {useState}from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { login, logout } from '../redux/user';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import TextField from '@mui/material/TextField';
 import NavBar from './NavBar'
@@ -83,15 +78,12 @@ const Signup = () => {
             return;
         }
         try {
-            console.log('loading')
             const res = await axios.post('http://localhost:4000/signup', body);
             if(res.status === 200){
                 setNormalLoading(false);
                 dispatch(login(res.data.user.uid))
                 navigate("/");
             }
-            // If the request is successful (status code 2xx)
-            console.log('Response data:', res);
         } catch (error) {
             setNormalLoading(false);
             // If the request encounters an error (status code outside 2xx range)
@@ -117,7 +109,6 @@ const Signup = () => {
                 dispatch(login(userId));
                 navigate('/');
             }
-            console.log('Response data:', res);
         } catch (error) {
             setGoogleLoading(false);
             if (error.response && error.response.status === 400 && error.response.data === "User already exists.") {
@@ -133,21 +124,7 @@ const Signup = () => {
         x = <div> Logged In </div>
     }
 
-    function togglelogin() {
-        if (uid !== null){
-            dispatch(logout());
-        }
-        else{
-            dispatch(login("test"));
-        }
-    }
-
     return (
-        // <div>
-        //     {x}
-        //     <button onClick={togglelogin}>togglelogin</button>
-        //     <Link to = "/login"> To login </Link>
-        // </div>
         <div>
             <NavBar/>
             <Container component="main" maxWidth="xs">
@@ -213,6 +190,12 @@ const Signup = () => {
                         onChange = {(e) => SetConPassword(e.target.value)}
                         error={conPassworderror}
                         helperText={conPassworderrorMsg}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSignup();
+                            }
+                          }}
                         />
                     </Grid>
                     </Grid>

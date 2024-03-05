@@ -72,7 +72,6 @@ const Login = () => {
             return;
         }
         try {
-            console.log('loading')
             const res = await axios.post('http://localhost:4000/login', body);
             // If the request is successful (status code 2xx)
             if(res.status === 200){
@@ -80,11 +79,8 @@ const Login = () => {
                 dispatch(login(res.data.user.uid))
                 navigate("/");
             }
-            console.log('there');
-            console.log(res);
         } catch (error) {
             setNormalLoading(false);
-            console.log('here');
             // If the request encounters an error (status code outside 2xx range)
             console.error('Error:', error.message,'with',error);
             setEmailerror(true);
@@ -108,7 +104,6 @@ const Login = () => {
                 dispatch(login(userId));
                 navigate('/');
             }
-            console.log('Response data:', res);
         } catch (error) {
             setGoogleLoading(false);
             if (error.response && error.response.status === 400 && error.response.data === "User does not exist") {
@@ -120,31 +115,7 @@ const Login = () => {
         }
     };
 
-    // let x = <div> Not Logged In </div>
-    // if (uid !== null){
-    //     x = <div> Logged In </div>
-    // }
-
-    // function togglelogin() {
-    //     if (uid !== null){
-    //         dispatch(logout());
-    //     }
-    //     else{
-    //         dispatch(login("test"));
-    //     }
-    // }
-
     return (
-        // <div>
-        //     <form noValidate autoComplete="off">
-        //         <TextField id="standard-basic" label="Standard" />
-        //         <TextField id="filled-basic" label="Filled" variant="filled" />
-        //         <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-        //     </form>
-        //     {x}
-        //     <button onClick={togglelogin}>togglelogin</button>
-        //     <Link to = "/signup"> To Signup </Link>
-        // </div>
         <div> 
             <NavBar/>  
             <Container component="main" maxWidth="xs">
@@ -193,12 +164,12 @@ const Login = () => {
                                 onChange = {(e) => SetPassword(e.target.value)}
                                 error={passworderror}
                                 helperText={passworderrorMsg}
-                                // onKeyDown={(e) => {
-                                //     if (e.key === 'Enter') {
-                                //       e.preventDefault();
-                                //       handleLogIn();
-                                //     }
-                                //   }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleLogIn();
+                                    }
+                                  }}
                                 />
                                 <LoadingButton
                                 type="button"

@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUML, removeUML } from '../redux/uml';
+import { useDispatch } from 'react-redux';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -11,12 +10,10 @@ import { Accordion, AccordionSummary, AccordionDetails, Checkbox, Grid, ButtonBa
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
-//import { useTheme } from '@mui/system'; add custom theme later
 import './Query.css'
 import NavBar from './NavBar';
-import Diagram_img from '../images/UML-Class-Diagram.png'
 import axios from 'axios';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const UserDesignContext = createContext();
@@ -44,14 +41,13 @@ const Home = () => {
     }
     try {
       const res = await axios.post('http://localhost:4000/get-all-uml', body);
-      console.log(res);
       if (res.status == 200){
         setLoaded(true);
         setUserUML(res.data);
       }
     }
     catch(error)
-    {console.log(error);}
+    {}
     }
 
     useEffect(() => {
@@ -90,7 +86,15 @@ const Filter = () => {
 
   const handleFormSubmit = () => {
     loadUML();
-    console.log('submit');
+  }
+
+  const handleResetClick = () => {
+    setStateChecked(true);
+    setClassChecked(true);
+    setActivityChecked(true);
+    setUseCaseChecked(true);
+    setSequenceChecked(true);
+    setNameContains('');
   }
 
 
@@ -129,11 +133,18 @@ const Filter = () => {
               fullWidth
             />
           </Grid>
-          <Grid item xs={12}>
-            <button variant="contained" color="primary" onClick={handleFormSubmit}>
-                Apply
-            </button>
-      </Grid>
+          <Grid item container direction='row' xs={12} spacing={1}>
+            <Grid item>
+              <button variant="contained" color="primary" onClick={handleFormSubmit}>
+                  Apply
+              </button>
+            </Grid>
+            <Grid item>
+              <button variant="contained" color="primary" onClick={handleResetClick}>
+                  Reset
+              </button>
+            </Grid>
+          </Grid>
         </Grid>
       </AccordionDetails>
     </Accordion>
@@ -204,7 +215,6 @@ const UserGenerations = () => {
 
 
     const handleCardClick = (event, UML) => {
-        console.log(UML);
         navigate("/query", {state: UML});
     }
     const columns = isSmallScreen ? 1 : 3;
