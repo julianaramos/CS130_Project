@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
-import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide} from '@mui/material';
+import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide, DialogActions} from '@mui/material';
 import {IconButton,ListItemIcon} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
@@ -42,6 +42,7 @@ const UserMenu = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { uid } = useSelector((state) => state.user);
+    const [open, setOpen] = useState(false); 
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -50,8 +51,16 @@ const UserMenu = () => {
         setAnchorElUser(null);
     };
 
+    const handleCloseDialog = (event) => {
+        setOpen(false)
+    }
+    const handleOpenDialog = () => {
+        setOpen(true);
+      };
+
     function flogout() {
         dispatch(logout());
+        navigate("/")
     }
 
     const handleDashboardClick = () => {
@@ -97,11 +106,19 @@ const UserMenu = () => {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                 >
-                    
                 <MenuItem onClick={handleDashboardClick}><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
-                <MenuItem><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
                 <MenuItem onClick={flogout}><ListItemIcon><Logout/></ListItemIcon>Logout</MenuItem>
-                <MenuItem onClick={handleDeleteClick}><ListItemIcon><DeleteIcon/></ListItemIcon>Delete Account</MenuItem>
+                <MenuItem onClick={handleOpenDialog}><ListItemIcon><DeleteIcon/></ListItemIcon>Delete Account</MenuItem>
+                <Dialog onClose={handleCloseDialog} open={open} fullWidth         
+                    sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    }}>
+                    <DialogTitle>This will permanently delete your account</DialogTitle>
+                    <DialogActions>
+                        <Button onClick={handleDeleteClick}>Delete account</Button>
+                    </DialogActions>
+                </Dialog>
                 </Menu>
             </Box>
         )
@@ -112,7 +129,7 @@ const UserMenu = () => {
                 <Button
                 key="Log in"
                 onClick={handleLoginClick}
-                sx={{ my: 2, color: 'white', display: 'block', fontWeight:600 }}
+                sx={{ my: 2, color: 'white', display: 'block', fontWeight:600, fontSize:'1.2vmax'}}
                 >
                 Log In
                 </Button>
@@ -202,7 +219,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}/>
         )
     }
-    else if(IndependentPageButtons=="QueryPage"){
+    else if(IndependentPageButtons=="QueryPage" && uid!=null){
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
@@ -225,12 +242,10 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     }}>
                     <DialogTitle sx={{ my: "1rem"}}>UML Diagram Description</DialogTitle>
                     <TextField 
-                        
                         onChange={handleDescriptionChange}
                         value={descriptionText}
                         label="Description..."
                         multiline
-                        
                     />
                 </Dialog>
                 <ToggleButtonGroup sx={{ ml:'2rem', mr:'5rem'}}
@@ -259,6 +274,13 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
             </Box>
         )
     }
+    else if(IndependentPageButtons=="QueryPage" && uid==null){
+        return(
+            <Box justifyContent={"center"} sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                <Typography fontSize={"1.5vmax"}>Log in to save your work</Typography>
+            </Box>
+        )
+    }
 }
 
 const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
@@ -278,7 +300,7 @@ const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
                     <Button
                         variant='text'
                         onClick = {handleHomeClick}
-                        style={{ color:"white" , fontSize: '1.6rem', fontWeight: 650, letterSpacing:".2rem"}}
+                        style={{ color:"white" , fontSize: '2vmax', fontWeight: 650, letterSpacing:".2vmax"}}
                         > <AccountTreeIcon sx={{ mr:"1rem" }} />
                         UML Lab
                     </Button>      
