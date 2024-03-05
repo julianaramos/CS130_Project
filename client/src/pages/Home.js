@@ -55,7 +55,7 @@ const Home = () => {
         await loadUML();
       })();
     },
-    [loadUML, stateChecked, classChecked, activityChecked, useCaseChecked, sequenceChecked, nameContains]
+    []
   );
 
   return (
