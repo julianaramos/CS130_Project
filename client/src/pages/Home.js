@@ -51,7 +51,9 @@ const Home = () => {
 
   useEffect(
     () => {
-      loadUML()
+      (async () => {
+        await loadUML();
+      })();
     },
     [loadUML, stateChecked, classChecked, activityChecked, useCaseChecked, sequenceChecked, nameContains]
   );
@@ -86,7 +88,7 @@ const Home = () => {
 
 const Filter = () => {
   const { stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML } = useContext(UserDesignContext);
-  const handleFormSubmit = loadUML();
+  const handleFormSubmit = loadUML;
   const handleResetClick = () => {
     setStateChecked(true);
     setClassChecked(true);

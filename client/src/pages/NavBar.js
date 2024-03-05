@@ -22,7 +22,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import SaveIcon from '@mui/icons-material/Save';
-import {Settings, Logout} from '@mui/icons-material';
+import { Logout } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -224,20 +224,20 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
         }
         else if(uml_id != null) // if we know what uml we are changing
         {
-          try{
-            const res = await axios.post('http://localhost:4000/update-uml', body);
+          try {
+            await axios.post('http://localhost:4000/update-uml', body);
           }
-          catch(error){}
+          catch(error) {}
         }
         setLoadingb(false);
     };
 
-    if(IndependentPageButtons==null){
+    if(IndependentPageButtons === null){
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}/>
         )
     }
-    else if(IndependentPageButtons=="QueryPage" && uid!=null){
+    else if (IndependentPageButtons === "QueryPage" && uid !== null) {
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
@@ -292,7 +292,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
             </Box>
         )
     }
-    else if(IndependentPageButtons=="QueryPage" && uid==null){
+    else if (IndependentPageButtons === "QueryPage" && uid === null) {
         return(
             <Box justifyContent={"center"} sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 <Typography fontSize={"1.5vmax"}>Log in to save your work</Typography>
