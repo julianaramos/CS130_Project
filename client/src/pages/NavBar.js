@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
-import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide} from '@mui/material';
+import {Box, Container, Toolbar, Tooltip, Menu, MenuItem, Button, Slide, DialogActions} from '@mui/material';
 import {IconButton,ListItemIcon} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/icons-material/AccountCircle';
@@ -13,9 +13,9 @@ import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { login, logout } from '../redux/user';
+import { logout } from '../redux/user';
 import { setUML, removeUML} from '../redux/uml';
-import { Navigate, useNavigate, useLocation} from 'react-router-dom';
+import { useNavigate, useLocation} from 'react-router-dom';
 import axios from 'axios';  
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -43,6 +43,7 @@ const UserMenu = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { uid } = useSelector((state) => state.user);
+    const [open, setOpen] = useState(false); 
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -50,6 +51,13 @@ const UserMenu = () => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
+    const handleCloseDialog = (event) => {
+        setOpen(false)
+    }
+    const handleOpenDialog = () => {
+        setOpen(true);
+      };
 
     function flogout() {
         dispatch(logout());
@@ -118,11 +126,19 @@ const UserMenu = () => {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                 >
-                    
                 <MenuItem onClick={handleDashboardClick}><ListItemIcon ><DashboardIcon/></ListItemIcon>Dashboard </MenuItem>
-                <MenuItem><ListItemIcon><Settings/></ListItemIcon>Settings </MenuItem>
                 <MenuItem onClick={flogout}><ListItemIcon><Logout/></ListItemIcon>Logout</MenuItem>
-                <MenuItem onClick={handleDeleteClick}><ListItemIcon><DeleteIcon/></ListItemIcon>Delete Account</MenuItem>
+                <MenuItem onClick={handleOpenDialog}><ListItemIcon><DeleteIcon/></ListItemIcon>Delete Account</MenuItem>
+                <Dialog onClose={handleCloseDialog} open={open} fullWidth         
+                    sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    }}>
+                    <DialogTitle>This will permanently delete your account</DialogTitle>
+                    <DialogActions>
+                        <Button onClick={handleDeleteClick}>Delete account</Button>
+                    </DialogActions>
+                </Dialog>
                 </Menu>
             </Box>
         )
@@ -132,16 +148,16 @@ const UserMenu = () => {
             
             <Box sx={{ flexGrow: 0 , display: 'flex'}}>
                 <Button
-                key="Log in"
+                key="Register"
                 onClick={handleSignUpClick}
-                sx={{ mr: 2, my: 2, color: 'white', display: 'block', fontWeight:600 }}
+                sx={{ my: 2, mr: 1, color: 'white', display: 'block', fontWeight:600, fontSize:'1.2vmax'}}
                 >
                 Register
                 </Button>
                 <Button
                 key="Log in"
                 onClick={handleLoginClick}
-                sx={{ my: 2, color: 'white', display: 'block', fontWeight:600 }}
+                sx={{ my: 2, color: 'white', display: 'block', fontWeight:600, fontSize:'1.2vmax'}}
                 >
                 Log In
                 </Button>
@@ -154,17 +170,11 @@ const UserMenu = () => {
 const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) =>{
     const {state} = useLocation();
 
-    //const [umlText, setUMLText] = useState(state ? state.content : '')
-    //const [data, setData] = useState({});
-    //const [feedback, setFeedback] = useState('');
-    //const [promptText, setPromptText] = useState('');
-    //const [diagram, setDiagram] = useState('');
     const { uid } = useSelector((state) => state.user);
     const {uml_id} = useSelector((state) => state.uml);
     const [nameText, setNameText] = useState(state && state.name ? state.name: 'untitled');
     const [privacy, setPrivacy] = useState(state && state.privacy ? state.privacy: 'public');
     const [descriptionText, setDescriptionText] = useState(state && state.description ? state.description: '');
-    //const [loaded, setLoaded] = useState(false);
     const dispatch = useDispatch();
 
     const [open, setOpen] = useState(false);    //description dialog button
@@ -194,7 +204,6 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
     };
 
     const handleSaveClick = async () => {
-        console.log("SACING");
         setLoadingb(true);
         const body = {
           uml_id : uml_id,
@@ -207,10 +216,8 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
         }
         if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
           try {
-            console.log(body);
             const res = await axios.post('http://localhost:4000/create-new-uml', body);
             dispatch(setUML(res.data));
-            console.log(res);
           }
           catch(error)
           {}
@@ -218,9 +225,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
         else if(uml_id != null) // if we know what uml we are changing
         {
           try{
-            console.log(body);
             const res = await axios.post('http://localhost:4000/update-uml', body);
-            console.log(res);
           }
           catch(error){}
         }
@@ -232,7 +237,7 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}/>
         )
     }
-    else if(IndependentPageButtons=="QueryPage"){
+    else if(IndependentPageButtons=="QueryPage" && uid!=null){
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
@@ -255,12 +260,10 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     }}>
                     <DialogTitle sx={{ my: "1rem"}}>UML Diagram Description</DialogTitle>
                     <TextField 
-                        
                         onChange={handleDescriptionChange}
                         value={descriptionText}
                         label="Description..."
                         multiline
-                        
                     />
                 </Dialog>
                 <ToggleButtonGroup sx={{ ml:'2rem', mr:'5rem'}}
@@ -289,6 +292,13 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
             </Box>
         )
     }
+    else if(IndependentPageButtons=="QueryPage" && uid==null){
+        return(
+            <Box justifyContent={"center"} sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                <Typography fontSize={"1.5vmax"}>Log in to save your work</Typography>
+            </Box>
+        )
+    }
 }
 
 const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
@@ -308,7 +318,7 @@ const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
                     <Button
                         variant='text'
                         onClick = {handleHomeClick}
-                        style={{ color:"white" , fontSize: '1.6rem', fontWeight: 650, letterSpacing:".2rem"}}
+                        style={{ color:"white" , fontSize: '2vmax', fontWeight: 650, letterSpacing:".2vmax"}}
                         > <AccountTreeIcon sx={{ mr:"1rem" }} />
                         UML Lab
                     </Button>      

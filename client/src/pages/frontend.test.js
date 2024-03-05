@@ -818,6 +818,9 @@ describe("NavBar Testing", () => {
     const deleteButton = await screen.findByText('Delete Account');
     fireEvent.click(deleteButton);
 
+    const confirmDelete = await screen.findByText('Delete account');
+    fireEvent.click(confirmDelete);
+
     await waitFor(() => {
       expect(axiosStub).toBeCalledWith("http://localhost:4000/delete-account", {"uid": "uid"});
       expect(store.getActions()).toEqual([{ type: 'user/logout', payload: undefined },  {type: 'uml/removeUML', payload: undefined }]);
@@ -851,6 +854,9 @@ describe("NavBar Testing", () => {
 
     const deleteButton = await screen.findByText('Delete Account');
     fireEvent.click(deleteButton);
+
+    const confirmDelete = await screen.findByText('Delete account');
+    fireEvent.click(confirmDelete);
 
     await waitFor(() => {
       expect(axiosStub).toBeCalledWith("http://localhost:4000/delete-google-account", {"uid": "uid"});

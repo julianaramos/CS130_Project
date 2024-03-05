@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-//import TextField from '@mui/material/TextField';
-//import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Masonry from '@mui/lab/Masonry';
@@ -18,7 +16,7 @@ import axios from 'axios';
 import Diagram_img from '../images/Not-Found.svg'
 import NavBar from './NavBar';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { setUML } from '../redux/uml';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -32,7 +30,6 @@ const UserDiagrams = () => {
     const { uid } = useSelector((state) => state.user);
 
     const handleEditClick = (event, UML) => {
-        console.log(UML);
         dispatch(setUML(UML.uml_id));
         navigate("/query", {state: UML});   
     }
@@ -66,7 +63,6 @@ const UserDiagrams = () => {
         }
         catch(error)
         {
-            console.log(error);
         }
     }
 
@@ -81,17 +77,13 @@ const UserDiagrams = () => {
                 setUserUML(res.data);
                 setLoaded(true);
               }
-              console.log(res);
             }
             catch(error)
-            {console.log(error);}
+            {}
         }
 
         if (!loaded){
-            console.log('loading');
             loadUML();
-            console.log('done');
-            console.log(userUML)
         }
     });
 

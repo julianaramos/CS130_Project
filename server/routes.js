@@ -7,7 +7,6 @@ const router = express.Router();
 require('dotenv').config({ path: './.env' });
 
 router.post('/test', async(req, res) => {
-    //console.log(req.body);
     res.send('Test route');
 });
 
@@ -64,7 +63,6 @@ router.post('/login', async (req, res) => {
     if(fields.password.length < 6){
         return res.status(400).send("Invalid password.")
     }
-    console.log(fields);
     try 
     {
         data = await firebase.auth().signInWithEmailAndPassword(fields.email, fields.password);
@@ -73,17 +71,6 @@ router.post('/login', async (req, res) => {
     catch (error) 
     {
         res.status(400).send(error);
-        // console.log("In route", error);
-        // console.error('Firebase Authentication Error:', error.code, error.message);
-        // let errorMessage = 'Invalid email or password';
-
-        // if (error.code === 'auth/user-not-found') {
-        //     errorMessage = 'User not found';
-        // } else if (error.code === 'auth/wrong-password') {
-        //     errorMessage = 'Wrong password';
-        // }
-
-        // res.status(400).send({ error: errorMessage });
     }
 });
 
@@ -166,8 +153,6 @@ router.post('/get-uml', async(req,res) => {
     uid = req.body.uid;
     uml_id = req.body.uml_id;
 
-    //console.log(req.body);
-
     var uml;
 
     try{
@@ -177,7 +162,6 @@ router.post('/get-uml', async(req,res) => {
             const umlDoc = await t.get(umlRef);
             uml = umlDoc.data();
         });
-        //console.log(uml);
         res.status(200).send(uml);
     }
     catch (error){
@@ -215,14 +199,11 @@ router.post('/get-all-uml', async(req,res) => {
             return false;
         }
 
-        //console.log(doc.content);
         const classPred = c && doc.content.includes("class");
         const statePred = s && doc.content.includes("[*]");
         const useCasePred = u && doc.content.includes("usecase");
         const activityPred = a && doc.content.includes("start\n");
         const sequencePred = seq && doc.content.includes("participant");
-
-        //console.log (classPred, statePred, useCasePred, activityPred);
 
         return classPred || statePred || useCasePred || activityPred || sequencePred;
     }
@@ -237,7 +218,6 @@ router.post('/get-all-uml', async(req,res) => {
         res.status(200).send(uml_collection);
     }
     catch (error){
-        //console.log(error)
         res.status(400).send(error)
     }
 
@@ -274,7 +254,6 @@ router.post('/create-new-uml', async(req, res) => {
         res.status(200).send(id);
     }
     catch (error){
-        //console.log(error);
         res.status(503).send("Could not create new uml, changes to db were not saved.")
     }
 });
@@ -407,7 +386,6 @@ router.post('/delete-account', async(req, res) => {
         res.status(200).send("Successly deleted account");
     }
     catch (error) {
-        console.log(error);
         res.status(400).send(error);
     }
 
@@ -435,7 +413,6 @@ router.post('/delete-google-account', async(req, res) => {
         res.status(200).send("Successly deleted account");
     }
     catch (error) {
-        console.log(error);
         res.status(400).send(error);
     }
 
