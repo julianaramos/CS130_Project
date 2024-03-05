@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
-import { TextField, Card, CardMedia, TextareaAutosize, CardContent } from '@mui/material';
+import { TextField, Card, CardMedia, TextareaAutosize, CardContent, IconButton } from '@mui/material';
 import './Query.css'
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
@@ -13,6 +13,7 @@ import Missing from '../images/Missing.svg';
 import SubmitIcon from '@mui/icons-material/ArrowUpward';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import CloseIcon from '@mui/icons-material/Close';
 
 const UmlInputBox = ({umlText, handleUMLChange}) => {    
     return (
@@ -47,13 +48,14 @@ const Diagram = ({image}) => {
   );
 };
 
-const Prompt = ({handlePromptChange, promptText}) => {
+const Prompt = ({handlePromptChange, promptText, promptType, error}) => {
   return (
     <TextField 
       onChange={handlePromptChange}
       value={promptText}
       fullWidth
-      label="Your Prompt"
+      label={"Your " + promptType.charAt(0).toUpperCase() + promptType.slice(1)}
+      error={error}
     />
   );
 };
@@ -70,8 +72,12 @@ const Query = () => {
   const [examinerResponse, setExaminerResponse] = useState('');
   const [prompttoggle, setPromptToggle] = useState(state && state.prompttoggle ? state.prompttoggle: 'prompt');
   const [oneTimeLoad, setOneTimeLoad] = useState(state && state.oneTimeLoad ? state.oneTimeLoad : false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [alertText, setAlertText] = useState('');
+  const [openDiagramSnackbar, setOpenDiagramSnackbar] = useState(false);
+  const [diagramAlertText, setDiagramAlertText] = useState('');
+  const [openUMLResponseSnackbar, setOpenUMLResponseSnackbar] = useState(false);
+  const [umlResponseAlertText, setUMLResponseAlertText] = useState('');
+  const [openUMLErrorSnackbar, setOpenUMLErrorSnackbar] = useState(false);
+  const [umlErrorAlertText, setUMLErrorAlertText] = useState('');
 
   const handleUMLChange = (event) => {
     setUMLText(event.target.value);
@@ -85,23 +91,34 @@ const Query = () => {
       query: promptText
     };
 
-    if (prompttoggle == 'prompt') {
+    if (prompttoggle === 'prompt') {
       setGeneratorResponded(false);
-      const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
-      console.log('done');
-      if (res.status == 200) {
+      try {
+        const res = await axios.post('http://localhost:4000/query-assistant-code-generator', body);
         setUMLText(res.data.uml_code);
-        setGeneratorResponded(true);
         setDiagramLoaded(false);
+      }
+      catch (error) {
+        setUMLErrorAlertText('Prompt failed with status: ' + error.response.data.type);
+        setOpenUMLErrorSnackbar(true);
+      }
+      finally {
+        setGeneratorResponded(true);
       }
     }
     else {
       setExaminerResponded(false);
-      const res = await axios.post('http://localhost:4000/query-assistant-code-examiner', body);
-      if (res.status == 200) {
-        setExaminerResponded(true);
-        console.log(res.data);
+      try {
+        const res = await axios.post('http://localhost:4000/query-assistant-code-examiner', body);
         setExaminerResponse(res.data);
+        setOpenUMLResponseSnackbar(true);
+      }
+      catch (error) {
+        setUMLErrorAlertText('Query failed with status: ' + error.response.data.type);
+        setOpenUMLErrorSnackbar(true);
+      }
+      finally {
+        setExaminerResponded(true);
       }
     }
   };
@@ -126,22 +143,22 @@ const Query = () => {
       const res = await axios.post('http://localhost:4000/fetch-plant-uml', plantBody);
       setDiagram(res.data);
       setDiagramLoaded(true);
-      setOpenSnackbar(false);
+      setOpenDiagramSnackbar(false);
     }
     catch(error) {
       switch (error.response.data.type) {
         case 'InvalidUMLCodeError':
-          setAlertText('Invalid UML Code');
+          setDiagramAlertText('Invalid UML Code');
           break;
         case 'TimeoutError':
-          setAlertText('PlantUML Server Timeout');
+          setDiagramAlertText('PlantUML Server Timeout');
           break;
         case 'ServerError':
-          setAlertText('PlantUML Server Unavailable');
+          setDiagramAlertText('PlantUML Server Unavailable');
         default:
-          setAlertText('Unknown PlantUML Server Error');
+          setDiagramAlertText('Unknown PlantUML Server Error');
       }
-      setOpenSnackbar(true);
+      setOpenDiagramSnackbar(true);
     }      
   };
 
@@ -158,26 +175,53 @@ const Query = () => {
     <div>
       <NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram} />
       <Grid container direction='row' className='query-container' spacing={2}>
-        <Grid item className='uml-wrapper' xs = {6}>
+        <Grid item className='uml-wrapper' xs = {6} sx={{ position: 'relative' }}>
           <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box' />
+          <Snackbar
+            open={openUMLResponseSnackbar}
+            sx={{ position: 'absolute'}}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            message={examinerResponse}
+            action={
+              <IconButton
+                size='small'
+                aria-label='close'
+                color='inherit'
+                onClick={() => setOpenUMLResponseSnackbar(false)}
+              >
+                <CloseIcon fontSize='small' />
+              </IconButton>
+            }
+          >
+          </Snackbar>
+          <Snackbar
+            open={openUMLErrorSnackbar}
+            onClose={(_, reason) => setOpenUMLErrorSnackbar(false)}
+            sx={{ position: 'absolute'}}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          >
+            <Alert onClose={() => setOpenUMLErrorSnackbar(false)} severity="error" sx={{ width: '100%' }}>
+              {umlErrorAlertText}
+            </Alert>
+          </Snackbar>
         </Grid>
         <Grid item className='diagram-wrapper' xs = {6} sx={{ position: 'relative' }}>
           <Diagram image={diagram} />
           <Snackbar
-            open={openSnackbar}
-            onClose={() => setOpenSnackbar(false)}
+            open={openDiagramSnackbar}
+            onClose={() => setOpenDiagramSnackbar(false)}
             sx={{ position: 'absolute'}}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
-            <Alert onClose={() => setOpenSnackbar(false)} severity="error" sx={{ width: '100%' }}>
-              {alertText}
+            <Alert onClose={() => setOpenDiagramSnackbar(false)} severity="error" sx={{ width: '100%' }}>
+              {diagramAlertText}
             </Alert>
           </Snackbar>
         </Grid>
       </Grid>
       <Grid container direction='row' spacing={2} >
         <Grid item xs={10} mt={2}>
-          <Prompt handlePromptChange={handlePromptChange} promptText={promptText} />
+          <Prompt handlePromptChange={handlePromptChange} promptText={promptText} promptType={prompttoggle} error={openUMLErrorSnackbar} />
         </Grid>
         <Grid item xs={2} >
           <Grid container item direction='column' rowSpacing={1}>
