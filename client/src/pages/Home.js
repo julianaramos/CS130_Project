@@ -55,6 +55,8 @@ const Home = () => {
         await loadUML();
       })();
     },
+    // we purposefully want to run this only once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -214,7 +216,7 @@ const UserGenerations = () => {
 
   const handleCardClick = (event, UML) => {
     navigate("/query", {state: UML});
-  }
+  };
   const columns = isSmallScreen ? 1 : 3;
 
   if (!loaded) {
