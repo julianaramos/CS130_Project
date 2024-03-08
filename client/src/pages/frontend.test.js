@@ -377,8 +377,33 @@ describe("Query Testing", () => {
       await waitFor(() => {
         expect(diagramBox.src).toContain('diagram');
       });
-
   });
+
+  it("should call plant uml visualizer after editing uml text box and display the error", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      status: 500,
+      response: { data: { type: "SomeError" } }
+    }));
+
+    render(
+        <Provider store={store}>
+          <Query />
+        </Provider>
+      );
+
+    const umlBox = await screen.findByTestId("uml-box")
+    fireEvent.change(umlBox, { target: { value: "uml_code" } });
+
+    expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toBeCalledWith("http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
+    });
+
+    expect(await screen.findByText('Unknown PlantUML Server Error')).toBeInTheDocument();
+});
 
   it("should query ai with info from prompt box and uml code and then display & visualize the generated code", async () => {
     axiosStub.mockImplementationOnce(() =>
@@ -446,6 +471,57 @@ describe("Query Testing", () => {
     await waitFor(() => {
       expect(diagramBox.src).toContain('final_diagram');
     });
+  });
+
+  it("should query ai with info from prompt box and uml code and then display error", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "first_diagram"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "first_diagram_refreshed"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      status: 500,
+      response : { data: {type: "SomeErrorStatus"} }
+    }));
+
+    render(
+        <Provider store={store}>
+          <Query />
+        </Provider>
+      );
+
+    const umlBox = await screen.findByTestId("uml-box")
+    fireEvent.change(umlBox, { target: { value: "uml_code" } });
+
+    expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
+    });
+
+    const promptBox = await screen.findByLabelText("Your Prompt");
+    fireEvent.change(promptBox, { target: { value: "prompt" } });
+
+    expect(await screen.findByDisplayValue('prompt')).toBeInTheDocument();
+
+    const submitButton = await screen.findByText("Submit");
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(3); // 1 for after code is entered, 1 after prompt is entered, 1 after submit
+      expect(axiosStub).toHaveBeenNthCalledWith(3, "http://localhost:4000/query-assistant-code-generator", {uml_code: "uml_code", prompt: "prompt", query: "prompt"});
+    });
+
+    expect(await screen.findByText('Prompt failed with status: SomeErrorStatus')).toBeInTheDocument();
   });
 
   it("should create new uml if this is a new document and set redux state to the newly generated uml_id", async () => {
@@ -629,13 +705,7 @@ describe("Query Testing", () => {
     axiosStub.mockImplementationOnce(() =>
     Promise.resolve({
       status: 200,
-      data: {uml_code: "generated_code"}
-    }));
-
-    axiosStub.mockImplementationOnce(() =>
-    Promise.resolve({
-      status: 200,
-      data: "final_diagram"
+      data: "query_response"
     }));
 
     render(
@@ -670,7 +740,61 @@ describe("Query Testing", () => {
       expect(axiosStub).toHaveBeenNthCalledWith(3, 'http://localhost:4000/query-assistant-code-examiner', {uml_code: "uml_code", prompt: "prompt", query: "prompt"});
     });
 
-    // TODO Do something with output
+    expect(await screen.findByText('query_response')).toBeInTheDocument();
+  });
+
+  it("should ask for assistance from ai when button is toggled and display error to screen", async () => {
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "first_diagram"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.resolve({
+      status: 200,
+      data: "first_diagram_refreshed"
+    }));
+
+    axiosStub.mockImplementationOnce(() =>
+    Promise.reject({
+      status: 500,
+      response: { data: { type: "SomeErrorStatus" } }
+    }));
+
+    render(
+        <Provider store={store}>
+          <Query />
+        </Provider>
+      );
+
+    const umlBox = await screen.findByTestId("uml-box")
+    fireEvent.change(umlBox, { target: { value: "uml_code" } });
+
+    expect(await screen.findByDisplayValue('uml_code')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(1);
+      expect(axiosStub).toHaveBeenNthCalledWith(1, "http://localhost:4000/fetch-plant-uml", {uml_code: "uml_code", response_type: 'SVG', return_as_uri: true});
+    });
+
+    const promptBox = await screen.findByLabelText("Your Prompt");
+    fireEvent.change(promptBox, { target: { value: "prompt" } });
+
+    expect(await screen.findByDisplayValue('prompt')).toBeInTheDocument();
+
+    const toggleButton = await screen.findByLabelText("Query");
+    fireEvent.click(toggleButton);
+
+    const submitButton = await screen.findByText("Submit");
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(axiosStub).toHaveBeenCalledTimes(3); // 1 for after code is entered, 1 after prompt is entered, 1 after submit
+      expect(axiosStub).toHaveBeenNthCalledWith(3, 'http://localhost:4000/query-assistant-code-examiner', {uml_code: "uml_code", prompt: "prompt", query: "prompt"});
+    });
+
+    expect(await screen.findByText('Query failed with status: SomeErrorStatus')).toBeInTheDocument();
   });
 });
 

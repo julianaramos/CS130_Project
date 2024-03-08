@@ -22,7 +22,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import SaveIcon from '@mui/icons-material/Save';
-import {Settings, Logout} from '@mui/icons-material';
+import { Logout } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -37,7 +37,8 @@ function HideOnScroll(props) {
         {children}
       </Slide>
     );
-}
+};
+
 const UserMenu = () => {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const navigate = useNavigate();
@@ -53,8 +54,8 @@ const UserMenu = () => {
     };
 
     const handleCloseDialog = (event) => {
-        setOpen(false)
-    }
+        setOpen(false);
+    };
     const handleOpenDialog = () => {
         setOpen(true);
       };
@@ -62,12 +63,12 @@ const UserMenu = () => {
     function flogout() {
         dispatch(logout());
         firebase.auth().signOut();
-    }
+    };
 
     const handleDashboardClick = () => {
         dispatch(removeUML());
         navigate("/dashboard");
-    }
+    };
 
     const handleDeleteClick = async () => {
         const body = {
@@ -91,23 +92,24 @@ const UserMenu = () => {
         dispatch(removeUML());
         firebase.auth().signOut();
         window.location.href = '/'; //need to refresh page
-    }
+    };
+
     const handleLoginClick = () => {
         dispatch(removeUML());
         navigate("/login");
-    }
+    };
 
     const handleSignUpClick = () => {
         dispatch(removeUML());
         navigate("/signup");
-    }
+    };
 
     if (uid !== null){
         return (
             <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="Open options">
                     <IconButton data-testid = 'usericon' onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar fontSize ="large" sx={{color: '#FFFFFF'}}/>
+                        <Avatar fontSize ="large" sx={{color: '#FFFFFF'}} />
                     </IconButton>
                 </Tooltip>
                 <Menu
@@ -141,9 +143,9 @@ const UserMenu = () => {
                 </Dialog>
                 </Menu>
             </Box>
-        )
+        );
     }
-    else{
+    else {
         return (
             
             <Box sx={{ flexGrow: 0 , display: 'flex'}}>
@@ -162,16 +164,15 @@ const UserMenu = () => {
                 Log In
                 </Button>
             </Box>
-        )
+        );
     }
-    
-}
+};
 
-const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) =>{
+const PageButtons = ({ IndependentPageButtons=null, umlText=null, diagram=null }) => {
     const {state} = useLocation();
 
     const { uid } = useSelector((state) => state.user);
-    const {uml_id} = useSelector((state) => state.uml);
+    const { uml_id } = useSelector((state) => state.uml);
     const [nameText, setNameText] = useState(state && state.name ? state.name: 'untitled');
     const [privacy, setPrivacy] = useState(state && state.privacy ? state.privacy: 'public');
     const [descriptionText, setDescriptionText] = useState(state && state.description ? state.description: '');
@@ -182,11 +183,11 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
   
     const handleNameChange = (event) => {
         setNameText(event.target.value);
-    }
+    };
 
     const handleDescriptionChange = (event) => {
         setDescriptionText(event.target.value);
-    }
+    };
   
     const handleClickDescription = () => {
       setOpen(true);
@@ -212,8 +213,9 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
           privacy: privacy,
           name: nameText,
           description: descriptionText,
-          diagram: diagram,
-        }
+          diagram: diagram
+        };
+
         if (uid != null && uml_id == null) { // if we are logged in but this is a new diagram
           try {
             const res = await axios.post('http://localhost:4000/create-new-uml', body);
@@ -224,20 +226,20 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
         }
         else if(uml_id != null) // if we know what uml we are changing
         {
-          try{
-            const res = await axios.post('http://localhost:4000/update-uml', body);
+          try {
+            await axios.post('http://localhost:4000/update-uml', body);
           }
-          catch(error){}
+          catch(error) {}
         }
         setLoadingb(false);
     };
 
-    if(IndependentPageButtons==null){
+    if(IndependentPageButtons === null){
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}/>
-        )
+        );
     }
-    else if(IndependentPageButtons=="QueryPage" && uid!=null){
+    else if (IndependentPageButtons === "QueryPage" && uid !== null) {
         return(
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' ,lg:'flex'} }}>
                 <TextField 
@@ -280,7 +282,6 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     </ToggleButton></Tooltip>
                 </ToggleButtonGroup>
                 <LoadingButton
-                    sx={{ mx:'4rem'}}
                     onClick={handleSaveClick}
                     loading={loadingb}
                     loadingPosition="start"
@@ -290,20 +291,20 @@ const PageButtons = ({IndependentPageButtons=null, umlText=null, diagram=null}) 
                     <span>Save</span>
                 </LoadingButton>
             </Box>
-        )
+        );
     }
-    else if(IndependentPageButtons=="QueryPage" && uid==null){
+    else if (IndependentPageButtons === "QueryPage" && uid === null) {
         return(
             <Box justifyContent={"center"} sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 <Typography fontSize={"1.5vmax"}>Log in to save your work</Typography>
             </Box>
-        )
+        );
     }
-}
+};
 
 const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     
     const handleHomeClick = () => {
         dispatch(removeUML());
@@ -318,16 +319,17 @@ const NavBar = ({IndependentPageButtons=null ,umlText=null, diagram=null}) => {
                     <Button
                         variant='text'
                         onClick = {handleHomeClick}
-                        style={{ color:"white" , fontSize: '2vmax', fontWeight: 650, letterSpacing:".2vmax"}}
+                        style={{ color: "white" , fontSize: '1.3vmax', fontWeight: 650, letterSpacing: ".2vmax" }}
                         > <AccountTreeIcon sx={{ mr:"1rem" }} />
                         UML Lab
-                    </Button>      
-                    <PageButtons IndependentPageButtons={IndependentPageButtons} umlText={umlText} diagram={diagram}/>
-                    <UserMenu/>
+                    </Button>
+                    <PageButtons IndependentPageButtons={IndependentPageButtons} umlText={umlText} diagram={diagram} />
+                    <UserMenu />
                 </Toolbar>
                 </Container>
             </AppBar>
         </HideOnScroll>
     );
-}
+};
+
 export default NavBar;

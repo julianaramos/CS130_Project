@@ -200,9 +200,9 @@ router.post('/get-all-uml', async(req,res) => {
         }
 
         const classPred = c && doc.content.includes("class");
-        const statePred = s && doc.content.includes("[*]");
+        const statePred = s && (doc.content.includes("[*]") || doc.content.includes("(*)"));
         const useCasePred = u && doc.content.includes("usecase");
-        const activityPred = a && doc.content.includes("start\n");
+        const activityPred = a && (doc.content.includes("start\n") || doc.content.includes(":Start;"));
         const sequencePred = seq && doc.content.includes("participant");
 
         return classPred || statePred || useCasePred || activityPred || sequencePred;
@@ -397,7 +397,7 @@ router.post('/delete-google-account', async(req, res) => {
 
     try {
         await firebase.firestore().runTransaction(async (t) => {
-
+            
             // Get the savedUML of a user
             const userRef = firebase.firestore().collection("User").doc(uid);
             const userDoc = await t.get(userRef);

@@ -1,16 +1,14 @@
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Masonry from '@mui/lab/Masonry';
-import { Accordion, AccordionSummary, AccordionDetails, Checkbox, Grid, ButtonBase, CardActionArea, useMediaQuery } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Checkbox, Grid, CardActionArea, useMediaQuery } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
-import './Query.css'
+import './Query.css';
 import NavBar from './NavBar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -26,68 +24,73 @@ const Home = () => {
   const [sequenceChecked, setSequenceChecked] = useState(true);
   const [nameContains, setNameContains] = useState('');
   const isSmallScreen = useMediaQuery('(max-width:600px)');
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState(false);
   const [userUML, setUserUML] = useState([]);
 
-  async function loadUML() {
-    setLoaded(false);
-    const body = {
-        s: stateChecked,
-        c: classChecked,
-        a: activityChecked,
-        u: useCaseChecked,
-        seq: sequenceChecked,
-        nameContains: nameContains
-    }
-    try {
-      const res = await axios.post('http://localhost:4000/get-all-uml', body);
-      if (res.status == 200){
+  const loadUML = useCallback(
+    async() => {
+      setLoaded(false);
+      const body = {
+          s: stateChecked,
+          c: classChecked,
+          a: activityChecked,
+          u: useCaseChecked,
+          seq: sequenceChecked,
+          nameContains: nameContains
+      };
+      try {
+        const res = await axios.post('http://localhost:4000/get-all-uml', body);
         setLoaded(true);
         setUserUML(res.data);
       }
-    }
-    catch(error)
-    {}
-    }
+      catch(error) {
+      }
+    },
+    [stateChecked, classChecked, activityChecked, useCaseChecked, sequenceChecked, nameContains]
+  );
 
-    useEffect(() => {
-      loadUML();
-    }, []);
+  useEffect(
+    () => {
+      (async () => {
+        await loadUML();
+      })();
+    },
+    // we purposefully want to run this only once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-    return (
-        <UserDesignContext.Provider
-            value= {{
-                stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
-            }}>
-            <NavBar/>
-            <Container
-                id="user-designs"
-                sx={{
-                    pt: "5rem",
-                    pb: "5rem",
-                    position: 'relative',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: { xs: 3, sm: 6 },
-                }}
-                >
-                <PromptBar/>
-                <GenText/>
-                <Filter/>
-                <UserGenerations/>
-            </Container>
-        </UserDesignContext.Provider>
-    );
-}
+  return (
+    <UserDesignContext.Provider
+      value= {{
+          stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
+      }}
+    >
+      <NavBar />
+      <Container
+        id="user-designs"
+        sx={{
+            pt: "5rem",
+            pb: "5rem",
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: { xs: 3, sm: 6 },
+        }}
+      >
+        <PromptBar />
+        <GenText />
+        <Filter />
+        <UserGenerations />
+      </Container>
+    </UserDesignContext.Provider>
+  );
+};
 
 const Filter = () => {
   const { stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML } = useContext(UserDesignContext);
-
-  const handleFormSubmit = () => {
-    loadUML();
-  }
-
+  const handleFormSubmit = loadUML;
   const handleResetClick = () => {
     setStateChecked(true);
     setClassChecked(true);
@@ -95,8 +98,7 @@ const Filter = () => {
     setUseCaseChecked(true);
     setSequenceChecked(true);
     setNameContains('');
-  }
-
+  };
 
   return (
     <Accordion>
@@ -152,108 +154,105 @@ const Filter = () => {
 };
 
 const PromptBar = () => {
-    const [prompt, setPrompt] = useState('');
-    const navigate = useNavigate()
+  const [prompt, setPrompt] = useState('');
+  const navigate = useNavigate();
 
-    return(
-        <Box
-        sx={{
+  return(
+    <Box
+      sx={{
         width: .7,
         textAlign: 'center',
         p: "5rem",
-        }}
+      }}
     >
-        <Typography component="h1" variant="h3" color="text.primary" marginBottom="1rem">
+      <Typography component="h1" variant="h3" color="text.primary" marginBottom="1rem">
         UML Lab
-        </Typography>
-        <TextField
-            margin="dense" 
-            id="placeholder"
-            hiddenLabel
-            fullWidth
-            multiline
-            size="small"
-            variant="outlined"
-            label= "unload your ideas..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault(); // Prevent the default behavior (inserting a newline)
-                  navigate("/query", {state: {prompt: prompt, oneTimeLoad: true}});
-                }
-              }}
-        />
+      </Typography>
+      <TextField
+          margin="dense" 
+          id="placeholder"
+          hiddenLabel
+          fullWidth
+          multiline
+          size="small"
+          variant="outlined"
+          label= "unload your ideas..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent the default behavior (inserting a newline)
+                navigate("/query", {state: {prompt: prompt, oneTimeLoad: true}});
+              }
+          }}
+      />
     </Box>
-    );
-}
+  );
+};
 
 const GenText =() => {
-    return (
-        <Box
-        sx={{
-        textAlign: 'center',
-        my:"1.5rem",
-        }}
-    >
-        <Typography component="h4" variant="h4" color="text.primary">
-            User's UML Generations
-        </Typography>
-        <Typography variant="body2" color="text.secondary"  my=".5rem">
-            Discover what others have created and unlock your potential
-        </Typography>
-    </Box>
-    );
-}
+  return (
+      <Box
+      sx={{
+      textAlign: 'center',
+      my:"1.5rem",
+      }}
+  >
+      <Typography component="h4" variant="h4" color="text.primary">
+          User's UML Generations
+      </Typography>
+      <Typography variant="body2" color="text.secondary"  my=".5rem">
+          Discover what others have created and unlock your potential
+      </Typography>
+  </Box>
+  );
+};
 
 const UserGenerations = () => {
-    const { userUML, loaded } = useContext(UserDesignContext);
-    const isSmallScreen = useMediaQuery('(max-width:600px)');
+  const { userUML, loaded } = useContext(UserDesignContext);
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
 
-    const navigate = useNavigate()
-    const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const handleCardClick = (event, UML) => {
+    navigate("/query", {state: UML});
+  };
+  const columns = isSmallScreen ? 1 : 3;
 
-    const handleCardClick = (event, UML) => {
-        navigate("/query", {state: UML});
-    }
-    const columns = isSmallScreen ? 1 : 3;
+  if (!loaded) {
+    return (<div className="loaderlong" />);
+  }
 
-    if (!loaded){
-        return (<div className="loaderlong"></div>)
-    }
-
-    return(
-        <Masonry columns={columns} spacing={2}>
-            {userUML.map((UML, index) => (
-            <Card key={index} sx={{ p: 1 }}>
-                <CardActionArea
-                    onClick={event => handleCardClick(event, UML)}>
-                    <CardMedia 
-                        sx={{ height: 300, width: '100%', objectFit: "contain"}}
-                        component="img"
-                        image={UML.diagram}
-                        title='UML Diagram' 
-                    /> 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            pr: 2,
-                        }}
-                    >
-                        <CardHeader
-                            title={UML.name}
-                            subheader={UML.description}
-                        />
-                    </Box>
-                </CardActionArea>
-            </Card>
-            ))}
-        </Masonry>
-    );
-
-}
+  return(
+    <Masonry columns={columns} spacing={2}>
+        {userUML.map((UML, index) => (
+          <Card key={index} sx={{ p: 1 }}>
+            <CardActionArea
+                onClick={event => handleCardClick(event, UML)}>
+                <CardMedia 
+                    sx={{ height: 300, width: '100%', objectFit: "contain"}}
+                    component="img"
+                    image={UML.diagram}
+                    title='UML Diagram' 
+                /> 
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        pr: 2,
+                    }}
+                >
+                  <CardHeader
+                      title={UML.name}
+                      subheader={UML.description}
+                  />
+                </Box>
+            </CardActionArea>
+          </Card>
+      ))}
+    </Masonry>
+  );
+};
 
 export default Home;
