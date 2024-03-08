@@ -17,15 +17,15 @@ import CloseIcon from '@mui/icons-material/Close';
 const UmlInputBox = ({umlText, handleUMLChange}) => {
     return (
       <Card className='uml-wrapper'>
-        <CardContent>
+        <CardContent style={{ paddingTop: '1.5vh'}}>
           <TextareaAutosize
             className='uml-box'
             variant="outlined"
             placeholder="Enter a search term"
             value={umlText}
-            rows = {33}
-            minRows= {33}
-            maxRows= {33}
+            rows = {24}
+            minRows= {24}
+            maxRows= {24}
             onChange={handleUMLChange}
             data-testid = 'uml-box'
           />
@@ -48,7 +48,7 @@ const Diagram = ({image}) => {
   return (
     <Card className='diagram-card'>
       <CardMedia
-        sx={{ height: '78vh', width: '49vw', objectFit: "contain" }}
+        sx={{ height: '73vh', width: '49vw', objectFit: "contain" }}
         component="img"
         alt="UML Diagram"
         src={displayImage}
@@ -193,7 +193,7 @@ const Query = () => {
     <div>
       <NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram} />
       <Grid container direction='row' className='query-container' spacing={2}>
-        <Grid item className='uml-wrapper' xs = {6} sx={{ position: 'relative' }}>
+        <Grid item className='uml-wrapper' xs = {6} mt={2} sx={{ position: 'relative' }}>
           <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box' />
           <Snackbar
             open={openUMLResponseSnackbar}
@@ -223,7 +223,7 @@ const Query = () => {
             </Alert>
           </Snackbar>
         </Grid>
-        <Grid item className='diagram-wrapper' xs = {6} sx={{ position: 'relative' }}>
+        <Grid item className='diagram-wrapper' xs={6} mt={2} sx={{ position: 'relative' }}>
           <Diagram image={diagram} />
           <Snackbar
             open={openDiagramSnackbar}
@@ -237,39 +237,35 @@ const Query = () => {
           </Snackbar>
         </Grid>
       </Grid>
-      <Grid container direction='row' spacing={2} >
-        <Grid item xs={10} mt={2}>
+      <Grid container direction='row' spacing={1}>
+        <Grid item xs={9} mt={1.5}>
           <Prompt handlePromptChange={handlePromptChange} promptText={promptText} promptType={prompttoggle} error={openUMLErrorSnackbar} />
         </Grid>
-        <Grid item xs={2} >
-          <Grid container item direction='column' rowSpacing={1}>
-            <Grid item >
-              <ToggleButtonGroup
-                value={prompttoggle}
-                exclusive
-                onChange={handlePromptClick}
-                aria-label="UML Privacy"
-              >
-                <ToggleButton value="prompt" aria-label="Prompt">
-                    Prompt
-                </ToggleButton>
-                <ToggleButton value="query" aria-label="Query">
-                    Query
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Grid>
-            <Grid item >
-              <LoadingButton
-                onClick={handleSubmission}
-                loading={(!generatorResponded || !examinerResponded)}
-                loadingPosition="start"
-                startIcon={<SubmitIcon />}
-                variant="contained"
-              >
-                <span>Submit</span>
-              </LoadingButton>
-            </Grid>
-          </Grid>
+        <Grid item xs={1.2} mt={2.5}>
+          <LoadingButton
+            onClick={handleSubmission}
+            loading={(!generatorResponded || !examinerResponded)}
+            loadingPosition="start"
+            startIcon={<SubmitIcon />}
+            variant="contained"
+          >
+            <span>Submit</span>
+          </LoadingButton>
+        </Grid>
+        <Grid item xs={1} mt={2}>
+          <ToggleButtonGroup
+            value={prompttoggle}
+            exclusive
+            onChange={handlePromptClick}
+            aria-label="UML Privacy"
+          >
+            <ToggleButton value="prompt" aria-label="Prompt">
+                Prompt
+            </ToggleButton>
+            <ToggleButton value="query" aria-label="Query">
+                Query
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Grid>
       </Grid>
     </div>
