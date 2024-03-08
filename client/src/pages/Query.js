@@ -23,9 +23,9 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             variant="outlined"
             placeholder="Enter a search term"
             value={umlText}
-            rows = {24}
-            minRows= {24}
-            maxRows= {24}
+            rows = {35}
+            minRows= {35}
+            maxRows= {35}
             onChange={handleUMLChange}
             data-testid = 'uml-box'
           />
