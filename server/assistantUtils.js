@@ -1,7 +1,21 @@
+/**
+ * @module AssistantUtils
+ * @description This module provides utility functions for interacting with OpenAI assistants.
+ */
+
 const OpenAI = require("openai");
 require('dotenv').config({ path: './.env' });
 
+
 const AssistantUtils = {
+    /**
+     * Prompts OpenAI assistant to respond
+     * @function
+     * @memberof module:AssistantUtils
+     * @param {string} assistant_id - ID of the OpenAI assistant to call
+     * @param {string} prompt - message to send to assistant
+     * @returns {Promise<string>} - response message of assistant
+     */
     async prompt_assistant(assistant_id, prompt) {
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
@@ -39,6 +53,16 @@ const AssistantUtils = {
         return messages.data.filter(message => message.role === 'assistant').pop().content[0].text.value;
     },
     
+    /**
+     * Wrapper for {@link module:AssistantUtils.prompt_assistant}, which handles error results of prompting the assistant, including a timeout
+     * @function
+     * @memberof module:AssistantUtils
+     * @param {string} assistant_id - ID of the OpenAI assistant to call
+     * @param {string} prompt - message to send to assistant
+     * @param {string} timeout - time in milliseconds to wait for assistant response before timing out
+     * @returns {Promise<string>} - response message of the assistant
+     * @throws {{status: int, to_send: {type: string, message: string}}} - HTTP error status, along with HTTP error response to send
+     */
     async handle_assistant_call(assistant_id, prompt, timeout) {
         let assistant_response, timeout_id;
     
