@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/pages/Home.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/pages/Home.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module client/home
  * @description Provides the Home component class
  */
@@ -70,13 +98,13 @@ const Home = () => {
   );
 
   return (
-    <UserDesignContext.Provider
+    &lt;UserDesignContext.Provider
       value= {{
           stateChecked, setStateChecked, classChecked, setClassChecked, activityChecked, setActivityChecked, useCaseChecked, setUseCaseChecked, sequenceChecked, setSequenceChecked, nameContains, setNameContains, loadUML, userUML, isSmallScreen, loaded
       }}
     >
-      <NavBar />
-      <Container
+      &lt;NavBar />
+      &lt;Container
         id="user-designs"
         sx={{
             pt: "5rem",
@@ -88,12 +116,12 @@ const Home = () => {
             gap: { xs: 3, sm: 6 },
         }}
       >
-        <PromptBar />
-        <GenText />
-        <Filter />
-        <UserGenerations />
-      </Container>
-    </UserDesignContext.Provider>
+        &lt;PromptBar />
+        &lt;GenText />
+        &lt;Filter />
+        &lt;UserGenerations />
+      &lt;/Container>
+    &lt;/UserDesignContext.Provider>
   );
 };
 
@@ -114,55 +142,55 @@ const Filter = () => {
   };
 
   return (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+    &lt;Accordion>
+      &lt;AccordionSummary expandIcon={&lt;ExpandMoreIcon />}>
         Filter
-      </AccordionSummary>
-      <AccordionDetails>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Checkbox data-testid="state" checked={stateChecked} onChange={() => setStateChecked(!stateChecked)} />
+      &lt;/AccordionSummary>
+      &lt;AccordionDetails>
+        &lt;Grid container spacing={2}>
+          &lt;Grid item xs={12}>
+            &lt;Checkbox data-testid="state" checked={stateChecked} onChange={() => setStateChecked(!stateChecked)} />
             State
-          </Grid>
-          <Grid item xs={12}>
-            <Checkbox checked={classChecked} onChange={() => setClassChecked(!classChecked)} />
+          &lt;/Grid>
+          &lt;Grid item xs={12}>
+            &lt;Checkbox checked={classChecked} onChange={() => setClassChecked(!classChecked)} />
             Class
-          </Grid>
-          <Grid item xs={12}>
-            <Checkbox checked={activityChecked} onChange={() => setActivityChecked(!activityChecked)} />
+          &lt;/Grid>
+          &lt;Grid item xs={12}>
+            &lt;Checkbox checked={activityChecked} onChange={() => setActivityChecked(!activityChecked)} />
             Activity
-          </Grid>
-          <Grid item xs={12}>
-            <Checkbox checked={useCaseChecked} onChange={() => setUseCaseChecked(!useCaseChecked)} />
+          &lt;/Grid>
+          &lt;Grid item xs={12}>
+            &lt;Checkbox checked={useCaseChecked} onChange={() => setUseCaseChecked(!useCaseChecked)} />
             Use Case
-          </Grid>
-          <Grid item xs={12}>
-            <Checkbox checked={sequenceChecked} onChange={() => setSequenceChecked(!sequenceChecked)} />
+          &lt;/Grid>
+          &lt;Grid item xs={12}>
+            &lt;Checkbox checked={sequenceChecked} onChange={() => setSequenceChecked(!sequenceChecked)} />
             Sequence
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
+          &lt;/Grid>
+          &lt;Grid item xs={12}>
+            &lt;TextField
               label="Name Contains"
               value={nameContains}
               onChange={(e) => setNameContains(e.target.value)}
               fullWidth
             />
-          </Grid>
-          <Grid item container direction='row' xs={12} spacing={1}>
-            <Grid item>
-              <button variant="contained" color="primary" onClick={handleFormSubmit}>
+          &lt;/Grid>
+          &lt;Grid item container direction='row' xs={12} spacing={1}>
+            &lt;Grid item>
+              &lt;button variant="contained" color="primary" onClick={handleFormSubmit}>
                   Apply
-              </button>
-            </Grid>
-            <Grid item>
-              <button variant="contained" color="primary" onClick={handleResetClick}>
+              &lt;/button>
+            &lt;/Grid>
+            &lt;Grid item>
+              &lt;button variant="contained" color="primary" onClick={handleResetClick}>
                   Reset
-              </button>
-            </Grid>
-          </Grid>
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
+              &lt;/button>
+            &lt;/Grid>
+          &lt;/Grid>
+        &lt;/Grid>
+      &lt;/AccordionDetails>
+    &lt;/Accordion>
   );
 };
 
@@ -175,17 +203,17 @@ const PromptBar = () => {
   const navigate = useNavigate();
 
   return(
-    <Box
+    &lt;Box
       sx={{
         width: .7,
         textAlign: 'center',
         p: "5rem",
       }}
     >
-      <Typography component="h1" variant="h3" color="text.primary" marginBottom="1rem">
+      &lt;Typography component="h1" variant="h3" color="text.primary" marginBottom="1rem">
         UML Lab
-      </Typography>
-      <TextField
+      &lt;/Typography>
+      &lt;TextField
           margin="dense" 
           id="placeholder"
           hiddenLabel
@@ -203,7 +231,7 @@ const PromptBar = () => {
               }
           }}
       />
-    </Box>
+    &lt;/Box>
   );
 };
 
@@ -213,19 +241,19 @@ const PromptBar = () => {
  */
 const GenText =() => {
   return (
-      <Box
+      &lt;Box
       sx={{
       textAlign: 'center',
       my:"1.5rem",
       }}
   >
-      <Typography component="h4" variant="h4" color="text.primary">
+      &lt;Typography component="h4" variant="h4" color="text.primary">
           User's UML Generations
-      </Typography>
-      <Typography variant="body2" color="text.secondary"  my=".5rem">
+      &lt;/Typography>
+      &lt;Typography variant="body2" color="text.secondary"  my=".5rem">
           Discover what others have created and unlock your potential
-      </Typography>
-  </Box>
+      &lt;/Typography>
+  &lt;/Box>
   );
 };
 
@@ -245,22 +273,22 @@ const UserGenerations = () => {
   const columns = isSmallScreen ? 1 : 3;
 
   if (!loaded) {
-    return (<div className="loaderlong" />);
+    return (&lt;div className="loaderlong" />);
   }
 
   return(
-    <Masonry columns={columns} spacing={2}>
+    &lt;Masonry columns={columns} spacing={2}>
         {userUML.map((UML, index) => (
-          <Card key={index} sx={{ p: 1 }}>
-            <CardActionArea
+          &lt;Card key={index} sx={{ p: 1 }}>
+            &lt;CardActionArea
                 onClick={event => handleCardClick(event, UML)}>
-                <CardMedia 
+                &lt;CardMedia 
                     sx={{ height: 300, width: '100%', objectFit: "contain"}}
                     component="img"
                     image={UML.diagram}
                     title='UML Diagram' 
                 /> 
-                <Box
+                &lt;Box
                     sx={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -268,16 +296,38 @@ const UserGenerations = () => {
                         pr: 2,
                     }}
                 >
-                  <CardHeader
+                  &lt;CardHeader
                       title={UML.name}
                       subheader={UML.description}
                   />
-                </Box>
-            </CardActionArea>
-          </Card>
+                &lt;/Box>
+            &lt;/CardActionArea>
+          &lt;/Card>
       ))}
-    </Masonry>
+    &lt;/Masonry>
   );
 };
 
-export default Home;
+export default Home;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-client_app.html">client/app</a></li><li><a href="module-client_dashboard.html">client/dashboard</a></li><li><a href="module-client_home.html">client/home</a></li><li><a href="module-client_login.html">client/login</a></li><li><a href="module-client_navbar.html">client/navbar</a></li><li><a href="module-client_query.html">client/query</a></li><li><a href="module-client_signup.html">client/signup</a></li><li><a href="module-server_assistantUtils.html">server/assistantUtils</a></li><li><a href="module-server_routes.html">server/routes</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-server_assistantUtils-AssistantUtils.html">AssistantUtils</a></li><li><a href="module-server_routes-Router.html">Router</a></li></ul><h3>Classes</h3><ul><li><a href="module-client_app.App.html">App</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Mar 13 2024 22:11:16 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

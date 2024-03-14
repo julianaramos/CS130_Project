@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: server/routes</title>
+    <title>JSDoc: Source: client/src/App.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,139 +17,67 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: server/routes</h1>
+    <h1 class="page-title">Source: client/src/App.js</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>This module defines the REST API routes for the application.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_routes.js.html">server/routes.js</a>, <a href="server_routes.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Namespaces</h3>
-
-        <dl>
-            <dt><a href="module-server_routes-Router.html">Router</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module client/app
+ * @description Provides the App component class
+ */
+
+import React, { Component } from 'react'
+import {BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Home from './pages/Home'
+import Signup from './pages/Signup'
+import Login from './pages/Login'
+import Query from './pages/Query'
+import Dashboard from './pages/Dashboard';
+
+/**
+ * The App component uses the React router to switch among the pages of 'Home', 'Signup', 'Login', 'Query', and 'Dashboard'.
+ * @memberof module:client/app
+ */
+class App extends Component {
+  render() {
+    return (
+      &lt;Router>
+        &lt;Routes>
+          &lt;Route
+            exact path={"/"}
+            element = {&lt;Home />}
+          />
+          &lt;Route
+            exact path={"/signup"}
+            element = {&lt;Signup />}
+          />
+          &lt;Route
+            exact path={"/login"}
+            element = {&lt;Login />}
+          />
+          &lt;Route
+            exact path={"/query"}
+            element = {&lt;Query />}
+          />
+          &lt;Route
+            exact path={"/dashboard"}
+            element = {&lt;Dashboard />}
+          />
+        &lt;/Routes>
+      &lt;/Router>
+    );
+  };
+};
+
+export default App</code></pre>
+        </article>
+    </section>
 
 
 

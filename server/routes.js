@@ -10,7 +10,7 @@ const axios = require('axios');
 require('dotenv').config({ path: './.env' });
 
 /**
- * Express router to mount user related functions on.
+ * Express router to mount backend API
  * @type {object}
  * @const
  * @namespace Router

@@ -1,3 +1,8 @@
+/**
+ * @module client/app
+ * @description Provides the App component class
+ */
+
 import React, { Component } from 'react'
 import {BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -7,6 +12,10 @@ import Login from './pages/Login'
 import Query from './pages/Query'
 import Dashboard from './pages/Dashboard';
 
+/**
+ * The App component uses the React router to switch among the pages of 'Home', 'Signup', 'Login', 'Query', and 'Dashboard'.
+ * @memberof module:client/app
+ */
 class App extends Component {
   render() {
     return (

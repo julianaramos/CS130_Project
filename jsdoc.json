@@ -1,12 +1,11 @@
 {
     "source": {
-        "include": ["server"],
-        "includePattern": "routes.js$",
-        "excludePattern": "(.test.js$)"
+        "include": ["server/assistantUtils.js", "server/routes.js", "client/src/App.js", "client/src/pages"],
+        "includePattern": ".js$",
+        "excludePattern": ".test.js$"
     },
     "plugins": [
-        "plugins/markdown",
-        "jsdoc-route-plugin"
+        "plugins/markdown"
     ],
     "templates": {
         "cleverLinks": true,

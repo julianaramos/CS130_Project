@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/pages/Dashboard.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/pages/Dashboard.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module client/dashboard
  * @description Provides the Dashboard component class
  */
@@ -95,46 +123,46 @@ const UserDiagrams = () => {
     });
 
     if (!loaded) {
-        return (<div className="loaderlong" />);
+        return (&lt;div className="loaderlong" />);
     }
 
     return (
-        <Masonry columns={columns} spacing={2}>
+        &lt;Masonry columns={columns} spacing={2}>
             {userUML.map((UML, index) => (
-                <Card key={index} sx={{ p: 1 }}>
-                    <CardMedia 
+                &lt;Card key={index} sx={{ p: 1 }}>
+                    &lt;CardMedia 
                         sx={{ height: 180, objectFit: "contain"}}
                         component="img"
                         image={UML.diagram ? UML.diagram : Diagram_img}
                         scale='20'
                         title='UML Diagram' 
                     /> 
-                    <ButtonGroup>
-                        <Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={<EditIcon />}>
+                    &lt;ButtonGroup>
+                        &lt;Button variant='filled' onClick={event => handleEditClick(event, UML)} startIcon={&lt;EditIcon />}>
                             Edit
-                        </Button>
-                        <Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={<DownloadIcon />}>
+                        &lt;/Button>
+                        &lt;Button variant='filled' onClick={event => handleDownloadClick(event, UML)} startIcon={&lt;DownloadIcon />}>
                             Download
-                        </Button>
-                        <Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={<DeleteIcon />}>
+                        &lt;/Button>
+                        &lt;Button variant='filled' onClick={event => handleDeleteClick(event, UML)} startIcon={&lt;DeleteIcon />}>
                             Delete
-                        </Button>
-                    </ButtonGroup>
-                    <Box
+                        &lt;/Button>
+                    &lt;/ButtonGroup>
+                    &lt;Box
                         sx={{
                             display: 'flex',
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                         }}
                     >
-                        <CardHeader
+                        &lt;CardHeader
                             title={UML.name}
                             subheader={UML.description}
                         />
-                    </Box>
-                </Card>
+                    &lt;/Box>
+                &lt;/Card>
             ))}
-        </Masonry>
+        &lt;/Masonry>
     );
 };
 
@@ -150,9 +178,9 @@ const Dashboard = () => {
     };
 
     return (
-        <div>
-            <NavBar />
-            <Container                 
+        &lt;div>
+            &lt;NavBar />
+            &lt;Container                 
                 sx={{
                     pt: "7rem",
                     pb: "5rem",
@@ -163,15 +191,37 @@ const Dashboard = () => {
                     gap: { xs: 3, sm: 6 },
                 }}
             >
-                <Box>
-                    <Button onClick={handleCreateClick} variant='outlined' startIcon={<AddIcon />}>
+                &lt;Box>
+                    &lt;Button onClick={handleCreateClick} variant='outlined' startIcon={&lt;AddIcon />}>
                         Create
-                    </Button>
-                </Box>
-                <UserDiagrams />
-            </Container>
-        </div>
+                    &lt;/Button>
+                &lt;/Box>
+                &lt;UserDiagrams />
+            &lt;/Container>
+        &lt;/div>
     );
 };
 
-export default Dashboard;
+export default Dashboard;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-client_app.html">client/app</a></li><li><a href="module-client_dashboard.html">client/dashboard</a></li><li><a href="module-client_home.html">client/home</a></li><li><a href="module-client_login.html">client/login</a></li><li><a href="module-client_navbar.html">client/navbar</a></li><li><a href="module-client_query.html">client/query</a></li><li><a href="module-client_signup.html">client/signup</a></li><li><a href="module-server_assistantUtils.html">server/assistantUtils</a></li><li><a href="module-server_routes.html">server/routes</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-server_assistantUtils-AssistantUtils.html">AssistantUtils</a></li><li><a href="module-server_routes-Router.html">Router</a></li></ul><h3>Classes</h3><ul><li><a href="module-client_app.App.html">App</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Mar 13 2024 22:11:16 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

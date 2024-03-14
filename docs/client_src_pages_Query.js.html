@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/pages/Query.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/pages/Query.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module client/query
  * @description Provides the Query component class
  */
@@ -25,9 +53,9 @@ import CloseIcon from '@mui/icons-material/Close';
  */
 const UmlInputBox = ({umlText, handleUMLChange}) => {
     return (
-      <Card className='uml-wrapper'>
-        <CardContent style={{ paddingTop: '1.5vh'}}>
-          <TextareaAutosize
+      &lt;Card className='uml-wrapper'>
+        &lt;CardContent style={{ paddingTop: '1.5vh'}}>
+          &lt;TextareaAutosize
             className='uml-box'
             variant="outlined"
             placeholder="Enter a search term"
@@ -38,8 +66,8 @@ const UmlInputBox = ({umlText, handleUMLChange}) => {
             onChange={handleUMLChange}
             data-testid = 'uml-box'
           />
-        </CardContent>
-      </Card>
+        &lt;/CardContent>
+      &lt;/Card>
     );
 };
 
@@ -59,14 +87,14 @@ const Diagram = ({image}) => {
   }
 
   return (
-    <Card className='diagram-card'>
-      <CardMedia
+    &lt;Card className='diagram-card'>
+      &lt;CardMedia
         sx={{ height: '73vh', width: '49vw', objectFit: "contain" }}
         component="img"
         alt="UML Diagram"
         src={displayImage}
       />
-    </Card>
+    &lt;/Card>
   );
 };
 
@@ -76,7 +104,7 @@ const Diagram = ({image}) => {
  */
 const Prompt = ({handlePromptChange, promptText, promptType, error}) => {
   return (
-    <TextField 
+    &lt;TextField 
       onChange={handlePromptChange}
       value={promptText}
       fullWidth
@@ -93,15 +121,15 @@ const Prompt = ({handlePromptChange, promptText, promptType, error}) => {
 const Query = () => {
   const {state} = useLocation();
 
-  const [umlText, setUMLText] = useState(state && state.content ? state.content : '');
-  const [promptText, setPromptText] = useState(state && state.prompt ? state.prompt : '');
-  const [diagram, setDiagram] = useState(state && state.diagram ? state.diagram : ''); // i think this works nicely
+  const [umlText, setUMLText] = useState(state &amp;&amp; state.content ? state.content : '');
+  const [promptText, setPromptText] = useState(state &amp;&amp; state.prompt ? state.prompt : '');
+  const [diagram, setDiagram] = useState(state &amp;&amp; state.diagram ? state.diagram : ''); // i think this works nicely
   const [diagramLoaded, setDiagramLoaded] = useState(false);
   const [generatorResponded, setGeneratorResponded] = useState(true);
   const [examinerResponded, setExaminerResponded] = useState(true);
   const [examinerResponse, setExaminerResponse] = useState('');
-  const [prompttoggle, setPromptToggle] = useState(state && state.prompttoggle ? state.prompttoggle: 'prompt');
-  const [oneTimeLoad, setOneTimeLoad] = useState(state && state.oneTimeLoad ? state.oneTimeLoad : false);
+  const [prompttoggle, setPromptToggle] = useState(state &amp;&amp; state.prompttoggle ? state.prompttoggle: 'prompt');
+  const [oneTimeLoad, setOneTimeLoad] = useState(state &amp;&amp; state.oneTimeLoad ? state.oneTimeLoad : false);
   const [openDiagramSnackbar, setOpenDiagramSnackbar] = useState(false);
   const [diagramAlertText, setDiagramAlertText] = useState('');
   const [openUMLResponseSnackbar, setOpenUMLResponseSnackbar] = useState(false);
@@ -200,9 +228,9 @@ const Query = () => {
 
   useEffect(
     () => {
-      if (umlText !== '' && !diagramLoaded)
+      if (umlText !== '' &amp;&amp; !diagramLoaded)
         loadDiagram();
-      if (oneTimeLoad && promptText !== '') {
+      if (oneTimeLoad &amp;&amp; promptText !== '') {
         handleSubmission();
       }
       setOneTimeLoad(false);
@@ -211,86 +239,108 @@ const Query = () => {
   );
 
   return (
-    <div>
-      <NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram} />
-      <Grid container direction='row' className='query-container' spacing={2}>
-        <Grid item className='uml-wrapper' xs = {6} mt={2} sx={{ position: 'relative' }}>
-          <UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box' />
-          <Snackbar
+    &lt;div>
+      &lt;NavBar IndependentPageButtons={"QueryPage"} umlText={umlText} diagram={diagram} />
+      &lt;Grid container direction='row' className='query-container' spacing={2}>
+        &lt;Grid item className='uml-wrapper' xs = {6} mt={2} sx={{ position: 'relative' }}>
+          &lt;UmlInputBox handleUMLChange={handleUMLChange} umlText={umlText} className='uml-box' />
+          &lt;Snackbar
             open={openUMLResponseSnackbar}
             sx={{ position: 'absolute'}}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             message={examinerResponse}
             action={
-              <IconButton
+              &lt;IconButton
                 size='small'
                 aria-label='close'
                 color='inherit'
                 onClick={() => setOpenUMLResponseSnackbar(false)}
               >
-                <CloseIcon fontSize='small' />
-              </IconButton>
+                &lt;CloseIcon fontSize='small' />
+              &lt;/IconButton>
             }
           >
-          </Snackbar>
-          <Snackbar
+          &lt;/Snackbar>
+          &lt;Snackbar
             open={openUMLErrorSnackbar}
             onClose={(_, reason) => setOpenUMLErrorSnackbar(false)}
             sx={{ position: 'absolute'}}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
-            <Alert onClose={() => setOpenUMLErrorSnackbar(false)} severity="error" sx={{ width: '100%' }}>
+            &lt;Alert onClose={() => setOpenUMLErrorSnackbar(false)} severity="error" sx={{ width: '100%' }}>
               {umlErrorAlertText}
-            </Alert>
-          </Snackbar>
-        </Grid>
-        <Grid item className='diagram-wrapper' xs={6} mt={2} sx={{ position: 'relative' }}>
-          <Diagram image={diagram} />
-          <Snackbar
+            &lt;/Alert>
+          &lt;/Snackbar>
+        &lt;/Grid>
+        &lt;Grid item className='diagram-wrapper' xs={6} mt={2} sx={{ position: 'relative' }}>
+          &lt;Diagram image={diagram} />
+          &lt;Snackbar
             open={openDiagramSnackbar}
             onClose={() => setOpenDiagramSnackbar(false)}
             sx={{ position: 'absolute'}}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
-            <Alert onClose={() => setOpenDiagramSnackbar(false)} severity="error" sx={{ width: '100%' }}>
+            &lt;Alert onClose={() => setOpenDiagramSnackbar(false)} severity="error" sx={{ width: '100%' }}>
               {diagramAlertText}
-            </Alert>
-          </Snackbar>
-        </Grid>
-      </Grid>
-      <Grid container direction='row' spacing={1}>
-        <Grid item xs={9} mt={1.5}>
-          <Prompt handlePromptChange={handlePromptChange} promptText={promptText} promptType={prompttoggle} error={openUMLErrorSnackbar} />
-        </Grid>
-        <Grid item xs={1.2} mt={2.5}>
-          <LoadingButton
+            &lt;/Alert>
+          &lt;/Snackbar>
+        &lt;/Grid>
+      &lt;/Grid>
+      &lt;Grid container direction='row' spacing={1}>
+        &lt;Grid item xs={9} mt={1.5}>
+          &lt;Prompt handlePromptChange={handlePromptChange} promptText={promptText} promptType={prompttoggle} error={openUMLErrorSnackbar} />
+        &lt;/Grid>
+        &lt;Grid item xs={1.2} mt={2.5}>
+          &lt;LoadingButton
             onClick={handleSubmission}
             loading={(!generatorResponded || !examinerResponded)}
             loadingPosition="start"
-            startIcon={<SubmitIcon />}
+            startIcon={&lt;SubmitIcon />}
             variant="contained"
           >
-            <span>Submit</span>
-          </LoadingButton>
-        </Grid>
-        <Grid item xs={1} mt={2}>
-          <ToggleButtonGroup
+            &lt;span>Submit&lt;/span>
+          &lt;/LoadingButton>
+        &lt;/Grid>
+        &lt;Grid item xs={1} mt={2}>
+          &lt;ToggleButtonGroup
             value={prompttoggle}
             exclusive
             onChange={handlePromptClick}
             aria-label="UML Privacy"
           >
-            <ToggleButton value="prompt" aria-label="Prompt">
+            &lt;ToggleButton value="prompt" aria-label="Prompt">
                 Prompt
-            </ToggleButton>
-            <ToggleButton value="query" aria-label="Query">
+            &lt;/ToggleButton>
+            &lt;ToggleButton value="query" aria-label="Query">
                 Query
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Grid>
-      </Grid>
-    </div>
+            &lt;/ToggleButton>
+          &lt;/ToggleButtonGroup>
+        &lt;/Grid>
+      &lt;/Grid>
+    &lt;/div>
   );
 };
 
-export default Query;
+export default Query;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-client_app.html">client/app</a></li><li><a href="module-client_dashboard.html">client/dashboard</a></li><li><a href="module-client_home.html">client/home</a></li><li><a href="module-client_login.html">client/login</a></li><li><a href="module-client_navbar.html">client/navbar</a></li><li><a href="module-client_query.html">client/query</a></li><li><a href="module-client_signup.html">client/signup</a></li><li><a href="module-server_assistantUtils.html">server/assistantUtils</a></li><li><a href="module-server_routes.html">server/routes</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-server_assistantUtils-AssistantUtils.html">AssistantUtils</a></li><li><a href="module-server_routes-Router.html">Router</a></li></ul><h3>Classes</h3><ul><li><a href="module-client_app.App.html">App</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Mar 13 2024 22:11:16 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
