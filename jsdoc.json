@@ -1,0 +1,19 @@
+{
+    "source": {
+        "include": ["server"],
+        "includePattern": "routes.js$",
+        "excludePattern": "(.test.js$)"
+    },
+    "plugins": [
+        "plugins/markdown",
+        "jsdoc-route-plugin"
+    ],
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": true
+    },
+    "opts" : {
+        "destination": "./docs/",
+        "recurse": true
+    }
+}
