@@ -2,7 +2,8 @@
   "scripts": {
     "test": "cd client && npm run test && cd ../server && npm run test",
     "doc": "jsdoc -r -c jsdoc.json && echo .name code { color: #ffffff; } >> docs\\styles\\jsdoc-default.css",
-    "install-dependencies": "npm install && cd client && npm install && cd ../server && npm install && cd .."
+    "install-dependencies": "npm install && cd client && npm install && cd ../server && npm install && cd ..",
+    "build": "cd client && npm run build"
   },
   "dependencies": {
     "axios": "^1.6.7",
@@ -10,6 +11,7 @@
     "firebase": "^10.7.2",
     "jest": "^29.7.0",
     "openai": "^4.26.0",
+    "react-scripts": "^5.0.1",
     "sinon": "^17.0.1",
     "supertest": "^6.3.4"
   },
