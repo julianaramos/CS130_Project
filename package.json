@@ -2,8 +2,7 @@
   "scripts": {
     "test": "cd client && npm run test && cd ../server && npm run test",
     "doc": "jsdoc -r -c jsdoc.json && echo .name code { color: #ffffff; } >> docs\\styles\\jsdoc-default.css",
-    "install-dependencies": "npm install && cd client && npm install && cd ../server && npm install && cd ..",
-    "build": "cd client && npm run build"
+    "install-dependencies": "npm install && cd client && npm install && cd ../server && npm install && cd .."
   },
   "dependencies": {
     "axios": "^1.6.7",
