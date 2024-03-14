@@ -64,6 +64,7 @@ describe('OpenAI Assitant API call testing', () => {
 
         try {
             const res = await prompt_assistant('assistant-id', 'prompt');
+            fail('Expected function to throw, but it did not');
         }
         catch (error) {
             // Ensure status of thrown object matches retrieved status
@@ -97,6 +98,7 @@ describe('OpenAI Assitant API call testing', () => {
 
         try {
             const res = await prompt_assistant('assistant-id', 'prompt');
+            fail('Expected function to throw, but it did not');
         }
         catch (error) {
             // Ensure status of thrown object matches retrieved status
@@ -150,6 +152,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 400);
@@ -164,6 +167,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 408);
@@ -178,6 +182,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 409);
@@ -192,6 +197,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 409);
@@ -206,6 +212,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 500);
@@ -222,6 +229,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', timeout);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 408);
@@ -237,6 +245,7 @@ describe('Assistant handler testing', () => {
 
         try {
             const res = await handle_assistant_call('assistant-id', 'prompt', 10000);
+            fail('Expected function to throw, but it did not');
         }
         catch(error) {
             assert.strictEqual(error.status, 500);
